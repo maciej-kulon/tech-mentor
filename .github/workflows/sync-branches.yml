@@ -23,7 +23,7 @@ jobs:
 
       - name: Sync dev to staging
         if: github.ref == 'refs/heads/dev'
-        uses: tretuna/sync-branches@v1.4.0
+        uses: tretuna/sync-branches@ea58ab6e406fd3ad016a064b31270bbb41127f41
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FROM_BRANCH: "dev"
@@ -34,7 +34,7 @@ jobs:
 
       - name: Sync staging to main
         if: github.ref == 'refs/heads/staging'
-        uses: tretuna/sync-branches@v1.4.0
+        uses: tretuna/sync-branches@ea58ab6e406fd3ad016a064b31270bbb41127f41
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FROM_BRANCH: "staging"
@@ -45,7 +45,7 @@ jobs:
 
       - name: Sync staging to dev (downsync)
         if: github.ref == 'refs/heads/staging'
-        uses: tretuna/sync-branches@v1.4.0
+        uses: tretuna/sync-branches@ea58ab6e406fd3ad016a064b31270bbb41127f41
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FROM_BRANCH: "staging"
@@ -56,7 +56,7 @@ jobs:
 
       - name: Sync main to staging (downsync)
         if: github.ref == 'refs/heads/main'
-        uses: tretuna/sync-branches@v1.4.0
+        uses: tretuna/sync-branches@ea58ab6e406fd3ad016a064b31270bbb41127f41
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FROM_BRANCH: "main"
