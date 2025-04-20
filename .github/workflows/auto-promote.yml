@@ -50,11 +50,11 @@ jobs:
           echo "changes_count=$CHANGES" >> $GITHUB_OUTPUT
           echo "Found $CHANGES commits to promote"
 
-      - name: Create or update promotion branch
+      - name: Create promotion branch
         if: steps.check_changes.outputs.changes_count > 0
         run: |
-          # Create or update the promotion branch
-          git checkout -B auto-promote/${{ steps.set-target.outputs.source_branch }}-to-${{ steps.set-target.outputs.target_branch }} ${{ steps.set-target.outputs.source_branch }}
+          # Create a new branch from source
+          git checkout -b auto-promote/${{ steps.set-target.outputs.source_branch }}-to-${{ steps.set-target.outputs.target_branch }} ${{ steps.set-target.outputs.source_branch }}
           git push -f origin auto-promote/${{ steps.set-target.outputs.source_branch }}-to-${{ steps.set-target.outputs.target_branch }}
 
       - name: Check for existing PR
