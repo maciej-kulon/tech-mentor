@@ -105,3 +105,5 @@ jobs:
             promotion
           base: ${{ steps.set-target.outputs.target_branch }}
           delete-branch: false
+          rebase: false
+          debug: true
