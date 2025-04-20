@@ -1,0 +1,29 @@
+services:
+  tech-mentor-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tech-mentor-backend:latest
+    container_name: tech-mentor-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb:27017/tech-mentor?authSource=admin
+    command: npm run start:dev
+    volumes:
+      - .:/app
+      - ./node_modules:/app/node_modules
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:8.0
+    container_name: tech-mentor-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin123
+    restart: unless-stopped
