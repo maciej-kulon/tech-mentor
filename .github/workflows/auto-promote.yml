@@ -17,6 +17,8 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.ref }}
+          fetch-tags: false
+          persist-credentials: true
 
       - name: Determine target branch
         id: set-target
@@ -33,7 +35,17 @@ jobs:
       - name: Check for changes
         id: check_changes
         run: |
-          git fetch origin ${{ steps.set-target.outputs.target_branch }}
+          # Fetch the target branch
+          git fetch origin ${{ steps.set-target.outputs.target_branch }}:${{ steps.set-target.outputs.target_branch }}
+
+          # Check if target branch exists
+          if ! git show-ref --verify --quiet refs/heads/${{ steps.set-target.outputs.target_branch }}; then
+            echo "Target branch ${{ steps.set-target.outputs.target_branch }} does not exist"
+            echo "changes_count=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Count changes between branches
           CHANGES=$(git rev-list --count ${{ steps.set-target.outputs.target_branch }}..${{ steps.set-target.outputs.source_branch }})
           echo "changes_count=$CHANGES" >> $GITHUB_OUTPUT
           echo "Found $CHANGES commits to promote"
