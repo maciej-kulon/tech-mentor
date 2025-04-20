@@ -71,14 +71,20 @@ jobs:
               base: process.env.TARGET_BRANCH
             });
             if (prs.length > 0) {
-              return prs[0].number;
+              // Close existing PR
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prs[0].number,
+                state: 'closed'
+              });
             }
             return 0;
         env:
           SOURCE_BRANCH: ${{ steps.set-target.outputs.source_branch }}
           TARGET_BRANCH: ${{ steps.set-target.outputs.target_branch }}
 
-      - name: Create or Update Pull Request
+      - name: Create Pull Request
         if: steps.check_changes.outputs.changes_count > 0
         uses: peter-evans/create-pull-request@v6
         with:
@@ -99,5 +105,3 @@ jobs:
             promotion
           base: ${{ steps.set-target.outputs.target_branch }}
           delete-branch: false
-          update-method: squash
-          pr-number: ${{ steps.check_pr.outputs.result }}
