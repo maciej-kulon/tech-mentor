@@ -1,11 +1,11 @@
 meta {
-  name: Create User
+  name: Login
   type: http
   seq: 1
 }
 
 post {
-  url: {{baseUrl}}/users/v1
+  url: {{baseUrl}}/auth/login/v1
   body: json
   auth: none
 }
@@ -16,22 +16,22 @@ headers {
 
 body:json {
   {
-    "name": "John",
-    "surname": "Doe",
     "email": "john@example.com",
     "password": "password123"
   }
 }
 
+script:post-response {
+  bru.setEnvVar('jwtToken', res.body.access_token);
+}
+
 tests {
   test("response status", function() {
-    expect(res.status).to.equal(201);
+    expect(res.status).to.equal(200);
   });
   
   test("response body", function() {
     const body = res.body;
-    expect(body).to.have.property("name", "John");
-    expect(body).to.have.property("surname", "Doe");
-    expect(body).to.have.property("email", "john@example.com");
+    expect(body).to.have.property("access_token");
   });
 }
