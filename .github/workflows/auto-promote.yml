@@ -90,6 +90,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: auto-promote/${{ steps.set-target.outputs.source_branch }}-to-${{ steps.set-target.outputs.target_branch }}
+          branch-suffix: timestamp
           title: "[${{ steps.set-target.outputs.date }}] Promote ${{ steps.set-target.outputs.source_branch }} to ${{ steps.set-target.outputs.target_branch }}"
           body: |
             🔄 Automatic promotion PR
@@ -107,6 +108,6 @@ jobs:
           delete-branch: false
           commit-message: "[promotion] Promote ${{ steps.set-target.outputs.source_branch }} to ${{ steps.set-target.outputs.target_branch }}"
           committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
-          author: maciej-kulon <26775310+maciej-kulon@users.noreply.github.com>
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           signoff: false
           draft: false
