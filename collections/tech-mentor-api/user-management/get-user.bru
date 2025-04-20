@@ -1,0 +1,33 @@
+meta {
+  name: Get User
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/users/:userId/v1
+  body: none
+  auth: none
+}
+
+params:path {
+  userId: 680516be5f726ab8dcd461f2
+}
+
+headers {
+  Authorization: Bearer {{jwtToken}}
+}
+
+tests {
+  test("response status", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("response body", function() {
+    const body = res.body;
+    expect(body).to.have.property("id");
+    expect(body).to.have.property("email");
+    expect(body).to.have.property("firstName");
+    expect(body).to.have.property("lastName");
+  });
+}
