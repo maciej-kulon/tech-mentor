@@ -33,10 +33,16 @@ jobs:
       - name: Check for changes
         id: check_changes
         run: |
-          git fetch origin ${{ steps.set-target.outputs.target_branch }}:${{ steps.set-target.outputs.target_branch }}
-          CHANGES=$(git log --oneline ${{ steps.set-target.outputs.target_branch }}..${{ steps.set-target.outputs.source_branch }} | wc -l)
-          echo "changes_count=$CHANGES" >> $GITHUB_OUTPUT
-          echo "Found $CHANGES commits to promote"
+          git fetch origin ${{ steps.set-target.outputs.target_branch }}
+          BEHIND_BY=$(git rev-list --count origin/${{ steps.set-target.outputs.target_branch }}..${{ steps.set-target.outputs.source_branch }})
+          echo "changes_count=$BEHIND_BY" >> $GITHUB_OUTPUT
+          echo "Found $BEHIND_BY commits to promote"
+
+      - name: Create temporary branch
+        if: steps.check_changes.outputs.changes_count > 0
+        run: |
+          git checkout -b temp-promotion-branch
+          git reset --hard origin/${{ steps.set-target.outputs.source_branch }}
 
       - name: Create Pull Request
         if: steps.check_changes.outputs.changes_count > 0
