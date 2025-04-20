@@ -38,11 +38,13 @@ jobs:
           echo "changes_count=$BEHIND_BY" >> $GITHUB_OUTPUT
           echo "Found $BEHIND_BY commits to promote"
 
-      - name: Create temporary branch
+      - name: Create promotion branch
         if: steps.check_changes.outputs.changes_count > 0
         run: |
-          git checkout -b temp-promotion-branch
-          git reset --hard origin/${{ steps.set-target.outputs.source_branch }}
+          # Create a new branch from the source branch
+          git checkout -b auto-promote/${{ steps.set-target.outputs.source_branch }}-to-${{ steps.set-target.outputs.target_branch }}
+          # Push the branch to origin
+          git push -u origin auto-promote/${{ steps.set-target.outputs.source_branch }}-to-${{ steps.set-target.outputs.target_branch }}
 
       - name: Create Pull Request
         if: steps.check_changes.outputs.changes_count > 0
