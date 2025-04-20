@@ -1,0 +1,48 @@
+name: Automatic Branch Promotion
+on:
+  push:
+    branches:
+      - dev
+      - staging
+
+jobs:
+  create-promotion-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine target branch
+        id: set-target
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            echo "target_branch=staging" >> $GITHUB_OUTPUT
+            echo "source_branch=dev" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            echo "target_branch=main" >> $GITHUB_OUTPUT
+            echo "source_branch=staging" >> $GITHUB_OUTPUT
+          fi
+          echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: auto-promote/${{ steps.set-target.outputs.source_branch }}-to-${{ steps.set-target.outputs.target_branch }}
+          title: "[${{ steps.set-target.outputs.date }}] Promote ${{ steps.set-target.outputs.source_branch }} to ${{ steps.set-target.outputs.target_branch }}"
+          body: |
+            🔄 Automatic promotion PR
+
+            This PR was automatically created to promote changes from `${{ steps.set-target.outputs.source_branch }}` to `${{ steps.set-target.outputs.target_branch }}`.
+
+            ### Changes included:
+            ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/${{ steps.set-target.outputs.target_branch }}...${{ steps.set-target.outputs.source_branch }}
+
+            Please review the changes and merge when ready.
+          labels: |
+            automated-pr
+            promotion
+          base: ${{ steps.set-target.outputs.target_branch }}
+          delete-branch: true
