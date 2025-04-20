@@ -8,11 +8,15 @@ on:
 jobs:
   create-promotion-pr:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.ref }}
 
       - name: Determine target branch
         id: set-target
@@ -26,7 +30,16 @@ jobs:
           fi
           echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git fetch origin ${{ steps.set-target.outputs.target_branch }}:${{ steps.set-target.outputs.target_branch }}
+          CHANGES=$(git log --oneline ${{ steps.set-target.outputs.target_branch }}..${{ steps.set-target.outputs.source_branch }} | wc -l)
+          echo "changes_count=$CHANGES" >> $GITHUB_OUTPUT
+          echo "Found $CHANGES commits to promote"
+
       - name: Create Pull Request
+        if: steps.check_changes.outputs.changes_count > 0
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -38,7 +51,7 @@ jobs:
             This PR was automatically created to promote changes from `${{ steps.set-target.outputs.source_branch }}` to `${{ steps.set-target.outputs.target_branch }}`.
 
             ### Changes included:
-            ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/${{ steps.set-target.outputs.target_branch }}...${{ steps.set-target.outputs.source_branch }}
+            ${{ github.server_url }}/${{ github.repository }}/compare/${{ steps.set-target.outputs.target_branch }}...${{ steps.set-target.outputs.source_branch }}
 
             Please review the changes and merge when ready.
           labels: |
