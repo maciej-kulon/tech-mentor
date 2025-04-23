@@ -6,23 +6,23 @@ import {
   Input,
   OnInit,
   ViewChild,
-} from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { SchemePage } from "./models/scheme-page.model";
-import { PageDots } from "./models/page-dots.model";
-import { SchemePageConfig } from "./interfaces/scheme-page-config.interface";
-import { Point } from "./interfaces/point.interface";
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { SchemePage } from './models/scheme-page.model';
+import { PageDots } from './models/page-dots.model';
+import { SchemePageConfig } from './interfaces/scheme-page-config.interface';
+import { Point } from './interfaces/point.interface';
 
 @Component({
-  selector: "app-electrical-cad-canvas",
+  selector: 'app-electrical-cad-canvas',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: "./electrical-cad-canvas.component.html",
-  styleUrl: "./electrical-cad-canvas.component.scss",
+  templateUrl: './electrical-cad-canvas.component.html',
+  styleUrl: './electrical-cad-canvas.component.scss',
 })
 export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
-  @ViewChild("cadCanvas") canvasRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild("canvasContainer") containerRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('cadCanvas') canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasContainer') containerRef!: ElementRef<HTMLDivElement>;
 
   @Input() schemeConfig: SchemePageConfig = { rows: 9, columns: 14 };
   @Input() page?: SchemePage;
@@ -70,7 +70,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
   ngAfterViewInit(): void {
     this.canvas = this.canvasRef.nativeElement;
-    this.ctx = this.canvas.getContext("2d")!;
+    this.ctx = this.canvas.getContext('2d')!;
     this.container = this.containerRef.nativeElement;
 
     this.setupCanvas();
@@ -93,16 +93,16 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.resizeCanvas();
 
     // Add event listeners for canvas interactions
-    this.canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
-    this.canvas.addEventListener("mouseup", this.onMouseUp.bind(this));
-    this.canvas.addEventListener("mousemove", this.onMouseMove.bind(this));
-    this.canvas.addEventListener("mouseleave", this.onMouseLeave.bind(this));
+    this.canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
+    this.canvas.addEventListener('mouseup', this.onMouseUp.bind(this));
+    this.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
+    this.canvas.addEventListener('mouseleave', this.onMouseLeave.bind(this));
 
     // Center the page after canvas setup
     this.centerPage();
   }
 
-  @HostListener("window:resize")
+  @HostListener('window:resize')
   private resizeCanvas(): void {
     // Set canvas dimensions to match container size
     const rect = this.container.getBoundingClientRect();
@@ -118,7 +118,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Draw canvas background (not the page)
-    this.ctx.fillStyle = "#f0f0f0";
+    this.ctx.fillStyle = '#f0f0f0';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Draw the page
@@ -138,7 +138,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.ctx.fillRect(this.offsetX, this.offsetY, scaledWidth, scaledHeight);
 
     // Draw page border
-    this.ctx.strokeStyle = "#000000";
+    this.ctx.strokeStyle = '#000000';
     this.ctx.lineWidth = 1;
     this.ctx.strokeRect(this.offsetX, this.offsetY, scaledWidth, scaledHeight);
 
@@ -223,9 +223,9 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       ) {
         // Determine dot color and size
         if (this.debugDraw && this.currentQuadTreeNode.includes(dot)) {
-          this.ctx.fillStyle = "#ff0000";
+          this.ctx.fillStyle = '#ff0000';
         } else {
-          this.ctx.fillStyle = "#aaaaaa";
+          this.ctx.fillStyle = '#aaaaaa';
         }
 
         const isClosestDot = this.closestDot === dot;
@@ -242,7 +242,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     const rowLabelWidth = 24 * this.scale;
     const columnLabelHeight = 24 * this.scale;
 
-    this.ctx.strokeStyle = "#00ff00";
+    this.ctx.strokeStyle = '#00ff00';
     this.ctx.lineWidth = 0.5;
 
     const bounds = pageDots.getQuadTreeStructure();
@@ -262,15 +262,15 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     isHeader: boolean = false
   ): void {
     // Use a different background color for header labels
-    this.ctx.fillStyle = isHeader ? "#e6e6e6" : "#f5f5f5";
+    this.ctx.fillStyle = isHeader ? '#e6e6e6' : '#f5f5f5';
     this.ctx.fillRect(position.x, position.y, size.width, size.height);
-    this.ctx.strokeStyle = "#333333";
+    this.ctx.strokeStyle = '#333333';
     this.ctx.lineWidth = 0.5;
     this.ctx.strokeRect(position.x, position.y, size.width, size.height);
   }
 
   private drawLabels(): void {
-    this.ctx.fillStyle = "#333333";
+    this.ctx.fillStyle = '#333333';
     this.ctx.font = `${10 * this.scale}px Arial`;
 
     const pageDimensions = this.activePage.getDimensions();
@@ -312,7 +312,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       );
 
       // Draw column number
-      this.ctx.fillStyle = "#333333";
+      this.ctx.fillStyle = '#333333';
       this.ctx.fillText(
         `${columnIndex + 1}`,
         labelPositionX + columnWidth / 2 - 3 * this.scale,
@@ -334,7 +334,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       );
 
       // Draw row letter
-      this.ctx.fillStyle = "#333333";
+      this.ctx.fillStyle = '#333333';
       this.ctx.fillText(
         letter,
         this.offsetX + rowLabelWidth / 2 - 3 * this.scale,
@@ -348,7 +348,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
     // Draw title at the top of the page
     if (this.activePage.title) {
-      this.ctx.fillStyle = "#000000";
+      this.ctx.fillStyle = '#000000';
       this.ctx.font = `bold ${16 * this.scale}px Arial`;
       this.ctx.fillText(
         this.activePage.title,
@@ -361,7 +361,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     const formatText = `${this.activePage.paperFormat} ${this.activePage.orientation}`;
     const versionText = `v${this.activePage.version}`;
 
-    this.ctx.fillStyle = "#333333";
+    this.ctx.fillStyle = '#333333';
     this.ctx.font = `${10 * this.scale}px Arial`;
 
     // Draw at bottom right with some padding
@@ -389,7 +389,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.currentMouseY >= this.offsetY &&
       this.currentMouseY <= this.offsetY + pageDimensions.height * this.scale
     ) {
-      this.ctx.strokeStyle = "#555555";
+      this.ctx.strokeStyle = '#555555';
       this.ctx.lineWidth = 0.5;
 
       // Draw horizontal line (only within page)
@@ -416,19 +416,19 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.isDragging = true;
     this.dragStartX = event.offsetX;
     this.dragStartY = event.offsetY;
-    this.canvas.style.cursor = "grabbing";
+    this.canvas.style.cursor = 'grabbing';
   }
 
   private onMouseUp(): void {
     this.isDragging = false;
-    this.canvas.style.cursor = "crosshair";
+    this.canvas.style.cursor = 'crosshair';
   }
 
   private onMouseLeave(): void {
     this.isDragging = false;
     this.currentMouseX = -1;
     this.currentMouseY = -1;
-    this.canvas.style.cursor = "default";
+    this.canvas.style.cursor = 'default';
     this.draw();
   }
 
@@ -453,7 +453,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.draw();
   }
 
-  @HostListener("wheel", ["$event"])
+  @HostListener('wheel', ['$event'])
   onWheel(event: WheelEvent): void {
     event.preventDefault();
 

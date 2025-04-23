@@ -1,10 +1,10 @@
-import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { RouterOutlet } from "@angular/router";
-import { ElectricalCadCanvasComponent } from "./components/electrical-cad-canvas/electrical-cad-canvas.component";
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterOutlet } from '@angular/router';
+import { ElectricalCadCanvasComponent } from './components/electrical-cad-canvas/electrical-cad-canvas.component';
 
 @Component({
-  selector: "app-root",
+  selector: 'app-root',
   standalone: true,
   imports: [CommonModule, RouterOutlet, ElectricalCadCanvasComponent],
   template: `
@@ -33,5 +33,5 @@ import { ElectricalCadCanvasComponent } from "./components/electrical-cad-canvas
   ],
 })
 export class AppComponent {
-  title = "tech-mentor";
+  title = 'tech-mentor';
 }
