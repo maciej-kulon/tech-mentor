@@ -445,6 +445,16 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.currentMouseX = -1;
     this.currentMouseY = -1;
     this.canvas.style.cursor = "default";
+
+    // Clear terminal highlighting by passing invalid mouse coordinates
+    this.electricalElementsRenderer.updateMousePosition(
+      -1,
+      -1,
+      this.scale,
+      this.offsetX,
+      this.offsetY
+    );
+
     this.draw();
   }
 
@@ -465,6 +475,15 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.dragStartX = event.offsetX;
       this.dragStartY = event.offsetY;
     }
+
+    // Update mouse position in the renderer
+    this.electricalElementsRenderer.updateMousePosition(
+      this.currentMouseX,
+      this.currentMouseY,
+      this.scale,
+      this.offsetX,
+      this.offsetY
+    );
 
     this.draw();
   }

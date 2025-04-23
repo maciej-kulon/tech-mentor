@@ -39,7 +39,38 @@
         { "x": 0, "y": 0.5 },
         { "x": 1, "y": 0.5 }
       ],
-      "defaultLabel": "R1",
+      "defaultLabels": [
+        {
+          "name": "reference",
+          "text": "R1",
+          "fontSize": 14,
+          "fontFamily": "Arial",
+          "fontWeight": "bold",
+          "fontColor": "#000000",
+          "x": 0.5,
+          "y": -0.6
+        },
+        {
+          "name": "value",
+          "text": "10kΩ",
+          "fontSize": 12,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontColor": "#000000",
+          "x": 0.5,
+          "y": -0.3
+        },
+        {
+          "name": "voltage",
+          "text": "@voltage V",
+          "fontSize": 10,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontColor": "#666666",
+          "x": 1.2,
+          "y": 0
+        }
+      ],
       "properties": {
         "resistance": {
           "type": "string",
@@ -51,7 +82,25 @@
           "default": "0.25W",
           "label": "Power"
         }
-      }
+      },
+      "terminals": [
+        {
+          "x": 0,
+          "y": 0.5,
+          "properties": {
+            "type": "passive",
+            "name": "terminal1"
+          }
+        },
+        {
+          "x": 1,
+          "y": 0.5,
+          "properties": {
+            "type": "passive",
+            "name": "terminal2"
+          }
+        }
+      ]
     },
     {
       "id": "capacitor-template",
@@ -100,7 +149,28 @@
         { "x": 0, "y": 0.5 },
         { "x": 1, "y": 0.5 }
       ],
-      "defaultLabel": "C1",
+      "defaultLabels": [
+        {
+          "name": "reference",
+          "text": "C1",
+          "fontSize": 14,
+          "fontFamily": "Arial",
+          "fontWeight": "bold",
+          "fontColor": "#000000",
+          "x": 0.5,
+          "y": -0.6
+        },
+        {
+          "name": "value",
+          "text": "100nF",
+          "fontSize": 12,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontColor": "#000000",
+          "x": 0.5,
+          "y": -0.3
+        }
+      ],
       "properties": {
         "capacitance": {
           "type": "string",
@@ -112,7 +182,25 @@
           "default": "50V",
           "label": "Voltage"
         }
-      }
+      },
+      "terminals": [
+        {
+          "x": 0,
+          "y": 0.5,
+          "properties": {
+            "type": "passive",
+            "name": "terminal1"
+          }
+        },
+        {
+          "x": 1,
+          "y": 0.5,
+          "properties": {
+            "type": "passive",
+            "name": "terminal2"
+          }
+        }
+      ]
     },
     {
       "id": "switch-template",
@@ -168,7 +256,28 @@
         { "x": 0, "y": 0.5 },
         { "x": 1, "y": 0.5 }
       ],
-      "defaultLabel": "SW1",
+      "defaultLabels": [
+        {
+          "name": "reference",
+          "text": "SW1",
+          "fontSize": 14,
+          "fontFamily": "Arial",
+          "fontWeight": "bold",
+          "fontColor": "#000000",
+          "x": 0.5,
+          "y": -0.3
+        },
+        {
+          "name": "state",
+          "text": "@state",
+          "fontSize": 10,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontColor": "#666666",
+          "x": 0.5,
+          "y": 0.8
+        }
+      ],
       "properties": {
         "type": {
           "type": "select",
@@ -176,7 +285,25 @@
           "default": "SPST",
           "label": "Switch Type"
         }
-      }
+      },
+      "terminals": [
+        {
+          "x": 0,
+          "y": 0.5,
+          "properties": {
+            "type": "switch",
+            "name": "input"
+          }
+        },
+        {
+          "x": 1,
+          "y": 0.5,
+          "properties": {
+            "type": "switch",
+            "name": "output"
+          }
+        }
+      ]
     },
     {
       "id": "diode-template",
@@ -228,7 +355,38 @@
         { "x": 0, "y": 0.5 },
         { "x": 1, "y": 0.5 }
       ],
-      "defaultLabel": "D1",
+      "defaultLabels": [
+        {
+          "name": "reference",
+          "text": "D1",
+          "fontSize": 14,
+          "fontFamily": "Arial",
+          "fontWeight": "bold",
+          "fontColor": "#000000",
+          "x": 0.5,
+          "y": -0.6
+        },
+        {
+          "name": "value",
+          "text": "1N4148",
+          "fontSize": 12,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontColor": "#000000",
+          "x": 0.5,
+          "y": -0.3
+        },
+        {
+          "name": "current",
+          "text": "@current mA",
+          "fontSize": 10,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontColor": "#666666",
+          "x": 1.2,
+          "y": 0
+        }
+      ],
       "properties": {
         "model": {
           "type": "string",
@@ -240,7 +398,27 @@
           "default": "100V",
           "label": "Max. Voltage"
         }
-      }
+      },
+      "terminals": [
+        {
+          "x": 0,
+          "y": 0.5,
+          "properties": {
+            "type": "diode",
+            "name": "anode",
+            "polarity": "positive"
+          }
+        },
+        {
+          "x": 1,
+          "y": 0.5,
+          "properties": {
+            "type": "diode",
+            "name": "cathode",
+            "polarity": "negative"
+          }
+        }
+      ]
     }
   ]
 }

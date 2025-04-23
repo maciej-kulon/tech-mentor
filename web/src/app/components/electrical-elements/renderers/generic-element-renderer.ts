@@ -9,7 +9,9 @@ export class GenericElementRenderer extends BaseElementRenderer {
     element: ElectricalElement,
     scale: number,
     offsetX: number,
-    offsetY: number
+    offsetY: number,
+    mouseX?: number,
+    mouseY?: number
   ): void {
     // Apply transformations (position, rotation)
     this.applyTransform(element, scale, offsetX, offsetY);
@@ -21,17 +23,49 @@ export class GenericElementRenderer extends BaseElementRenderer {
 
     // Get the drawing instructions from the element or use default drawing logic
     if (element.shape && Array.isArray(element.shape)) {
-      this.renderElementShape(element.shape, width, height);
+      this.renderElementShape(element.shape, width, height, scale);
     } else {
       // Default rendering if no shape is defined
       this.renderDefaultElement(width, height);
     }
 
-    // Restore context
+    // Restore context after shape rendering
     this.restoreContext();
 
-    // Draw label below the element
-    this.drawLabel(element, scale, offsetX, offsetY);
+    // Draw labels with their own transformation context
+    this.drawLabels(element, scale, offsetX, offsetY);
+
+    // Handle terminal highlighting if mouse position is provided
+    if (typeof mouseX === "number" && typeof mouseY === "number") {
+      this.highlightNearestTerminal(
+        element,
+        scale,
+        offsetX,
+        offsetY,
+        mouseX,
+        mouseY
+      );
+    }
+  }
+
+  /**
+   * Calculate line width based on relative size and constraints
+   */
+  private calculateLineWidth(
+    shape: any,
+    width: number,
+    height: number
+  ): number {
+    let lineWidth = (shape.lineWidth || 0.05) * Math.min(width, height);
+
+    if (shape.minWidth && lineWidth < shape.minWidth) {
+      lineWidth = shape.minWidth;
+    }
+    if (shape.maxWidth && lineWidth > shape.maxWidth) {
+      lineWidth = shape.maxWidth;
+    }
+
+    return lineWidth;
   }
 
   /**
@@ -40,7 +74,8 @@ export class GenericElementRenderer extends BaseElementRenderer {
   private renderElementShape(
     shape: any[],
     width: number,
-    height: number
+    height: number,
+    scale: number
   ): void {
     for (const part of shape) {
       switch (part.type) {
@@ -67,7 +102,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
   private drawLine(line: any, width: number, height: number): void {
     this.ctx.beginPath();
     this.ctx.strokeStyle = line.strokeStyle || "#000000";
-    this.ctx.lineWidth = line.lineWidth || 2;
+    this.ctx.lineWidth = this.calculateLineWidth(line, width, height);
 
     // Convert relative coordinates to actual coordinates
     const x1 = line.x1 * width - width / 2;
@@ -87,7 +122,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
     this.ctx.beginPath();
     this.ctx.fillStyle = rect.fillStyle || "#FFFFFF";
     this.ctx.strokeStyle = rect.strokeStyle || "#000000";
-    this.ctx.lineWidth = rect.lineWidth || 1.5;
+    this.ctx.lineWidth = this.calculateLineWidth(rect, width, height);
 
     // Convert relative coordinates to actual coordinates
     const x = rect.x * width - width / 2;
@@ -112,7 +147,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
     this.ctx.beginPath();
     this.ctx.fillStyle = circle.fillStyle || "#FFFFFF";
     this.ctx.strokeStyle = circle.strokeStyle || "#000000";
-    this.ctx.lineWidth = circle.lineWidth || 1.5;
+    this.ctx.lineWidth = this.calculateLineWidth(circle, width, height);
 
     // Convert relative coordinates to actual coordinates
     const x = circle.x * width - width / 2;
@@ -138,7 +173,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
     this.ctx.beginPath();
     this.ctx.fillStyle = path.fillStyle || "#FFFFFF";
     this.ctx.strokeStyle = path.strokeStyle || "#000000";
-    this.ctx.lineWidth = path.lineWidth || 1.5;
+    this.ctx.lineWidth = this.calculateLineWidth(path, width, height);
 
     for (const cmd of path.commands) {
       const type = cmd.type;
@@ -176,7 +211,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
    */
   private renderDefaultElement(width: number, height: number): void {
     // Draw connection lines
-    this.ctx.lineWidth = 2;
+    this.ctx.lineWidth = Math.min(2, Math.max(1.5, width * 0.05));
     this.ctx.strokeStyle = "#000000";
 
     // Left connector line
@@ -194,7 +229,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
     // Draw element body (default rectangular shape)
     this.ctx.fillStyle = "#FFFFFF";
     this.ctx.strokeStyle = "#000000";
-    this.ctx.lineWidth = 1.5;
+    this.ctx.lineWidth = Math.min(1.5, Math.max(1, width * 0.04));
 
     const bodyWidth = width * 0.6;
     const bodyHeight = height * 0.6;

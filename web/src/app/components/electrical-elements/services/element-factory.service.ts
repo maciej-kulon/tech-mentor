@@ -1,7 +1,10 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable, map, of, shareReplay, tap } from "rxjs";
-import { ElectricalElement } from "../interfaces/electrical-element.interface";
+import {
+  ElectricalElement,
+  Label,
+} from "../interfaces/electrical-element.interface";
 
 interface ElementTemplate {
   id: string;
@@ -12,12 +15,8 @@ interface ElementTemplate {
   height: number;
   shape: any[];
   pinPositions: { x: number; y: number }[];
-  defaultLabel: string;
+  defaultLabels: Label[];
   properties: Record<string, any>;
-}
-
-interface ElementTemplatesResponse {
-  templates: ElementTemplate[];
 }
 
 @Injectable({
@@ -25,29 +24,21 @@ interface ElementTemplatesResponse {
 })
 export class ElementFactoryService {
   private templates: ElementTemplate[] = [];
-  private templatesCache$: Observable<ElementTemplate[]> | null = null;
+  private templatesLoaded$ = this.http
+    .get<{ templates: ElementTemplate[] }>("assets/data/element-templates.json")
+    .pipe(
+      map((response) => response.templates),
+      tap((templates) => (this.templates = templates)),
+      shareReplay(1)
+    );
 
   constructor(private http: HttpClient) {}
 
   /**
-   * Get all element templates
+   * Get all available templates
    */
   getTemplates(): Observable<ElementTemplate[]> {
-    if (this.templatesCache$) {
-      return this.templatesCache$;
-    }
-
-    this.templatesCache$ = this.http
-      .get<ElementTemplatesResponse>("assets/data/element-templates.json")
-      .pipe(
-        map((response) => response.templates),
-        tap((templates) => {
-          this.templates = templates;
-        }),
-        shareReplay(1)
-      );
-
-    return this.templatesCache$;
+    return this.templatesLoaded$;
   }
 
   /**
@@ -57,7 +48,7 @@ export class ElementFactoryService {
     templateId: string,
     x: number,
     y: number,
-    label?: string,
+    labels?: Label[],
     properties?: Record<string, any>,
     rotation: number = 0
   ): Observable<ElectricalElement | null> {
@@ -74,8 +65,8 @@ export class ElementFactoryService {
           Math.random() * 1000
         )}`;
 
-        // Create a label based on template's default or provided label
-        const elementLabel = label || template.defaultLabel;
+        // Use provided labels or template's default labels
+        const elementLabels = labels || template.defaultLabels;
 
         // Create element with merged properties
         const element: ElectricalElement = {
@@ -86,7 +77,7 @@ export class ElementFactoryService {
           width: template.width,
           height: template.height,
           rotation,
-          label: elementLabel,
+          labels: elementLabels,
           shape: [...template.shape], // Clone the shape array
           pinPoints: template.pinPositions.map((pos) => ({ ...pos })), // Clone pin positions
           properties: { ...template.properties, ...properties }, // Merge properties
@@ -104,7 +95,7 @@ export class ElementFactoryService {
     type: string,
     x: number,
     y: number,
-    label: string,
+    labels: Label[],
     rotation: number = 0
   ): ElectricalElement | null {
     // Find matching template by type
@@ -123,7 +114,7 @@ export class ElementFactoryService {
       width: template.width,
       height: template.height,
       rotation,
-      label,
+      labels,
       shape: [...template.shape],
       pinPoints: template.pinPositions.map((pos) => ({ ...pos })),
     };

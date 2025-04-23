@@ -1,6 +1,9 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { ElectricalElement } from "../interfaces/electrical-element.interface";
+import {
+  ElectricalElement,
+  Label,
+} from "../interfaces/electrical-element.interface";
 import { BaseElementRenderer } from "../renderers/base-element-renderer";
 import { GenericElementRenderer } from "../renderers/generic-element-renderer";
 import { ElementFactoryService } from "./element-factory.service";
@@ -13,6 +16,8 @@ export class ElectricalElementsRendererService {
   private elements: ElectricalElement[] = [];
   private ctx: CanvasRenderingContext2D | null = null;
   private isElementsLoaded = false;
+  private mouseX: number = 0;
+  private mouseY: number = 0;
 
   constructor(
     private http: HttpClient,
@@ -65,32 +70,100 @@ export class ElectricalElementsRendererService {
    * Load fallback elements in case JSON loading fails
    */
   private loadFallbackElements(): void {
+    const createDefaultLabels = (
+      reference: string,
+      value?: string
+    ): Label[] => {
+      const labels: Label[] = [
+        {
+          name: "reference",
+          text: reference,
+          fontSize: 14,
+          fontFamily: "Arial",
+          fontWeight: "bold",
+          fontColor: "#000000",
+          x: 0.5,
+          y: -0.6,
+        },
+      ];
+
+      if (value) {
+        labels.push({
+          name: "value",
+          text: value,
+          fontSize: 12,
+          fontFamily: "Arial",
+          fontWeight: "normal",
+          fontColor: "#000000",
+          x: 0.5,
+          y: -0.3,
+        });
+      }
+
+      return labels;
+    };
+
     // Create elements using the factory service
     this.elementFactory
-      .createElementFromTemplate("resistor-template", 200, 150, "R1 10kΩ")
+      .createElementFromTemplate(
+        "resistor-template",
+        200,
+        150,
+        createDefaultLabels("R1", "10kΩ")
+      )
       .subscribe((element) => {
         if (element) this.elements.push(element);
       });
 
     this.elementFactory
-      .createElementFromTemplate("capacitor-template", 200, 250, "C1 100nF")
+      .createElementFromTemplate(
+        "capacitor-template",
+        200,
+        250,
+        createDefaultLabels("C1", "100nF")
+      )
       .subscribe((element) => {
         if (element) this.elements.push(element);
       });
 
     this.elementFactory
-      .createElementFromTemplate("switch-template", 300, 150, "SW1")
+      .createElementFromTemplate(
+        "switch-template",
+        300,
+        150,
+        createDefaultLabels("SW1")
+      )
       .subscribe((element) => {
         if (element) this.elements.push(element);
       });
 
     this.elementFactory
-      .createElementFromTemplate("diode-template", 300, 250, "D1 1N4148")
+      .createElementFromTemplate(
+        "diode-template",
+        300,
+        250,
+        createDefaultLabels("D1", "1N4148")
+      )
       .subscribe((element) => {
         if (element) this.elements.push(element);
       });
 
     this.isElementsLoaded = true;
+  }
+
+  /**
+   * Update mouse position and trigger redraw
+   */
+  updateMousePosition(
+    x: number,
+    y: number,
+    scale: number,
+    offsetX: number,
+    offsetY: number
+  ): void {
+    this.mouseX = x;
+    this.mouseY = y;
+    this.renderElements(scale, offsetX, offsetY);
   }
 
   /**
@@ -101,7 +174,14 @@ export class ElectricalElementsRendererService {
 
     // Render each element using the generic renderer
     this.elements.forEach((element) => {
-      this.renderer.render(element, scale, offsetX, offsetY);
+      this.renderer.render(
+        element,
+        scale,
+        offsetX,
+        offsetY,
+        this.mouseX,
+        this.mouseY
+      );
     });
   }
 

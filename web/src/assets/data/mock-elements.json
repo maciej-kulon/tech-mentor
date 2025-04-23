@@ -7,7 +7,44 @@
     "width": 60,
     "height": 30,
     "rotation": 0,
-    "label": "R1 10kΩ",
+    "labels": [
+      {
+        "name": "value",
+        "text": "10kΩ",
+        "fontSize": 0.3,
+        "fontFamily": "Arial",
+        "fontWeight": "normal",
+        "fontColor": "#000000",
+        "x": 0.5,
+        "y": -0.5,
+        "minSize": 8,
+        "maxSize": 14
+      },
+      {
+        "name": "reference",
+        "text": "R1",
+        "fontSize": 0.35,
+        "fontFamily": "Arial",
+        "fontWeight": "bold",
+        "fontColor": "#000000",
+        "x": 0.5,
+        "y": -0.8,
+        "minSize": 10,
+        "maxSize": 16
+      },
+      {
+        "name": "voltage",
+        "text": "@voltage V",
+        "fontSize": 0.25,
+        "fontFamily": "Arial",
+        "fontWeight": "normal",
+        "fontColor": "#666666",
+        "x": 1.2,
+        "y": 0,
+        "minSize": 6,
+        "maxSize": 12
+      }
+    ],
     "shape": [
       {
         "type": "line",
@@ -15,7 +52,9 @@
         "y1": 0.5,
         "x2": 0.2,
         "y2": 0.5,
-        "lineWidth": 2
+        "lineWidth": 0.05,
+        "minWidth": 1.5,
+        "maxWidth": 3
       },
       {
         "type": "line",
@@ -23,7 +62,9 @@
         "y1": 0.5,
         "x2": 1,
         "y2": 0.5,
-        "lineWidth": 2
+        "lineWidth": 0.05,
+        "minWidth": 1.5,
+        "maxWidth": 3
       },
       {
         "type": "rect",
@@ -33,7 +74,27 @@
         "height": 0.6,
         "fillStyle": "#FFFFFF",
         "strokeStyle": "#000000",
-        "lineWidth": 1.5
+        "lineWidth": 0.04,
+        "minWidth": 1,
+        "maxWidth": 2.5
+      }
+    ],
+    "terminals": [
+      {
+        "x": 0,
+        "y": 0.5,
+        "properties": {
+          "type": "passive",
+          "name": "terminal1"
+        }
+      },
+      {
+        "x": 1,
+        "y": 0.5,
+        "properties": {
+          "type": "passive",
+          "name": "terminal2"
+        }
       }
     ]
   },
@@ -45,7 +106,32 @@
     "width": 60,
     "height": 30,
     "rotation": 0,
-    "label": "C1 100nF",
+    "labels": [
+      {
+        "name": "value",
+        "text": "100nF",
+        "fontSize": 0.3,
+        "fontFamily": "Arial",
+        "fontWeight": "normal",
+        "fontColor": "#000000",
+        "x": 0.5,
+        "y": -0.5,
+        "minSize": 8,
+        "maxSize": 14
+      },
+      {
+        "name": "reference",
+        "text": "C1",
+        "fontSize": 0.35,
+        "fontFamily": "Arial",
+        "fontWeight": "bold",
+        "fontColor": "#000000",
+        "x": 0.5,
+        "y": -0.8,
+        "minSize": 10,
+        "maxSize": 16
+      }
+    ],
     "shape": [
       {
         "type": "line",
@@ -53,7 +139,9 @@
         "y1": 0.5,
         "x2": 0.4,
         "y2": 0.5,
-        "lineWidth": 2
+        "lineWidth": 0.05,
+        "minWidth": 1.5,
+        "maxWidth": 3
       },
       {
         "type": "line",
@@ -61,7 +149,9 @@
         "y1": 0.5,
         "x2": 1,
         "y2": 0.5,
-        "lineWidth": 2
+        "lineWidth": 0.05,
+        "minWidth": 1.5,
+        "maxWidth": 3
       },
       {
         "type": "line",
@@ -69,7 +159,9 @@
         "y1": 0.2,
         "x2": 0.4,
         "y2": 0.8,
-        "lineWidth": 2,
+        "lineWidth": 0.05,
+        "minWidth": 1.5,
+        "maxWidth": 3,
         "strokeStyle": "#000000"
       },
       {
@@ -78,8 +170,28 @@
         "y1": 0.2,
         "x2": 0.6,
         "y2": 0.8,
-        "lineWidth": 2,
+        "lineWidth": 0.05,
+        "minWidth": 1.5,
+        "maxWidth": 3,
         "strokeStyle": "#000000"
+      }
+    ],
+    "terminals": [
+      {
+        "x": 0,
+        "y": 0.5,
+        "properties": {
+          "type": "passive",
+          "name": "terminal1"
+        }
+      },
+      {
+        "x": 1,
+        "y": 0.5,
+        "properties": {
+          "type": "passive",
+          "name": "terminal2"
+        }
       }
     ]
   },
@@ -91,7 +203,32 @@
     "width": 60,
     "height": 30,
     "rotation": 0,
-    "label": "SW1",
+    "labels": [
+      {
+        "name": "reference",
+        "text": "SW1",
+        "fontSize": 0.35,
+        "fontFamily": "Arial",
+        "fontWeight": "bold",
+        "fontColor": "#000000",
+        "x": 0.5,
+        "y": -0.5,
+        "minSize": 10,
+        "maxSize": 16
+      },
+      {
+        "name": "state",
+        "text": "@state",
+        "fontSize": 0.25,
+        "fontFamily": "Arial",
+        "fontWeight": "normal",
+        "fontColor": "#666666",
+        "x": 0.5,
+        "y": 0.8,
+        "minSize": 6,
+        "maxSize": 12
+      }
+    ],
     "shape": [
       {
         "type": "line",
@@ -99,7 +236,9 @@
         "y1": 0.5,
         "x2": 0.3,
         "y2": 0.5,
-        "lineWidth": 2
+        "lineWidth": 0.05,
+        "minWidth": 1.5,
+        "maxWidth": 3
       },
       {
         "type": "line",
@@ -107,7 +246,9 @@
         "y1": 0.5,
         "x2": 1,
         "y2": 0.5,
-        "lineWidth": 2
+        "lineWidth": 0.05,
+        "minWidth": 1.5,
+        "maxWidth": 3
       },
       {
         "type": "circle",
@@ -131,8 +272,28 @@
         "y1": 0.5,
         "x2": 0.65,
         "y2": 0.3,
-        "lineWidth": 2,
+        "lineWidth": 0.05,
+        "minWidth": 1.5,
+        "maxWidth": 3,
         "strokeStyle": "#000000"
+      }
+    ],
+    "terminals": [
+      {
+        "x": 0,
+        "y": 0.5,
+        "properties": {
+          "type": "switch",
+          "name": "input"
+        }
+      },
+      {
+        "x": 1,
+        "y": 0.5,
+        "properties": {
+          "type": "switch",
+          "name": "output"
+        }
       }
     ]
   },
@@ -144,7 +305,44 @@
     "width": 60,
     "height": 30,
     "rotation": 0,
-    "label": "D1 1N4148",
+    "labels": [
+      {
+        "name": "value",
+        "text": "1N4148",
+        "fontSize": 0.3,
+        "fontFamily": "Arial",
+        "fontWeight": "normal",
+        "fontColor": "#000000",
+        "x": 0.5,
+        "y": -0.5,
+        "minSize": 8,
+        "maxSize": 14
+      },
+      {
+        "name": "reference",
+        "text": "D1",
+        "fontSize": 0.35,
+        "fontFamily": "Arial",
+        "fontWeight": "bold",
+        "fontColor": "#000000",
+        "x": 0.5,
+        "y": -0.8,
+        "minSize": 10,
+        "maxSize": 16
+      },
+      {
+        "name": "current",
+        "text": "@current mA",
+        "fontSize": 0.25,
+        "fontFamily": "Arial",
+        "fontWeight": "normal",
+        "fontColor": "#666666",
+        "x": 1.2,
+        "y": 0,
+        "minSize": 6,
+        "maxSize": 12
+      }
+    ],
     "shape": [
       {
         "type": "line",
@@ -152,7 +350,9 @@
         "y1": 0.5,
         "x2": 0.3,
         "y2": 0.5,
-        "lineWidth": 2
+        "lineWidth": 0.05,
+        "minWidth": 1.5,
+        "maxWidth": 3
       },
       {
         "type": "line",
@@ -160,7 +360,9 @@
         "y1": 0.5,
         "x2": 1,
         "y2": 0.5,
-        "lineWidth": 2
+        "lineWidth": 0.05,
+        "minWidth": 1.5,
+        "maxWidth": 3
       },
       {
         "type": "path",
@@ -172,7 +374,9 @@
         ],
         "fillStyle": "#FFFFFF",
         "strokeStyle": "#000000",
-        "lineWidth": 1.5
+        "lineWidth": 0.04,
+        "minWidth": 1,
+        "maxWidth": 2.5
       },
       {
         "type": "line",
@@ -180,8 +384,30 @@
         "y1": 0.2,
         "x2": 0.7,
         "y2": 0.8,
-        "lineWidth": 2,
+        "lineWidth": 0.05,
+        "minWidth": 1.5,
+        "maxWidth": 3,
         "strokeStyle": "#000000"
+      }
+    ],
+    "terminals": [
+      {
+        "x": 0,
+        "y": 0.5,
+        "properties": {
+          "type": "diode",
+          "name": "anode",
+          "polarity": "positive"
+        }
+      },
+      {
+        "x": 1,
+        "y": 0.5,
+        "properties": {
+          "type": "diode",
+          "name": "cathode",
+          "polarity": "negative"
+        }
       }
     ]
   }
