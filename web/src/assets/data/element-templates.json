@@ -1,0 +1,246 @@
+{
+  "templates": [
+    {
+      "id": "resistor-template",
+      "type": "resistor",
+      "name": "Resistor",
+      "description": "Standard resistor component",
+      "width": 60,
+      "height": 30,
+      "shape": [
+        {
+          "type": "line",
+          "x1": 0,
+          "y1": 0.5,
+          "x2": 0.2,
+          "y2": 0.5,
+          "lineWidth": 2
+        },
+        {
+          "type": "line",
+          "x1": 0.8,
+          "y1": 0.5,
+          "x2": 1,
+          "y2": 0.5,
+          "lineWidth": 2
+        },
+        {
+          "type": "rect",
+          "x": 0.2,
+          "y": 0.2,
+          "width": 0.6,
+          "height": 0.6,
+          "fillStyle": "#FFFFFF",
+          "strokeStyle": "#000000",
+          "lineWidth": 1.5
+        }
+      ],
+      "pinPositions": [
+        { "x": 0, "y": 0.5 },
+        { "x": 1, "y": 0.5 }
+      ],
+      "defaultLabel": "R1",
+      "properties": {
+        "resistance": {
+          "type": "string",
+          "default": "10kΩ",
+          "label": "Resistance"
+        },
+        "power": {
+          "type": "string",
+          "default": "0.25W",
+          "label": "Power"
+        }
+      }
+    },
+    {
+      "id": "capacitor-template",
+      "type": "capacitor",
+      "name": "Capacitor",
+      "description": "Standard capacitor component",
+      "width": 60,
+      "height": 30,
+      "shape": [
+        {
+          "type": "line",
+          "x1": 0,
+          "y1": 0.5,
+          "x2": 0.4,
+          "y2": 0.5,
+          "lineWidth": 2
+        },
+        {
+          "type": "line",
+          "x1": 0.6,
+          "y1": 0.5,
+          "x2": 1,
+          "y2": 0.5,
+          "lineWidth": 2
+        },
+        {
+          "type": "line",
+          "x1": 0.4,
+          "y1": 0.2,
+          "x2": 0.4,
+          "y2": 0.8,
+          "lineWidth": 2,
+          "strokeStyle": "#000000"
+        },
+        {
+          "type": "line",
+          "x1": 0.6,
+          "y1": 0.2,
+          "x2": 0.6,
+          "y2": 0.8,
+          "lineWidth": 2,
+          "strokeStyle": "#000000"
+        }
+      ],
+      "pinPositions": [
+        { "x": 0, "y": 0.5 },
+        { "x": 1, "y": 0.5 }
+      ],
+      "defaultLabel": "C1",
+      "properties": {
+        "capacitance": {
+          "type": "string",
+          "default": "100nF",
+          "label": "Capacitance"
+        },
+        "voltage": {
+          "type": "string",
+          "default": "50V",
+          "label": "Voltage"
+        }
+      }
+    },
+    {
+      "id": "switch-template",
+      "type": "switch",
+      "name": "Switch",
+      "description": "Basic switch component",
+      "width": 60,
+      "height": 30,
+      "shape": [
+        {
+          "type": "line",
+          "x1": 0,
+          "y1": 0.5,
+          "x2": 0.3,
+          "y2": 0.5,
+          "lineWidth": 2
+        },
+        {
+          "type": "line",
+          "x1": 0.7,
+          "y1": 0.5,
+          "x2": 1,
+          "y2": 0.5,
+          "lineWidth": 2
+        },
+        {
+          "type": "circle",
+          "x": 0.3,
+          "y": 0.5,
+          "radius": 0.05,
+          "fillStyle": "#000000",
+          "stroke": false
+        },
+        {
+          "type": "circle",
+          "x": 0.7,
+          "y": 0.5,
+          "radius": 0.05,
+          "fillStyle": "#000000",
+          "stroke": false
+        },
+        {
+          "type": "line",
+          "x1": 0.3,
+          "y1": 0.5,
+          "x2": 0.65,
+          "y2": 0.3,
+          "lineWidth": 2,
+          "strokeStyle": "#000000"
+        }
+      ],
+      "pinPositions": [
+        { "x": 0, "y": 0.5 },
+        { "x": 1, "y": 0.5 }
+      ],
+      "defaultLabel": "SW1",
+      "properties": {
+        "type": {
+          "type": "select",
+          "options": ["SPST", "SPDT", "DPST", "DPDT"],
+          "default": "SPST",
+          "label": "Switch Type"
+        }
+      }
+    },
+    {
+      "id": "diode-template",
+      "type": "diode",
+      "name": "Diode",
+      "description": "Standard diode component",
+      "width": 60,
+      "height": 30,
+      "shape": [
+        {
+          "type": "line",
+          "x1": 0,
+          "y1": 0.5,
+          "x2": 0.3,
+          "y2": 0.5,
+          "lineWidth": 2
+        },
+        {
+          "type": "line",
+          "x1": 0.7,
+          "y1": 0.5,
+          "x2": 1,
+          "y2": 0.5,
+          "lineWidth": 2
+        },
+        {
+          "type": "path",
+          "commands": [
+            { "type": "moveTo", "x": 0.3, "y": 0.2 },
+            { "type": "lineTo", "x": 0.3, "y": 0.8 },
+            { "type": "lineTo", "x": 0.7, "y": 0.5 },
+            { "type": "lineTo", "x": 0.3, "y": 0.2 }
+          ],
+          "fillStyle": "#FFFFFF",
+          "strokeStyle": "#000000",
+          "lineWidth": 1.5
+        },
+        {
+          "type": "line",
+          "x1": 0.7,
+          "y1": 0.2,
+          "x2": 0.7,
+          "y2": 0.8,
+          "lineWidth": 2,
+          "strokeStyle": "#000000"
+        }
+      ],
+      "pinPositions": [
+        { "x": 0, "y": 0.5 },
+        { "x": 1, "y": 0.5 }
+      ],
+      "defaultLabel": "D1",
+      "properties": {
+        "model": {
+          "type": "string",
+          "default": "1N4148",
+          "label": "Model"
+        },
+        "maxVoltage": {
+          "type": "string",
+          "default": "100V",
+          "label": "Max. Voltage"
+        }
+      }
+    }
+  ]
+}
