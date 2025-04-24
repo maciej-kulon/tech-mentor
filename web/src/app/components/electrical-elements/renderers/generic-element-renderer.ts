@@ -13,6 +13,9 @@ export class GenericElementRenderer extends BaseElementRenderer {
     mouseX?: number,
     mouseY?: number
   ): void {
+    // Save the current context state
+    this.ctx.save();
+
     // Apply transformations (position, rotation)
     this.applyTransform(element, scale, offsetX, offsetY);
 
@@ -28,13 +31,20 @@ export class GenericElementRenderer extends BaseElementRenderer {
     }
 
     // Restore context after shape rendering
-    this.restoreContext();
+    this.ctx.restore();
+
+    // Save context again for labels
+    this.ctx.save();
 
     // Draw labels with their own transformation context
     this.drawLabels(element, scale, offsetX, offsetY);
 
+    // Restore context after labels
+    this.ctx.restore();
+
     // Handle terminal highlighting if mouse position is provided
     if (typeof mouseX === "number" && typeof mouseY === "number") {
+      this.ctx.save();
       this.highlightNearestTerminal(
         element,
         scale,
@@ -43,6 +53,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
         mouseX,
         mouseY
       );
+      this.ctx.restore();
     }
   }
 
@@ -329,6 +340,68 @@ export class GenericElementRenderer extends BaseElementRenderer {
     this.ctx.beginPath();
     this.ctx.rect(-bodyWidth / 2, -bodyHeight / 2, bodyWidth, bodyHeight);
     this.ctx.fill();
+    this.ctx.stroke();
+  }
+
+  /**
+   * Render highlight for an element
+   */
+  renderHighlight(
+    element: ElectricalElement,
+    scale: number,
+    offsetX: number,
+    offsetY: number,
+    opacity: number
+  ): void {
+    console.log("Rendering highlight:", {
+      element,
+      scale,
+      offsetX,
+      offsetY,
+      opacity,
+    });
+
+    // Save current context state
+    this.ctx.save();
+
+    // Apply transformations (position, rotation)
+    this.applyTransform(element, scale, offsetX, offsetY);
+
+    const width = element.width * scale;
+    const height = element.height * scale;
+
+    // Set highlight style
+    this.ctx.strokeStyle = `rgba(135, 206, 235, ${opacity})`; // sky blue with given opacity
+    this.ctx.lineWidth = Math.max(2, width * 0.1); // Ensure highlight is visible
+
+    // Draw highlight rectangle centered around the element
+    this.ctx.strokeRect(-width / 2, -height / 2, width, height);
+
+    // Restore context
+    this.ctx.restore();
+  }
+
+  /**
+   * Default highlight rendering for elements without a shape definition
+   */
+  private renderDefaultElementHighlight(width: number, height: number): void {
+    // Draw connection lines
+    this.ctx.beginPath();
+    this.ctx.moveTo(-width / 2, 0);
+    this.ctx.lineTo(-width / 2 + width * 0.2, 0);
+    this.ctx.stroke();
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(width / 2 - width * 0.2, 0);
+    this.ctx.lineTo(width / 2, 0);
+    this.ctx.stroke();
+
+    // Draw element body outline
+    const bodyWidth = width * 0.6;
+    const bodyHeight = height * 0.6;
+
+    this.ctx.beginPath();
+    this.ctx.rect(-bodyWidth / 2, -bodyHeight / 2, bodyWidth, bodyHeight);
     this.ctx.stroke();
   }
 }

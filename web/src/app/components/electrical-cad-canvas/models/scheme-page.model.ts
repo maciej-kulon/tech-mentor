@@ -4,23 +4,23 @@ import {
   PaperDimensions,
   PageMetadata,
   PageDates,
-} from '../interfaces/paper-format.interface';
+} from "../interfaces/paper-format.interface";
 
 /**
  * Class representing a scheme page with all its properties and dimensions
  */
 export class SchemePage implements PageMetadata, PageDates {
-  title: string = '';
-  description: string = '';
-  paperFormat: PaperFormat = 'A4';
-  backgroundColor: string = 'white';
-  orientation: PageOrientation = 'landscape';
-  author: string = '';
+  title: string = "asd";
+  description: string = "";
+  paperFormat: PaperFormat = "A4";
+  backgroundColor: string = "white";
+  orientation: PageOrientation = "landscape";
+  author: string = "";
   creationDate: Date = new Date();
   reviewDate?: Date;
   lastUpdateDate: Date = new Date();
-  version: string = '1.0';
-  reviewedBy: string = '';
+  version: string = "1.0";
+  reviewedBy: string = "";
   rows: number = 9;
   columns: number = 9;
 
@@ -51,7 +51,7 @@ export class SchemePage implements PageMetadata, PageDates {
   private updateDimensions(): void {
     const format = this.PAPER_FORMATS[this.paperFormat];
 
-    if (this.orientation === 'landscape') {
+    if (this.orientation === "landscape") {
       this.dimensions = { width: format.height, height: format.width };
     } else {
       this.dimensions = { width: format.width, height: format.height };
