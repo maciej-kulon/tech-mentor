@@ -419,6 +419,320 @@
           }
         }
       ]
+    },
+    {
+      "id": "lamp-template",
+      "type": "lamp",
+      "name": "Light Bulb",
+      "description": "Standard light bulb component",
+      "width": 60,
+      "height": 60,
+      "shape": [
+        {
+          "type": "line",
+          "x1": 0,
+          "y1": 0.5,
+          "x2": 0.2,
+          "y2": 0.5,
+          "lineWidth": 2
+        },
+        {
+          "type": "line",
+          "x1": 0.8,
+          "y1": 0.5,
+          "x2": 1,
+          "y2": 0.5,
+          "lineWidth": 2
+        },
+        {
+          "type": "circle",
+          "x": 0.5,
+          "y": 0.5,
+          "radius": 0.3,
+          "fillStyle": "#FFFFFF",
+          "strokeStyle": "#000000",
+          "lineWidth": 1.5
+        },
+        {
+          "type": "line",
+          "x1": 0.35,
+          "y1": 0.35,
+          "x2": 0.65,
+          "y2": 0.65,
+          "lineWidth": 1.5
+        },
+        {
+          "type": "line",
+          "x1": 0.35,
+          "y1": 0.65,
+          "x2": 0.65,
+          "y2": 0.35,
+          "lineWidth": 1.5
+        }
+      ],
+      "pinPositions": [
+        { "x": 0, "y": 0.5 },
+        { "x": 1, "y": 0.5 }
+      ],
+      "defaultLabels": [
+        {
+          "name": "reference",
+          "text": "L1",
+          "fontSize": 14,
+          "fontFamily": "Arial",
+          "fontWeight": "bold",
+          "fontColor": "#000000",
+          "x": 0.5,
+          "y": -0.3
+        },
+        {
+          "name": "power",
+          "text": "60W",
+          "fontSize": 12,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontColor": "#000000",
+          "x": 0.5,
+          "y": 1.2
+        }
+      ],
+      "properties": {
+        "power": {
+          "type": "string",
+          "default": "60W",
+          "label": "Power Rating"
+        },
+        "voltage": {
+          "type": "string",
+          "default": "230V",
+          "label": "Voltage Rating"
+        }
+      },
+      "terminals": [
+        {
+          "x": 0,
+          "y": 0.5,
+          "properties": {
+            "type": "passive",
+            "name": "terminal1"
+          }
+        },
+        {
+          "x": 1,
+          "y": 0.5,
+          "properties": {
+            "type": "passive",
+            "name": "terminal2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "coil-template",
+      "type": "coil",
+      "name": "Coil",
+      "description": "Coil component with circular arcs",
+      "width": 60,
+      "height": 40,
+      "shape": [
+        {
+          "type": "line",
+          "x1": 0,
+          "y1": 0.5,
+          "x2": 0.1,
+          "y2": 0.5,
+          "lineWidth": 2
+        },
+        {
+          "type": "arc",
+          "x": 0.25,
+          "y": 0.5,
+          "radius": 0.15,
+          "startAngle": 3.14159,
+          "endAngle": 0,
+          "lineWidth": 1.5,
+          "strokeStyle": "#000000",
+          "fillStyle": "none"
+        },
+        {
+          "type": "arc",
+          "x": 0.5,
+          "y": 0.5,
+          "radius": 0.15,
+          "startAngle": 3.14159,
+          "endAngle": 0,
+          "lineWidth": 1.5,
+          "strokeStyle": "#000000",
+          "fillStyle": "none"
+        },
+        {
+          "type": "arc",
+          "x": 0.75,
+          "y": 0.5,
+          "radius": 0.15,
+          "startAngle": 3.14159,
+          "endAngle": 0,
+          "lineWidth": 1.5,
+          "strokeStyle": "#000000",
+          "fillStyle": "none"
+        },
+        {
+          "type": "line",
+          "x1": 0.9,
+          "y1": 0.5,
+          "x2": 1,
+          "y2": 0.5,
+          "lineWidth": 2
+        }
+      ],
+      "defaultLabels": [
+        {
+          "name": "reference",
+          "text": "L1",
+          "fontSize": 14,
+          "fontFamily": "Arial",
+          "fontWeight": "bold",
+          "fontColor": "#000000",
+          "x": 0.5,
+          "y": -0.3
+        }
+      ],
+      "terminals": [
+        {
+          "x": 0,
+          "y": 0.5,
+          "properties": {
+            "type": "passive",
+            "name": "terminal1"
+          }
+        },
+        {
+          "x": 1,
+          "y": 0.5,
+          "properties": {
+            "type": "passive",
+            "name": "terminal2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-generator-template",
+      "type": "wave-generator",
+      "name": "Wave Generator",
+      "description": "Wave generator with sinusoidal output",
+      "width": 80,
+      "height": 40,
+      "shape": [
+        {
+          "type": "line",
+          "x1": 0,
+          "y1": 0.5,
+          "x2": 0.2,
+          "y2": 0.5,
+          "lineWidth": 2
+        },
+        {
+          "type": "line",
+          "x1": 0.8,
+          "y1": 0.5,
+          "x2": 1,
+          "y2": 0.5,
+          "lineWidth": 2
+        },
+        {
+          "type": "rect",
+          "x": 0.2,
+          "y": 0.2,
+          "width": 0.6,
+          "height": 0.6,
+          "fillStyle": "#FFFFFF",
+          "strokeStyle": "#000000",
+          "lineWidth": 1.5
+        },
+        {
+          "type": "bezier",
+          "x1": 0.3,
+          "y1": 0.5,
+          "cp1x": 0.35,
+          "cp1y": 0.3,
+          "cp2x": 0.45,
+          "cp2y": 0.7,
+          "x2": 0.5,
+          "y2": 0.5,
+          "lineWidth": 1.5,
+          "strokeStyle": "#FF0000"
+        },
+        {
+          "type": "bezier",
+          "x1": 0.5,
+          "y1": 0.5,
+          "cp1x": 0.55,
+          "cp1y": 0.3,
+          "cp2x": 0.65,
+          "cp2y": 0.7,
+          "x2": 0.7,
+          "y2": 0.5,
+          "lineWidth": 1.5,
+          "strokeStyle": "#FF0000"
+        }
+      ],
+      "pinPositions": [
+        { "x": 0, "y": 0.5 },
+        { "x": 1, "y": 0.5 }
+      ],
+      "defaultLabels": [
+        {
+          "name": "reference",
+          "text": "WG1",
+          "fontSize": 14,
+          "fontFamily": "Arial",
+          "fontWeight": "bold",
+          "fontColor": "#000000",
+          "x": 0.5,
+          "y": -0.6
+        },
+        {
+          "name": "frequency",
+          "text": "1kHz",
+          "fontSize": 12,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontColor": "#000000",
+          "x": 0.5,
+          "y": -0.3
+        }
+      ],
+      "properties": {
+        "frequency": {
+          "type": "string",
+          "default": "1kHz",
+          "label": "Frequency"
+        },
+        "amplitude": {
+          "type": "string",
+          "default": "5V",
+          "label": "Amplitude"
+        }
+      },
+      "terminals": [
+        {
+          "x": 0,
+          "y": 0.5,
+          "properties": {
+            "type": "output",
+            "name": "output"
+          }
+        },
+        {
+          "x": 1,
+          "y": 0.5,
+          "properties": {
+            "type": "output",
+            "name": "output"
+          }
+        }
+      ]
     }
   ]
 }

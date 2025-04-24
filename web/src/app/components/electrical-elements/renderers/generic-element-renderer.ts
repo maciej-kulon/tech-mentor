@@ -1,5 +1,5 @@
-import { ElectricalElement } from '../interfaces/electrical-element.interface';
-import { BaseElementRenderer } from './base-element-renderer';
+import { ElectricalElement } from "../interfaces/electrical-element.interface";
+import { BaseElementRenderer } from "./base-element-renderer";
 
 /**
  * Generic renderer for electrical elements based on their JSON definition
@@ -11,7 +11,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
     offsetX: number,
     offsetY: number,
     mouseX?: number,
-    mouseY?: number,
+    mouseY?: number
   ): void {
     // Apply transformations (position, rotation)
     this.applyTransform(element, scale, offsetX, offsetY);
@@ -34,14 +34,14 @@ export class GenericElementRenderer extends BaseElementRenderer {
     this.drawLabels(element, scale, offsetX, offsetY);
 
     // Handle terminal highlighting if mouse position is provided
-    if (typeof mouseX === 'number' && typeof mouseY === 'number') {
+    if (typeof mouseX === "number" && typeof mouseY === "number") {
       this.highlightNearestTerminal(
         element,
         scale,
         offsetX,
         offsetY,
         mouseX,
-        mouseY,
+        mouseY
       );
     }
   }
@@ -52,7 +52,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
   private calculateLineWidth(
     shape: any,
     width: number,
-    height: number,
+    height: number
   ): number {
     let lineWidth = (shape.lineWidth || 0.05) * Math.min(width, height);
 
@@ -73,23 +73,28 @@ export class GenericElementRenderer extends BaseElementRenderer {
     shape: any[],
     width: number,
     height: number,
-    scale: number,
+    scale: number
   ): void {
     for (const part of shape) {
       switch (part.type) {
-        case 'line':
+        case "line":
           this.drawLine(part, width, height);
           break;
-        case 'rect':
+        case "rect":
           this.drawRect(part, width, height);
           break;
-        case 'circle':
+        case "circle":
           this.drawCircle(part, width, height);
           break;
-        case 'path':
+        case "path":
           this.drawPath(part, width, height);
           break;
-        // Add more shape types as needed
+        case "arc":
+          this.drawArc(part, width, height);
+          break;
+        case "bezier":
+          this.drawBezier(part, width, height);
+          break;
       }
     }
   }
@@ -99,7 +104,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
    */
   private drawLine(line: any, width: number, height: number): void {
     this.ctx.beginPath();
-    this.ctx.strokeStyle = line.strokeStyle || '#000000';
+    this.ctx.strokeStyle = line.strokeStyle || "#000000";
     this.ctx.lineWidth = this.calculateLineWidth(line, width, height);
 
     // Convert relative coordinates to actual coordinates
@@ -118,8 +123,8 @@ export class GenericElementRenderer extends BaseElementRenderer {
    */
   private drawRect(rect: any, width: number, height: number): void {
     this.ctx.beginPath();
-    this.ctx.fillStyle = rect.fillStyle || '#FFFFFF';
-    this.ctx.strokeStyle = rect.strokeStyle || '#000000';
+    this.ctx.fillStyle = rect.fillStyle || "#FFFFFF";
+    this.ctx.strokeStyle = rect.strokeStyle || "#000000";
     this.ctx.lineWidth = this.calculateLineWidth(rect, width, height);
 
     // Convert relative coordinates to actual coordinates
@@ -143,8 +148,8 @@ export class GenericElementRenderer extends BaseElementRenderer {
    */
   private drawCircle(circle: any, width: number, height: number): void {
     this.ctx.beginPath();
-    this.ctx.fillStyle = circle.fillStyle || '#FFFFFF';
-    this.ctx.strokeStyle = circle.strokeStyle || '#000000';
+    this.ctx.fillStyle = circle.fillStyle || "#FFFFFF";
+    this.ctx.strokeStyle = circle.strokeStyle || "#000000";
     this.ctx.lineWidth = this.calculateLineWidth(circle, width, height);
 
     // Convert relative coordinates to actual coordinates
@@ -169,22 +174,22 @@ export class GenericElementRenderer extends BaseElementRenderer {
     if (!path.commands || !Array.isArray(path.commands)) return;
 
     this.ctx.beginPath();
-    this.ctx.fillStyle = path.fillStyle || '#FFFFFF';
-    this.ctx.strokeStyle = path.strokeStyle || '#000000';
+    this.ctx.fillStyle = path.fillStyle || "#FFFFFF";
+    this.ctx.strokeStyle = path.strokeStyle || "#000000";
     this.ctx.lineWidth = this.calculateLineWidth(path, width, height);
 
     for (const cmd of path.commands) {
       const type = cmd.type;
 
-      if (type === 'moveTo') {
+      if (type === "moveTo") {
         const x = cmd.x * width - width / 2;
         const y = cmd.y * height - height / 2;
         this.ctx.moveTo(x, y);
-      } else if (type === 'lineTo') {
+      } else if (type === "lineTo") {
         const x = cmd.x * width - width / 2;
         const y = cmd.y * height - height / 2;
         this.ctx.lineTo(x, y);
-      } else if (type === 'arc') {
+      } else if (type === "arc") {
         const x = cmd.x * width - width / 2;
         const y = cmd.y * height - height / 2;
         const r = cmd.radius * Math.min(width, height);
@@ -205,12 +210,101 @@ export class GenericElementRenderer extends BaseElementRenderer {
   }
 
   /**
+   * Draw an arc using either center-radius-angle or start-end-radius method
+   */
+  private drawArc(arc: any, width: number, height: number): void {
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = arc.strokeStyle || "#000000";
+    this.ctx.lineWidth = this.calculateLineWidth(arc, width, height);
+
+    if (arc.x !== undefined && arc.radius !== undefined) {
+      // Method 1: center point, radius, angles
+      const x = arc.x * width - width / 2;
+      const y = arc.y * height - height / 2;
+      const radius = arc.radius * Math.min(width, height);
+      const startAngle = arc.startAngle || 0;
+      const endAngle = arc.endAngle || Math.PI * 2;
+      const counterclockwise = arc.counterclockwise || false;
+
+      this.ctx.arc(x, y, radius, startAngle, endAngle, counterclockwise);
+    } else if (
+      arc.x1 !== undefined &&
+      arc.x2 !== undefined &&
+      arc.arcRadius !== undefined
+    ) {
+      // Method 2: start point, end point, radius
+      const x1 = arc.x1 * width - width / 2;
+      const y1 = arc.y1 * height - height / 2;
+      const x2 = arc.x2 * width - width / 2;
+      const y2 = arc.y2 * height - height / 2;
+      const radius = arc.arcRadius * Math.min(width, height);
+
+      // Calculate center point and angles for the arc
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      // Ensure the radius is not too small
+      if (radius < distance / 2) {
+        // If radius is too small, just draw a line
+        this.ctx.moveTo(x1, y1);
+        this.ctx.lineTo(x2, y2);
+      } else {
+        // Calculate the center point and angles
+        const midX = (x1 + x2) / 2;
+        const midY = (y1 + y2) / 2;
+        const h = Math.sqrt(radius * radius - (distance * distance) / 4);
+        const angle = Math.atan2(dy, dx);
+
+        // Choose the center point (there are two possible points)
+        const centerX = midX - h * Math.sin(angle);
+        const centerY = midY + h * Math.cos(angle);
+
+        // Calculate start and end angles
+        const startAngle = Math.atan2(y1 - centerY, x1 - centerX);
+        const endAngle = Math.atan2(y2 - centerY, x2 - centerX);
+
+        this.ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+      }
+    }
+
+    if (arc.fillStyle !== "none") {
+      this.ctx.fillStyle = arc.fillStyle || "#FFFFFF";
+      this.ctx.fill();
+    }
+    this.ctx.stroke();
+  }
+
+  /**
+   * Draw a bezier curve based on relative coordinates
+   */
+  private drawBezier(bezier: any, width: number, height: number): void {
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = bezier.strokeStyle || "#000000";
+    this.ctx.lineWidth = this.calculateLineWidth(bezier, width, height);
+
+    // Convert relative coordinates to actual coordinates
+    const x1 = bezier.x1 * width - width / 2;
+    const y1 = bezier.y1 * height - height / 2;
+    const cp1x = bezier.cp1x * width - width / 2;
+    const cp1y = bezier.cp1y * height - height / 2;
+    const cp2x = bezier.cp2x * width - width / 2;
+    const cp2y = bezier.cp2y * height - height / 2;
+    const x2 = bezier.x2 * width - width / 2;
+    const y2 = bezier.y2 * height - height / 2;
+
+    this.ctx.moveTo(x1, y1);
+    this.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x2, y2);
+    this.ctx.stroke();
+  }
+
+  /**
    * Default rendering for elements without a shape definition
    */
   private renderDefaultElement(width: number, height: number): void {
     // Draw connection lines
     this.ctx.lineWidth = Math.min(2, Math.max(1.5, width * 0.05));
-    this.ctx.strokeStyle = '#000000';
+    this.ctx.strokeStyle = "#000000";
 
     // Left connector line
     this.ctx.beginPath();
@@ -225,8 +319,8 @@ export class GenericElementRenderer extends BaseElementRenderer {
     this.ctx.stroke();
 
     // Draw element body (default rectangular shape)
-    this.ctx.fillStyle = '#FFFFFF';
-    this.ctx.strokeStyle = '#000000';
+    this.ctx.fillStyle = "#FFFFFF";
+    this.ctx.strokeStyle = "#000000";
     this.ctx.lineWidth = Math.min(1.5, Math.max(1, width * 0.04));
 
     const bodyWidth = width * 0.6;
