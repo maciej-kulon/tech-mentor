@@ -1,15 +1,14 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import {
   ElectricalElement,
   Label,
-} from "../interfaces/electrical-element.interface";
-import { BaseElementRenderer } from "../renderers/base-element-renderer";
-import { GenericElementRenderer } from "../renderers/generic-element-renderer";
-import { ElementFactoryService } from "./element-factory.service";
+} from '../interfaces/electrical-element.interface';
+import { GenericElementRenderer } from '../renderers/generic-element-renderer';
+import { ElementFactoryService } from './element-factory.service';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class ElectricalElementsRendererService {
   private renderer!: GenericElementRenderer;
@@ -21,7 +20,7 @@ export class ElectricalElementsRendererService {
 
   constructor(
     private http: HttpClient,
-    private elementFactory: ElementFactoryService
+    private elementFactory: ElementFactoryService,
   ) {
     // Start loading templates in the background
     this.elementFactory.getTemplates().subscribe();
@@ -47,9 +46,9 @@ export class ElectricalElementsRendererService {
    */
   private loadElementsFromJSON(): void {
     this.http
-      .get<ElectricalElement[]>("assets/data/mock-elements.json")
+      .get<ElectricalElement[]>('assets/data/mock-elements.json')
       .subscribe({
-        next: (elements) => {
+        next: elements => {
           this.elements = elements;
           this.isElementsLoaded = true;
 
@@ -58,8 +57,8 @@ export class ElectricalElementsRendererService {
             this.renderElements(1, 0, 0); // Default values for scale and offset
           }
         },
-        error: (error) => {
-          console.error("Error loading electrical elements:", error);
+        error: error => {
+          console.error('Error loading electrical elements:', error);
           // Fall back to hardcoded elements in case of error
           this.loadFallbackElements();
         },
@@ -72,16 +71,16 @@ export class ElectricalElementsRendererService {
   private loadFallbackElements(): void {
     const createDefaultLabels = (
       reference: string,
-      value?: string
+      value?: string,
     ): Label[] => {
       const labels: Label[] = [
         {
-          name: "reference",
+          name: 'reference',
           text: reference,
           fontSize: 14,
-          fontFamily: "Arial",
-          fontWeight: "bold",
-          fontColor: "#000000",
+          fontFamily: 'Arial',
+          fontWeight: 'bold',
+          fontColor: '#000000',
           x: 0.5,
           y: -0.6,
         },
@@ -89,12 +88,12 @@ export class ElectricalElementsRendererService {
 
       if (value) {
         labels.push({
-          name: "value",
+          name: 'value',
           text: value,
           fontSize: 12,
-          fontFamily: "Arial",
-          fontWeight: "normal",
-          fontColor: "#000000",
+          fontFamily: 'Arial',
+          fontWeight: 'normal',
+          fontColor: '#000000',
           x: 0.5,
           y: -0.3,
         });
@@ -106,45 +105,45 @@ export class ElectricalElementsRendererService {
     // Create elements using the factory service
     this.elementFactory
       .createElementFromTemplate(
-        "resistor-template",
+        'resistor-template',
         200,
         150,
-        createDefaultLabels("R1", "10kΩ")
+        createDefaultLabels('R1', '10kΩ'),
       )
-      .subscribe((element) => {
+      .subscribe(element => {
         if (element) this.elements.push(element);
       });
 
     this.elementFactory
       .createElementFromTemplate(
-        "capacitor-template",
+        'capacitor-template',
         200,
         250,
-        createDefaultLabels("C1", "100nF")
+        createDefaultLabels('C1', '100nF'),
       )
-      .subscribe((element) => {
+      .subscribe(element => {
         if (element) this.elements.push(element);
       });
 
     this.elementFactory
       .createElementFromTemplate(
-        "switch-template",
+        'switch-template',
         300,
         150,
-        createDefaultLabels("SW1")
+        createDefaultLabels('SW1'),
       )
-      .subscribe((element) => {
+      .subscribe(element => {
         if (element) this.elements.push(element);
       });
 
     this.elementFactory
       .createElementFromTemplate(
-        "diode-template",
+        'diode-template',
         300,
         250,
-        createDefaultLabels("D1", "1N4148")
+        createDefaultLabels('D1', '1N4148'),
       )
-      .subscribe((element) => {
+      .subscribe(element => {
         if (element) this.elements.push(element);
       });
 
@@ -159,7 +158,7 @@ export class ElectricalElementsRendererService {
     y: number,
     scale: number,
     offsetX: number,
-    offsetY: number
+    offsetY: number,
   ): void {
     this.mouseX = x;
     this.mouseY = y;
@@ -173,14 +172,14 @@ export class ElectricalElementsRendererService {
     if (!this.ctx || !this.renderer) return;
 
     // Render each element using the generic renderer
-    this.elements.forEach((element) => {
+    this.elements.forEach(element => {
       this.renderer.render(
         element,
         scale,
         offsetX,
         offsetY,
         this.mouseX,
-        this.mouseY
+        this.mouseY,
       );
     });
   }

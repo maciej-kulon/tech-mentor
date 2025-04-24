@@ -1,5 +1,5 @@
-import { ElectricalElement } from "../interfaces/electrical-element.interface";
-import { BaseElementRenderer } from "./base-element-renderer";
+import { ElectricalElement } from '../interfaces/electrical-element.interface';
+import { BaseElementRenderer } from './base-element-renderer';
 
 /**
  * Generic renderer for electrical elements based on their JSON definition
@@ -11,15 +11,13 @@ export class GenericElementRenderer extends BaseElementRenderer {
     offsetX: number,
     offsetY: number,
     mouseX?: number,
-    mouseY?: number
+    mouseY?: number,
   ): void {
     // Apply transformations (position, rotation)
     this.applyTransform(element, scale, offsetX, offsetY);
 
     const width = element.width * scale;
     const height = element.height * scale;
-    const halfWidth = width / 2;
-    const halfHeight = height / 2;
 
     // Get the drawing instructions from the element or use default drawing logic
     if (element.shape && Array.isArray(element.shape)) {
@@ -36,14 +34,14 @@ export class GenericElementRenderer extends BaseElementRenderer {
     this.drawLabels(element, scale, offsetX, offsetY);
 
     // Handle terminal highlighting if mouse position is provided
-    if (typeof mouseX === "number" && typeof mouseY === "number") {
+    if (typeof mouseX === 'number' && typeof mouseY === 'number') {
       this.highlightNearestTerminal(
         element,
         scale,
         offsetX,
         offsetY,
         mouseX,
-        mouseY
+        mouseY,
       );
     }
   }
@@ -54,7 +52,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
   private calculateLineWidth(
     shape: any,
     width: number,
-    height: number
+    height: number,
   ): number {
     let lineWidth = (shape.lineWidth || 0.05) * Math.min(width, height);
 
@@ -75,20 +73,20 @@ export class GenericElementRenderer extends BaseElementRenderer {
     shape: any[],
     width: number,
     height: number,
-    scale: number
+    scale: number,
   ): void {
     for (const part of shape) {
       switch (part.type) {
-        case "line":
+        case 'line':
           this.drawLine(part, width, height);
           break;
-        case "rect":
+        case 'rect':
           this.drawRect(part, width, height);
           break;
-        case "circle":
+        case 'circle':
           this.drawCircle(part, width, height);
           break;
-        case "path":
+        case 'path':
           this.drawPath(part, width, height);
           break;
         // Add more shape types as needed
@@ -101,7 +99,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
    */
   private drawLine(line: any, width: number, height: number): void {
     this.ctx.beginPath();
-    this.ctx.strokeStyle = line.strokeStyle || "#000000";
+    this.ctx.strokeStyle = line.strokeStyle || '#000000';
     this.ctx.lineWidth = this.calculateLineWidth(line, width, height);
 
     // Convert relative coordinates to actual coordinates
@@ -120,8 +118,8 @@ export class GenericElementRenderer extends BaseElementRenderer {
    */
   private drawRect(rect: any, width: number, height: number): void {
     this.ctx.beginPath();
-    this.ctx.fillStyle = rect.fillStyle || "#FFFFFF";
-    this.ctx.strokeStyle = rect.strokeStyle || "#000000";
+    this.ctx.fillStyle = rect.fillStyle || '#FFFFFF';
+    this.ctx.strokeStyle = rect.strokeStyle || '#000000';
     this.ctx.lineWidth = this.calculateLineWidth(rect, width, height);
 
     // Convert relative coordinates to actual coordinates
@@ -145,8 +143,8 @@ export class GenericElementRenderer extends BaseElementRenderer {
    */
   private drawCircle(circle: any, width: number, height: number): void {
     this.ctx.beginPath();
-    this.ctx.fillStyle = circle.fillStyle || "#FFFFFF";
-    this.ctx.strokeStyle = circle.strokeStyle || "#000000";
+    this.ctx.fillStyle = circle.fillStyle || '#FFFFFF';
+    this.ctx.strokeStyle = circle.strokeStyle || '#000000';
     this.ctx.lineWidth = this.calculateLineWidth(circle, width, height);
 
     // Convert relative coordinates to actual coordinates
@@ -171,22 +169,22 @@ export class GenericElementRenderer extends BaseElementRenderer {
     if (!path.commands || !Array.isArray(path.commands)) return;
 
     this.ctx.beginPath();
-    this.ctx.fillStyle = path.fillStyle || "#FFFFFF";
-    this.ctx.strokeStyle = path.strokeStyle || "#000000";
+    this.ctx.fillStyle = path.fillStyle || '#FFFFFF';
+    this.ctx.strokeStyle = path.strokeStyle || '#000000';
     this.ctx.lineWidth = this.calculateLineWidth(path, width, height);
 
     for (const cmd of path.commands) {
       const type = cmd.type;
 
-      if (type === "moveTo") {
+      if (type === 'moveTo') {
         const x = cmd.x * width - width / 2;
         const y = cmd.y * height - height / 2;
         this.ctx.moveTo(x, y);
-      } else if (type === "lineTo") {
+      } else if (type === 'lineTo') {
         const x = cmd.x * width - width / 2;
         const y = cmd.y * height - height / 2;
         this.ctx.lineTo(x, y);
-      } else if (type === "arc") {
+      } else if (type === 'arc') {
         const x = cmd.x * width - width / 2;
         const y = cmd.y * height - height / 2;
         const r = cmd.radius * Math.min(width, height);
@@ -212,7 +210,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
   private renderDefaultElement(width: number, height: number): void {
     // Draw connection lines
     this.ctx.lineWidth = Math.min(2, Math.max(1.5, width * 0.05));
-    this.ctx.strokeStyle = "#000000";
+    this.ctx.strokeStyle = '#000000';
 
     // Left connector line
     this.ctx.beginPath();
@@ -227,8 +225,8 @@ export class GenericElementRenderer extends BaseElementRenderer {
     this.ctx.stroke();
 
     // Draw element body (default rectangular shape)
-    this.ctx.fillStyle = "#FFFFFF";
-    this.ctx.strokeStyle = "#000000";
+    this.ctx.fillStyle = '#FFFFFF';
+    this.ctx.strokeStyle = '#000000';
     this.ctx.lineWidth = Math.min(1.5, Math.max(1, width * 0.04));
 
     const bodyWidth = width * 0.6;

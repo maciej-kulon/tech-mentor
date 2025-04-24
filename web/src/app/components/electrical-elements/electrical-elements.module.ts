@@ -1,6 +1,6 @@
-import { NgModule } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { ElectricalElementsRendererService } from "./services/electrical-elements-renderer.service";
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ElectricalElementsRendererService } from './services/electrical-elements-renderer.service';
 
 @NgModule({
   declarations: [],

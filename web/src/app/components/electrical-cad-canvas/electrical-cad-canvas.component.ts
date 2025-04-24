@@ -6,25 +6,25 @@ import {
   Input,
   OnInit,
   ViewChild,
-} from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { SchemePage } from "./models/scheme-page.model";
-import { PageDots } from "./models/page-dots.model";
-import { SchemePageConfig } from "./interfaces/scheme-page-config.interface";
-import { Point } from "./interfaces/point.interface";
-import { ElectricalElementsModule } from "../electrical-elements/electrical-elements.module";
-import { ElectricalElementsRendererService } from "../electrical-elements/services/electrical-elements-renderer.service";
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { SchemePage } from './models/scheme-page.model';
+import { PageDots } from './models/page-dots.model';
+import { SchemePageConfig } from './interfaces/scheme-page-config.interface';
+import { Point } from './interfaces/point.interface';
+import { ElectricalElementsModule } from '../electrical-elements/electrical-elements.module';
+import { ElectricalElementsRendererService } from '../electrical-elements/services/electrical-elements-renderer.service';
 
 @Component({
-  selector: "app-electrical-cad-canvas",
+  selector: 'app-electrical-cad-canvas',
   standalone: true,
   imports: [CommonModule, ElectricalElementsModule],
-  templateUrl: "./electrical-cad-canvas.component.html",
-  styleUrl: "./electrical-cad-canvas.component.scss",
+  templateUrl: './electrical-cad-canvas.component.html',
+  styleUrl: './electrical-cad-canvas.component.scss',
 })
 export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
-  @ViewChild("cadCanvas") canvasRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild("canvasContainer") containerRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('cadCanvas') canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasContainer') containerRef!: ElementRef<HTMLDivElement>;
 
   @Input() schemeConfig: SchemePageConfig = { rows: 9, columns: 14 };
   @Input() page?: SchemePage;
@@ -52,11 +52,8 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   private currentMouseX = 0;
   private currentMouseY = 0;
 
-  // Grid properties
-  private dotRadius = this.dotSize;
-
   constructor(
-    private electricalElementsRenderer: ElectricalElementsRendererService
+    private electricalElementsRenderer: ElectricalElementsRendererService,
   ) {}
 
   ngOnInit(): void {
@@ -76,7 +73,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
   ngAfterViewInit(): void {
     this.canvas = this.canvasRef.nativeElement;
-    this.ctx = this.canvas.getContext("2d")!;
+    this.ctx = this.canvas.getContext('2d')!;
     this.container = this.containerRef.nativeElement;
 
     // Initialize the electrical elements renderer
@@ -102,16 +99,16 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.resizeCanvas();
 
     // Add event listeners for canvas interactions
-    this.canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
-    this.canvas.addEventListener("mouseup", this.onMouseUp.bind(this));
-    this.canvas.addEventListener("mousemove", this.onMouseMove.bind(this));
-    this.canvas.addEventListener("mouseleave", this.onMouseLeave.bind(this));
+    this.canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
+    this.canvas.addEventListener('mouseup', this.onMouseUp.bind(this));
+    this.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
+    this.canvas.addEventListener('mouseleave', this.onMouseLeave.bind(this));
 
     // Center the page after canvas setup
     this.centerPage();
   }
 
-  @HostListener("window:resize")
+  @HostListener('window:resize')
   private resizeCanvas(): void {
     // Set canvas dimensions to match container size
     const rect = this.container.getBoundingClientRect();
@@ -127,7 +124,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Draw canvas background (not the page)
-    this.ctx.fillStyle = "#f0f0f0";
+    this.ctx.fillStyle = '#f0f0f0';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Draw the page
@@ -137,7 +134,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.electricalElementsRenderer.renderElements(
       this.scale,
       this.offsetX,
-      this.offsetY
+      this.offsetY,
     );
 
     // Draw crosshair cursor at the current mouse position
@@ -154,7 +151,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.ctx.fillRect(this.offsetX, this.offsetY, scaledWidth, scaledHeight);
 
     // Draw page border
-    this.ctx.strokeStyle = "#000000";
+    this.ctx.strokeStyle = '#000000';
     this.ctx.lineWidth = 1;
     this.ctx.strokeRect(this.offsetX, this.offsetY, scaledWidth, scaledHeight);
 
@@ -190,7 +187,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       pageDots = new PageDots(
         pageDimensions.width,
         pageDimensions.height,
-        this.dotsPerPageLength
+        this.dotsPerPageLength,
       );
       this.pageDotsMap.set(this.activePage, pageDots);
     }
@@ -239,9 +236,9 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       ) {
         // Determine dot color and size
         if (this.debugDraw && this.currentQuadTreeNode.includes(dot)) {
-          this.ctx.fillStyle = "#ff0000";
+          this.ctx.fillStyle = '#ff0000';
         } else {
-          this.ctx.fillStyle = "#aaaaaa";
+          this.ctx.fillStyle = '#aaaaaa';
         }
 
         const isClosestDot = this.closestDot === dot;
@@ -258,7 +255,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     const rowLabelWidth = 24 * this.scale;
     const columnLabelHeight = 24 * this.scale;
 
-    this.ctx.strokeStyle = "#00ff00";
+    this.ctx.strokeStyle = '#00ff00';
     this.ctx.lineWidth = 0.5;
 
     const bounds = pageDots.getQuadTreeStructure();
@@ -275,18 +272,18 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   private drawLabelFrame(
     position: { x: number; y: number },
     size: { width: number; height: number },
-    isHeader: boolean = false
+    isHeader: boolean = false,
   ): void {
     // Use a different background color for header labels
-    this.ctx.fillStyle = isHeader ? "#e6e6e6" : "#f5f5f5";
+    this.ctx.fillStyle = isHeader ? '#e6e6e6' : '#f5f5f5';
     this.ctx.fillRect(position.x, position.y, size.width, size.height);
-    this.ctx.strokeStyle = "#333333";
+    this.ctx.strokeStyle = '#333333';
     this.ctx.lineWidth = 0.5;
     this.ctx.strokeRect(position.x, position.y, size.width, size.height);
   }
 
   private drawLabels(): void {
-    this.ctx.fillStyle = "#333333";
+    this.ctx.fillStyle = '#333333';
     this.ctx.font = `${10 * this.scale}px Arial`;
 
     const pageDimensions = this.activePage.getDimensions();
@@ -308,7 +305,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.drawLabelFrame(
       { x: this.offsetX, y: this.offsetY },
       { width: rowLabelWidth, height: columnLabelHeight },
-      true
+      true,
     );
 
     // Create header row for column numbers
@@ -324,15 +321,15 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.drawLabelFrame(
         { x: labelPositionX, y: this.offsetY },
         { width: columnWidth, height: columnLabelHeight },
-        true
+        true,
       );
 
       // Draw column number
-      this.ctx.fillStyle = "#333333";
+      this.ctx.fillStyle = '#333333';
       this.ctx.fillText(
         `${columnIndex + 1}`,
         labelPositionX + columnWidth / 2 - 3 * this.scale,
-        this.offsetY + columnLabelHeight / 2 + 3 * this.scale
+        this.offsetY + columnLabelHeight / 2 + 3 * this.scale,
       );
     }
 
@@ -346,15 +343,15 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.drawLabelFrame(
         { x: this.offsetX, y: labelPositionY },
         { width: rowLabelWidth, height: rowHeight },
-        true
+        true,
       );
 
       // Draw row letter
-      this.ctx.fillStyle = "#333333";
+      this.ctx.fillStyle = '#333333';
       this.ctx.fillText(
         letter,
         this.offsetX + rowLabelWidth / 2 - 3 * this.scale,
-        labelPositionY + rowHeight / 2 + 3 * this.scale
+        labelPositionY + rowHeight / 2 + 3 * this.scale,
       );
     }
   }
@@ -364,12 +361,12 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
     // Draw title at the top of the page
     if (this.activePage.title) {
-      this.ctx.fillStyle = "#000000";
+      this.ctx.fillStyle = '#000000';
       this.ctx.font = `bold ${16 * this.scale}px Arial`;
       this.ctx.fillText(
         this.activePage.title,
         this.offsetX + 20 * this.scale,
-        this.offsetY + 20 * this.scale
+        this.offsetY + 20 * this.scale,
       );
     }
 
@@ -377,20 +374,20 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     const formatText = `${this.activePage.paperFormat} ${this.activePage.orientation}`;
     const versionText = `v${this.activePage.version}`;
 
-    this.ctx.fillStyle = "#333333";
+    this.ctx.fillStyle = '#333333';
     this.ctx.font = `${10 * this.scale}px Arial`;
 
     // Draw at bottom right with some padding
     this.ctx.fillText(
       formatText,
       this.offsetX + pageDimensions.width * this.scale - 100 * this.scale,
-      this.offsetY + pageDimensions.height * this.scale - 15 * this.scale
+      this.offsetY + pageDimensions.height * this.scale - 15 * this.scale,
     );
 
     this.ctx.fillText(
       versionText,
       this.offsetX + pageDimensions.width * this.scale - 100 * this.scale,
-      this.offsetY + pageDimensions.height * this.scale - 5 * this.scale
+      this.offsetY + pageDimensions.height * this.scale - 5 * this.scale,
     );
   }
 
@@ -405,7 +402,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.currentMouseY >= this.offsetY &&
       this.currentMouseY <= this.offsetY + pageDimensions.height * this.scale
     ) {
-      this.ctx.strokeStyle = "#555555";
+      this.ctx.strokeStyle = '#555555';
       this.ctx.lineWidth = 0.5;
 
       // Draw horizontal line (only within page)
@@ -413,7 +410,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.ctx.moveTo(this.offsetX, this.currentMouseY);
       this.ctx.lineTo(
         this.offsetX + pageDimensions.width * this.scale,
-        this.currentMouseY
+        this.currentMouseY,
       );
       this.ctx.stroke();
 
@@ -422,7 +419,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.ctx.moveTo(this.currentMouseX, this.offsetY);
       this.ctx.lineTo(
         this.currentMouseX,
-        this.offsetY + pageDimensions.height * this.scale
+        this.offsetY + pageDimensions.height * this.scale,
       );
       this.ctx.stroke();
     }
@@ -432,19 +429,19 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.isDragging = true;
     this.dragStartX = event.offsetX;
     this.dragStartY = event.offsetY;
-    this.canvas.style.cursor = "grabbing";
+    this.canvas.style.cursor = 'grabbing';
   }
 
   private onMouseUp(): void {
     this.isDragging = false;
-    this.canvas.style.cursor = "crosshair";
+    this.canvas.style.cursor = 'crosshair';
   }
 
   private onMouseLeave(): void {
     this.isDragging = false;
     this.currentMouseX = -1;
     this.currentMouseY = -1;
-    this.canvas.style.cursor = "default";
+    this.canvas.style.cursor = 'default';
 
     // Clear terminal highlighting by passing invalid mouse coordinates
     this.electricalElementsRenderer.updateMousePosition(
@@ -452,7 +449,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       -1,
       this.scale,
       this.offsetX,
-      this.offsetY
+      this.offsetY,
     );
 
     this.draw();
@@ -482,13 +479,13 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.currentMouseY,
       this.scale,
       this.offsetX,
-      this.offsetY
+      this.offsetY,
     );
 
     this.draw();
   }
 
-  @HostListener("wheel", ["$event"])
+  @HostListener('wheel', ['$event'])
   onWheel(event: WheelEvent): void {
     event.preventDefault();
 

@@ -2,11 +2,11 @@ import {
   ElectricalElement,
   Label,
   Terminal,
-} from "../interfaces/electrical-element.interface";
+} from '../interfaces/electrical-element.interface';
 
 export abstract class BaseElementRenderer {
   // Constants for terminal rendering
-  protected static readonly TERMINAL_HIGHLIGHT_COLOR = "#2196F3"; // Material Blue
+  protected static readonly TERMINAL_HIGHLIGHT_COLOR = '#2196F3'; // Material Blue
   protected static readonly TERMINAL_HIGHLIGHT_RADIUS = 6; // Base radius in pixels
   protected static readonly TERMINAL_HIGHLIGHT_THRESHOLD = 10; // Base threshold in pixels
 
@@ -16,7 +16,7 @@ export abstract class BaseElementRenderer {
     element: ElectricalElement,
     scale: number,
     offsetX: number,
-    offsetY: number
+    offsetY: number,
   ): void;
 
   /**
@@ -26,14 +26,14 @@ export abstract class BaseElementRenderer {
     element: ElectricalElement,
     scale: number,
     offsetX: number,
-    offsetY: number
+    offsetY: number,
   ): void {
     if (!element.labels) return;
 
     this.ctx.save();
     this.ctx.translate(
       element.x * scale + offsetX + (element.width * scale) / 2,
-      element.y * scale + offsetY + (element.height * scale) / 2
+      element.y * scale + offsetY + (element.height * scale) / 2,
     );
 
     // Apply element rotation if any
@@ -42,7 +42,7 @@ export abstract class BaseElementRenderer {
     }
 
     // Draw each label
-    element.labels.forEach((label) => {
+    element.labels.forEach(label => {
       this.drawLabel(label, element.width, element.height, scale);
     });
 
@@ -56,7 +56,7 @@ export abstract class BaseElementRenderer {
     label: Label,
     elementWidth: number,
     elementHeight: number,
-    scale: number
+    scale: number,
   ): void {
     this.ctx.save();
 
@@ -84,8 +84,8 @@ export abstract class BaseElementRenderer {
     // Apply font properties
     this.ctx.font = `${label.fontWeight} ${fontSize}px ${label.fontFamily}`;
     this.ctx.fillStyle = label.fontColor;
-    this.ctx.textAlign = "center";
-    this.ctx.textBaseline = "middle";
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
 
     // Handle variable references
     const text = this.processLabelText(label.text);
@@ -100,7 +100,7 @@ export abstract class BaseElementRenderer {
   private processLabelText(text: string): string {
     // Replace @variable with actual values if available
     // For now, just remove the @ symbol
-    return text.replace(/@(\w+)/g, "$1");
+    return text.replace(/@(\w+)/g, '$1');
   }
 
   /**
@@ -110,12 +110,12 @@ export abstract class BaseElementRenderer {
     element: ElectricalElement,
     scale: number,
     offsetX: number,
-    offsetY: number
+    offsetY: number,
   ): void {
     this.ctx.save();
     this.ctx.translate(
       element.x * scale + offsetX + (element.width * scale) / 2,
-      element.y * scale + offsetY + (element.height * scale) / 2
+      element.y * scale + offsetY + (element.height * scale) / 2,
     );
 
     if (element.rotation !== 0) {
@@ -139,7 +139,7 @@ export abstract class BaseElementRenderer {
     offsetX: number,
     offsetY: number,
     mouseX: number,
-    mouseY: number
+    mouseY: number,
   ): void {
     if (!element.terminals?.length) return;
 
@@ -170,7 +170,7 @@ export abstract class BaseElementRenderer {
 
       // Calculate distance to mouse
       const distance = Math.sqrt(
-        Math.pow(mouseX - terminalX, 2) + Math.pow(mouseY - terminalY, 2)
+        Math.pow(mouseX - terminalX, 2) + Math.pow(mouseY - terminalY, 2),
       );
 
       if (distance < threshold && distance < minDistance) {
@@ -186,7 +186,7 @@ export abstract class BaseElementRenderer {
         closestTerminal,
         scale,
         offsetX,
-        offsetY
+        offsetY,
       );
     }
   }
@@ -199,14 +199,14 @@ export abstract class BaseElementRenderer {
     terminal: Terminal,
     scale: number,
     offsetX: number,
-    offsetY: number
+    offsetY: number,
   ): void {
     this.ctx.save();
 
     // Apply element transform
     this.ctx.translate(
       element.x * scale + offsetX + (element.width * scale) / 2,
-      element.y * scale + offsetY + (element.height * scale) / 2
+      element.y * scale + offsetY + (element.height * scale) / 2,
     );
 
     if (element.rotation !== 0) {
@@ -225,7 +225,7 @@ export abstract class BaseElementRenderer {
       y,
       BaseElementRenderer.TERMINAL_HIGHLIGHT_RADIUS,
       0,
-      Math.PI * 2
+      Math.PI * 2,
     );
     this.ctx.fill();
 

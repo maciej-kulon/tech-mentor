@@ -14,7 +14,7 @@ export class PageDots {
   constructor(
     private pageWidth: number,
     private pageHeight: number,
-    public dotsPerLength: number
+    public dotsPerLength: number,
   ) {
     this.baseSpacing = pageWidth / dotsPerLength;
     this.quadTree = new QuadTree({

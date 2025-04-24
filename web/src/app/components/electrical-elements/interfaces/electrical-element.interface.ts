@@ -33,7 +33,7 @@ export interface ElectricalElement {
 }
 
 export interface ElectricalElementShape {
-  type: "line" | "rect" | "circle" | "path";
+  type: 'line' | 'rect' | 'circle' | 'path';
   lineWidth?: number;
   minWidth?: number;
   maxWidth?: number;

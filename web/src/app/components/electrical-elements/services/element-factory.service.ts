@@ -1,10 +1,11 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable, map, of, shareReplay, tap } from "rxjs";
+/* eslint-disable no-console */
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable, map, shareReplay, tap } from 'rxjs';
 import {
   ElectricalElement,
   Label,
-} from "../interfaces/electrical-element.interface";
+} from '../interfaces/electrical-element.interface';
 
 interface ElementTemplate {
   id: string;
@@ -20,19 +21,19 @@ interface ElementTemplate {
 }
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class ElementFactoryService {
   private templates: ElementTemplate[] = [];
   private templatesLoaded$ = this.http
-    .get<{ templates: ElementTemplate[] }>("assets/data/element-templates.json")
+    .get<{ templates: ElementTemplate[] }>('assets/data/element-templates.json')
     .pipe(
-      map((response) => response.templates),
-      tap((templates) => (this.templates = templates)),
-      shareReplay(1)
+      map(response => response.templates),
+      tap(templates => (this.templates = templates)),
+      shareReplay(1),
     );
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Get all available templates
@@ -50,11 +51,11 @@ export class ElementFactoryService {
     y: number,
     labels?: Label[],
     properties?: Record<string, any>,
-    rotation: number = 0
+    rotation: number = 0,
   ): Observable<ElectricalElement | null> {
     return this.getTemplates().pipe(
-      map((templates) => {
-        const template = templates.find((t) => t.id === templateId);
+      map(templates => {
+        const template = templates.find(t => t.id === templateId);
         if (!template) {
           console.error(`Template with ID ${templateId} not found`);
           return null;
@@ -62,7 +63,7 @@ export class ElementFactoryService {
 
         // Create a unique ID for the element
         const elementId = `${template.type}-${Date.now()}-${Math.floor(
-          Math.random() * 1000
+          Math.random() * 1000,
         )}`;
 
         // Use provided labels or template's default labels
@@ -79,12 +80,12 @@ export class ElementFactoryService {
           rotation,
           labels: elementLabels,
           shape: [...template.shape], // Clone the shape array
-          pinPoints: template.pinPositions.map((pos) => ({ ...pos })), // Clone pin positions
+          pinPoints: template.pinPositions.map(pos => ({ ...pos })), // Clone pin positions
           properties: { ...template.properties, ...properties }, // Merge properties
         };
 
         return element;
-      })
+      }),
     );
   }
 
@@ -96,10 +97,10 @@ export class ElementFactoryService {
     x: number,
     y: number,
     labels: Label[],
-    rotation: number = 0
+    rotation: number = 0,
   ): ElectricalElement | null {
     // Find matching template by type
-    const template = this.templates.find((t) => t.type === type);
+    const template = this.templates.find(t => t.type === type);
     if (!template) {
       console.error(`No template found for element type: ${type}`);
       return null;
@@ -116,7 +117,7 @@ export class ElementFactoryService {
       rotation,
       labels,
       shape: [...template.shape],
-      pinPoints: template.pinPositions.map((pos) => ({ ...pos })),
+      pinPoints: template.pinPositions.map(pos => ({ ...pos })),
     };
   }
 }
