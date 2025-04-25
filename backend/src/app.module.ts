@@ -5,8 +5,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongoDBModule } from './mongodb/mongodb.module';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
-const modulesWithControllers = [UserModule];
+const modulesWithControllers = [UserModule, AuthModule];
 
 @Module({
   imports: [

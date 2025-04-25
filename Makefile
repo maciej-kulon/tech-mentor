@@ -25,8 +25,8 @@ build-backend:
 run-backend: stop-backend
 	@echo "Starting backend and MongoDB containers..."
 	@cd $(BACKEND_DIR) && $(DOCKER_COMPOSE) up -d
-	@echo "Showing logs..."
-	@cd $(BACKEND_DIR) && $(DOCKER_COMPOSE) logs -f
+	@echo "Showing application logs..."
+	@cd $(BACKEND_DIR) && $(DOCKER_COMPOSE) logs -f tech-mentor-backend
 
 .PHONY: stop-backend
 stop-backend:
@@ -40,7 +40,7 @@ clean-backend: stop-backend
 
 .PHONY: logs-backend
 logs-backend:
-	@cd $(BACKEND_DIR) && $(DOCKER_COMPOSE) logs -f
+	@cd $(BACKEND_DIR) && $(DOCKER_COMPOSE) logs -f tech-mentor-backend
 
 # Frontend targets (placeholder for future implementation)
 .PHONY: build-frontend
