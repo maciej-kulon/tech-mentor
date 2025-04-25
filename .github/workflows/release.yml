@@ -27,8 +27,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create release branch
+        run: |
+          git checkout -b release/$(date +%Y%m%d%H%M%S)
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
+
+      - name: Create Pull Request
+        if: success()
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(release): update version and changelog"
+          title: "chore(release): update version and changelog"
+          body: "Automated release PR created by semantic-release"
+          branch: main
+          base: main
+          delete-branch: true

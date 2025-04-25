@@ -1,5 +1,48 @@
 {
   "version": "1",
   "name": "tech-mentor-api",
-  "type": "collection"
-} 
+  "type": "collection",
+  "requests": [
+    {
+      "name": "Login",
+      "method": "POST",
+      "url": "{{baseUrl}}/auth/login/v1",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "name": "Create User",
+      "method": "POST",
+      "url": "{{baseUrl}}/users/v1",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "name": "Get User",
+      "method": "GET",
+      "url": "{{baseUrl}}/users/{{userId}}/v1",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{token}}"
+        }
+      ]
+    }
+  ]
+}

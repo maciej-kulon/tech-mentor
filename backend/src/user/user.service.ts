@@ -28,4 +28,8 @@ export class UserService {
   public async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findByEmail(email);
   }
+
+  public async findById(id: string): Promise<IUser | null> {
+    return this.userRepository.findById(id);
+  }
 }
