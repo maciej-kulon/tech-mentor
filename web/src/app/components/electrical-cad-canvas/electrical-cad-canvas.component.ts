@@ -16,8 +16,9 @@ import { ElectricalElementsModule } from "../electrical-elements/electrical-elem
 import { ElectricalElementsRendererService } from "../electrical-elements/services/electrical-elements-renderer.service";
 import { MacOSKeyBindings } from "@app/config/key-bindings.macos";
 import { WindowsKeyBindings } from "@app/config/key-bindings.windows";
-import { MatDialog, MatDialogModule } from "@angular/material/dialog";
+import { MatDialogModule } from "@angular/material/dialog";
 import { DebugInfoDialogComponent } from "./debug-info-dialog/debug-info-dialog.component";
+import { DialogService } from "@app/services/dialog.service";
 
 @Component({
   selector: "app-electrical-cad-canvas",
@@ -67,7 +68,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
   constructor(
     private electricalElementsRenderer: ElectricalElementsRendererService,
-    private dialog: MatDialog
+    private dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
@@ -662,8 +663,8 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     }
   }
 
-  private onDoubleClick(event: MouseEvent): void {
-    // Check if there's an element under cursor
+  private async onDoubleClick(event: MouseEvent): Promise<void> {
+    // Get the element under the cursor
     const elementUnderCursor =
       this.electricalElementsRenderer.findElementUnderCursor(
         event.offsetX,
@@ -674,19 +675,17 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       );
 
     if (elementUnderCursor) {
-      // Show element debug info
-      const dialogRef = this.dialog.open(DebugInfoDialogComponent, {
+      // Open debug dialog for the element
+      const result = await this.dialogService.open(DebugInfoDialogComponent, {
         data: elementUnderCursor,
         width: "600px",
       });
 
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-          // Update the element with the edited data
-          Object.assign(elementUnderCursor, result);
-          this.draw(); // Redraw to show changes
-        }
-      });
+      if (result) {
+        // Update the element with the edited data
+        Object.assign(elementUnderCursor, result);
+        this.draw(); // Redraw to show changes
+      }
     } else {
       // Check if click is within page bounds
       const pageDimensions = this.activePage.getDimensions();
@@ -698,18 +697,16 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
       if (isWithinPage) {
         // Show page debug info
-        const dialogRef = this.dialog.open(DebugInfoDialogComponent, {
+        const result = await this.dialogService.open(DebugInfoDialogComponent, {
           data: this.activePage,
           width: "600px",
         });
 
-        dialogRef.afterClosed().subscribe((result) => {
-          if (result) {
-            // Update the page with the edited data
-            Object.assign(this.activePage, result);
-            this.draw(); // Redraw to show changes
-          }
-        });
+        if (result) {
+          // Update the page with the edited data
+          Object.assign(this.activePage, result);
+          this.draw(); // Redraw to show changes
+        }
       }
     }
   }

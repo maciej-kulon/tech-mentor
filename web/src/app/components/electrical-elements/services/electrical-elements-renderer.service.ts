@@ -1,5 +1,5 @@
-import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
+import { HttpService } from "../../../services/http.service";
 import {
   ElectricalElement,
   Label,
@@ -24,11 +24,13 @@ export class ElectricalElementsRendererService {
     new Map();
 
   constructor(
-    private http: HttpClient,
+    private httpService: HttpService,
     private elementFactory: ElementFactoryService
   ) {
     // Start loading templates in the background
-    this.elementFactory.getTemplates().subscribe();
+    this.elementFactory.getTemplates().catch((error) => {
+      console.error("Error preloading templates:", error);
+    });
   }
 
   /**
@@ -50,31 +52,29 @@ export class ElectricalElementsRendererService {
   /**
    * Load electrical elements from JSON file
    */
-  private loadElementsFromJSON(): void {
-    this.http
-      .get<ElectricalElement[]>("assets/data/mock-elements.json")
-      .subscribe({
-        next: (elements) => {
-          this.elements = elements;
-          this.isElementsLoaded = true;
+  private async loadElementsFromJSON(): Promise<void> {
+    try {
+      const elements = await this.httpService.get<ElectricalElement[]>(
+        "assets/data/mock-elements.json"
+      );
+      this.elements = elements;
+      this.isElementsLoaded = true;
 
-          // Force redraw if canvas context is available
-          if (this.ctx) {
-            this.renderElements(1, 0, 0); // Default values for scale and offset
-          }
-        },
-        error: (error) => {
-          console.error("Error loading electrical elements:", error);
-          // Fall back to hardcoded elements in case of error
-          this.loadFallbackElements();
-        },
-      });
+      // Force redraw if canvas context is available
+      if (this.ctx) {
+        this.renderElements(1, 0, 0); // Default values for scale and offset
+      }
+    } catch (error) {
+      console.error("Error loading electrical elements:", error);
+      // Fall back to hardcoded elements in case of error
+      this.loadFallbackElements();
+    }
   }
 
   /**
    * Load fallback elements in case JSON loading fails
    */
-  private loadFallbackElements(): void {
+  private async loadFallbackElements(): Promise<void> {
     const createDefaultLabels = (
       reference: string,
       value?: string
@@ -108,52 +108,44 @@ export class ElectricalElementsRendererService {
       return labels;
     };
 
-    // Create elements using the factory service
-    this.elementFactory
-      .createElementFromTemplate(
+    try {
+      // Create elements using the factory service
+      const resistor = await this.elementFactory.createElementFromTemplate(
         "resistor-template",
         200,
         150,
         createDefaultLabels("R1", "10kΩ")
-      )
-      .subscribe((element) => {
-        if (element) this.elements.push(element);
-      });
+      );
+      if (resistor) this.elements.push(resistor);
 
-    this.elementFactory
-      .createElementFromTemplate(
+      const capacitor = await this.elementFactory.createElementFromTemplate(
         "capacitor-template",
         200,
         250,
         createDefaultLabels("C1", "100nF")
-      )
-      .subscribe((element) => {
-        if (element) this.elements.push(element);
-      });
+      );
+      if (capacitor) this.elements.push(capacitor);
 
-    this.elementFactory
-      .createElementFromTemplate(
+      const switchElement = await this.elementFactory.createElementFromTemplate(
         "switch-template",
         300,
         150,
         createDefaultLabels("SW1")
-      )
-      .subscribe((element) => {
-        if (element) this.elements.push(element);
-      });
+      );
+      if (switchElement) this.elements.push(switchElement);
 
-    this.elementFactory
-      .createElementFromTemplate(
+      const diode = await this.elementFactory.createElementFromTemplate(
         "diode-template",
         300,
         250,
         createDefaultLabels("D1", "1N4148")
-      )
-      .subscribe((element) => {
-        if (element) this.elements.push(element);
-      });
+      );
+      if (diode) this.elements.push(diode);
 
-    this.isElementsLoaded = true;
+      this.isElementsLoaded = true;
+    } catch (error) {
+      console.error("Error creating fallback elements:", error);
+    }
   }
 
   /**

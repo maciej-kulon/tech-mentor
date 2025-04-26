@@ -1,7 +1,5 @@
- 
-import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable, map, shareReplay, tap } from "rxjs";
+import { HttpService } from "../../../services/http.service";
 import {
   ElectricalElement,
   Label,
@@ -25,68 +23,79 @@ interface ElementTemplate {
 })
 export class ElementFactoryService {
   private templates: ElementTemplate[] = [];
-  private templatesLoaded$ = this.http
-    .get<{ templates: ElementTemplate[] }>("assets/data/element-templates.json")
-    .pipe(
-      map(response => response.templates),
-      tap(templates => (this.templates = templates)),
-      shareReplay(1),
-    );
+  private templatesPromise: Promise<ElementTemplate[]> | null = null;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly httpService: HttpService) {}
 
   /**
    * Get all available templates
    */
-  getTemplates(): Observable<ElementTemplate[]> {
-    return this.templatesLoaded$;
+  getTemplates(): Promise<ElementTemplate[]> {
+    if (!this.templatesPromise) {
+      this.templatesPromise = this.httpService
+        .get<{ templates: ElementTemplate[] }>(
+          "assets/data/element-templates.json"
+        )
+        .then((response) => {
+          this.templates = response.templates;
+          return this.templates;
+        })
+        .catch((error) => {
+          console.error("Error loading templates:", error);
+          throw error;
+        });
+    }
+    return this.templatesPromise;
   }
 
   /**
    * Create an electrical element from a template
    */
-  createElementFromTemplate(
+  async createElementFromTemplate(
     templateId: string,
     x: number,
     y: number,
     labels?: Label[],
     properties?: Record<string, any>,
-    rotation: number = 0,
-  ): Observable<ElectricalElement | null> {
-    return this.getTemplates().pipe(
-      map(templates => {
-        const template = templates.find(t => t.id === templateId);
-        if (!template) {
-          console.error(`Template with ID ${templateId} not found`);
-          return null;
-        }
+    rotation: number = 0
+  ): Promise<ElectricalElement | null> {
+    try {
+      const templates = await this.getTemplates();
+      const template = templates.find((t) => t.id === templateId);
 
-        // Create a unique ID for the element
-        const elementId = `${template.type}-${Date.now()}-${Math.floor(
-          Math.random() * 1000,
-        )}`;
+      if (!template) {
+        console.error(`Template with ID ${templateId} not found`);
+        return null;
+      }
 
-        // Use provided labels or template's default labels
-        const elementLabels = labels || template.defaultLabels;
+      // Create a unique ID for the element
+      const elementId = `${template.type}-${Date.now()}-${Math.floor(
+        Math.random() * 1000
+      )}`;
 
-        // Create element with merged properties
-        const element: ElectricalElement = {
-          id: elementId,
-          type: template.type,
-          x,
-          y,
-          width: template.width,
-          height: template.height,
-          rotation,
-          labels: elementLabels,
-          shape: [...template.shape], // Clone the shape array
-          pinPoints: template.pinPositions.map(pos => ({ ...pos })), // Clone pin positions
-          properties: { ...template.properties, ...properties }, // Merge properties
-        };
+      // Use provided labels or template's default labels
+      const elementLabels = labels || template.defaultLabels;
 
-        return element;
-      }),
-    );
+      // Create element with merged properties
+      const element: ElectricalElement = {
+        id: elementId,
+        type: template.type,
+        x,
+        y,
+        width: template.width,
+        height: template.height,
+        rotation,
+        labels: elementLabels,
+        shape: [...template.shape], // Clone the shape array
+        pinPoints: template.pinPositions.map((pos) => ({ ...pos })), // Clone pin positions
+        properties: { ...template.properties, ...properties }, // Merge properties
+      };
+
+      return element;
+    } catch (error) {
+      console.error("Error creating element:", error);
+      return null;
+    }
   }
 
   /**
@@ -97,10 +106,10 @@ export class ElementFactoryService {
     x: number,
     y: number,
     labels: Label[],
-    rotation: number = 0,
+    rotation: number = 0
   ): ElectricalElement | null {
     // Find matching template by type
-    const template = this.templates.find(t => t.type === type);
+    const template = this.templates.find((t) => t.type === type);
     if (!template) {
       console.error(`No template found for element type: ${type}`);
       return null;
@@ -117,7 +126,7 @@ export class ElementFactoryService {
       rotation,
       labels,
       shape: [...template.shape],
-      pinPoints: template.pinPositions.map(pos => ({ ...pos })),
+      pinPoints: template.pinPositions.map((pos) => ({ ...pos })),
     };
   }
 }
