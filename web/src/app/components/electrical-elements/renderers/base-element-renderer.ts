@@ -261,4 +261,79 @@ export abstract class BaseElementRenderer {
       BaseElementRenderer.TERMINAL_HIGHLIGHT_THRESHOLD * Math.min(1, scale)
     );
   }
+
+  /**
+   * Highlight a specific label
+   */
+  public highlightLabel(
+    element: ElectricalElement,
+    label: Label,
+    scale: number,
+    offsetX: number,
+    offsetY: number,
+    isSelected: boolean = false
+  ): void {
+    this.ctx.save();
+
+    // Position at element's center
+    this.ctx.translate(
+      element.x * scale + offsetX + (element.width * scale) / 2,
+      element.y * scale + offsetY + (element.height * scale) / 2
+    );
+
+    // Apply element rotation if any
+    if (element.rotation !== 0) {
+      this.ctx.rotate((element.rotation * Math.PI) / 180);
+    }
+
+    // Position the label relative to the element's center
+    const scaledWidth = element.width * scale;
+    const scaledHeight = element.height * scale;
+    this.ctx.translate(label.x * scaledWidth, label.y * scaledHeight);
+
+    // Calculate base font size relative to the element's base size (unscaled)
+    const baseFontSize =
+      label.fontSize * Math.min(element.width, element.height);
+
+    // Apply scale to get the final font size
+    let fontSize = baseFontSize * scale;
+
+    // Apply min/max constraints if specified, also scaled
+    if (label.minSize) {
+      const scaledMinSize = label.minSize * scale;
+      fontSize = Math.max(fontSize, scaledMinSize);
+    }
+    if (label.maxSize) {
+      const scaledMaxSize = label.maxSize * scale;
+      fontSize = Math.min(fontSize, scaledMaxSize);
+    }
+
+    // Approximate label text width and height
+    const text = this.processLabelText(label.text);
+    const textWidth = text.length * fontSize * 0.6;
+    const textHeight = fontSize * 1.2;
+
+    // Draw highlight rectangle
+    this.ctx.beginPath();
+    this.ctx.fillStyle = isSelected
+      ? "rgba(0, 191, 255, 0.3)" // Selected label - more opaque blue
+      : "rgba(0, 191, 255, 0.15)"; // Hovered label - translucent blue
+    this.ctx.roundRect(
+      -textWidth / 2 - fontSize * 0.3,
+      -textHeight / 2 - fontSize * 0.1,
+      textWidth + fontSize * 0.6,
+      textHeight + fontSize * 0.2,
+      fontSize * 0.2
+    );
+    this.ctx.fill();
+
+    // Add border
+    this.ctx.lineWidth = isSelected ? 2 : 1;
+    this.ctx.strokeStyle = isSelected
+      ? "#00BFFF" // Solid blue for selected
+      : "rgba(0, 191, 255, 0.6)"; // More transparent for hover
+    this.ctx.stroke();
+
+    this.ctx.restore();
+  }
 }

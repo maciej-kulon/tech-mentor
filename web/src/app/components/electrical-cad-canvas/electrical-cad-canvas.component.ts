@@ -670,9 +670,9 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   }
 
   private async onDoubleClick(event: MouseEvent): Promise<void> {
-    // Get the element under the cursor
-    const elementUnderCursor =
-      this.electricalElementsRenderer.findElementUnderCursor(
+    // First check if a label is under the cursor
+    const labelUnderCursor =
+      this.electricalElementsRenderer.findLabelUnderCursor(
         event.offsetX,
         event.offsetY,
         this.scale,
@@ -680,38 +680,73 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
         this.offsetY
       );
 
-    if (elementUnderCursor) {
-      // Open debug dialog for the element
+    if (labelUnderCursor) {
+      // Open debug dialog for just the label
       const result = await this.dialogService.open(DebugInfoDialogComponent, {
-        data: elementUnderCursor,
+        data: labelUnderCursor.label,
         width: "600px",
       });
 
       if (result) {
-        // Update the element with the edited data
-        Object.assign(elementUnderCursor, result);
-        this.draw(); // Redraw to show changes
+        // Update the label with the edited data
+        // Find the label in the element and update it
+        const element = labelUnderCursor.element;
+        const labelIndex = element.labels?.findIndex(
+          (l) => l.name === labelUnderCursor.label.name
+        );
+
+        if (labelIndex !== undefined && labelIndex >= 0 && element.labels) {
+          element.labels[labelIndex] = result;
+          this.draw(); // Redraw to show changes
+        }
       }
     } else {
-      // Check if click is within page bounds
-      const pageDimensions = this.activePage.getDimensions();
-      const isWithinPage =
-        event.offsetX >= this.offsetX &&
-        event.offsetX <= this.offsetX + pageDimensions.width * this.scale &&
-        event.offsetY >= this.offsetY &&
-        event.offsetY <= this.offsetY + pageDimensions.height * this.scale;
+      // Get the element under the cursor
+      const elementUnderCursor =
+        this.electricalElementsRenderer.findElementUnderCursor(
+          event.offsetX,
+          event.offsetY,
+          this.scale,
+          this.offsetX,
+          this.offsetY
+        );
 
-      if (isWithinPage) {
-        // Show page debug info
+      if (elementUnderCursor) {
+        // Open debug dialog for the element
         const result = await this.dialogService.open(DebugInfoDialogComponent, {
-          data: this.activePage,
+          data: elementUnderCursor,
           width: "600px",
         });
 
         if (result) {
-          // Update the page with the edited data
-          Object.assign(this.activePage, result);
+          // Update the element with the edited data
+          Object.assign(elementUnderCursor, result);
           this.draw(); // Redraw to show changes
+        }
+      } else {
+        // Check if click is within page bounds
+        const pageDimensions = this.activePage.getDimensions();
+        const isWithinPage =
+          event.offsetX >= this.offsetX &&
+          event.offsetX <= this.offsetX + pageDimensions.width * this.scale &&
+          event.offsetY >= this.offsetY &&
+          event.offsetY <= this.offsetY + pageDimensions.height * this.scale;
+
+        if (isWithinPage) {
+          // Show page debug info
+          const result = await this.dialogService.open(
+            DebugInfoDialogComponent,
+            {
+              data: this.activePage,
+              width: "600px",
+            }
+          );
+
+          if (result) {
+            // Update the page with the edited data
+            Object.assign(this.activePage, result);
+            this.draw(); // Redraw to show changes
+          }
         }
       }
     }

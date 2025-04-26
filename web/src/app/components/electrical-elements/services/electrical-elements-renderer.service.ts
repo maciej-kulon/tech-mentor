@@ -24,6 +24,10 @@ export class ElectricalElementsRendererService {
   private originalPositions: Map<ElectricalElement, { x: number; y: number }> =
     new Map();
   private activePage!: SchemePage;
+  private hoveredLabel: { element: ElectricalElement; label: Label } | null =
+    null;
+  private selectedLabel: { element: ElectricalElement; label: Label } | null =
+    null;
 
   constructor(
     private httpService: HttpService,
@@ -202,6 +206,93 @@ export class ElectricalElementsRendererService {
     return smallest;
   }
 
+  /**
+   * Find label under cursor and its parent element
+   */
+  findLabelUnderCursor(
+    x: number,
+    y: number,
+    scale: number,
+    offsetX: number,
+    offsetY: number
+  ): { element: ElectricalElement; label: Label } | null {
+    // Get the label size which affects coordinate calculations
+    const labelSize = this.activePage.labelSize;
+
+    // Check each element's labels
+    for (const element of this.elements) {
+      if (!element.labels?.length) continue;
+
+      // In drawLabels method, the translation is:
+      // element.x * scale + offsetX + (element.width * scale) / 2,
+      // element.y * scale + offsetY + (element.height * scale) / 2
+      const centerX = element.x * scale + offsetX + (element.width * scale) / 2;
+      const centerY =
+        element.y * scale + offsetY + (element.height * scale) / 2;
+
+      // Transform mouse coordinates to be relative to the element's center
+      // This effectively reverses the translation in drawLabels
+      let relativeX = x - centerX;
+      let relativeY = y - centerY;
+
+      // If element is rotated, apply inverse rotation to mouse coordinates
+      if (element.rotation !== 0) {
+        const angle = (-element.rotation * Math.PI) / 180; // Negative for inverse
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+
+        // Apply inverse rotation matrix
+        const rotX = relativeX * cos - relativeY * sin;
+        const rotY = relativeX * sin + relativeY * cos;
+
+        relativeX = rotX;
+        relativeY = rotY;
+      }
+
+      // Check each label in element's local space
+      for (const label of element.labels) {
+        // In drawLabel method, it translates to label's position with:
+        // const scaledWidth = elementWidth * scale;
+        // const scaledHeight = elementHeight * scale;
+        // this.ctx.translate(label.x * scaledWidth, label.y * scaledHeight);
+        const labelPosX = label.x * element.width * scale;
+        const labelPosY = label.y * element.height * scale;
+
+        // Calculate font size as done in drawLabel
+        let fontSize =
+          label.fontSize * Math.min(element.width, element.height) * scale;
+
+        // Apply min/max constraints if specified, with scaling
+        if (label.minSize) {
+          const scaledMinSize = label.minSize * scale;
+          fontSize = Math.max(fontSize, scaledMinSize);
+        }
+        if (label.maxSize) {
+          const scaledMaxSize = label.maxSize * scale;
+          fontSize = Math.min(fontSize, scaledMaxSize);
+        }
+
+        // Calculate text dimensions same as in highlightLabel
+        const labelText = label.text.replace(/@(\w+)/g, "$1");
+        const textWidth = labelText.length * fontSize * 0.6;
+        const textHeight = fontSize * 1.2;
+
+        // Check if transformed mouse position is inside label bounds
+        // Since the label is anchored at its center point
+        if (
+          relativeX >= labelPosX - textWidth / 2 &&
+          relativeX <= labelPosX + textWidth / 2 &&
+          relativeY >= labelPosY - textHeight / 2 &&
+          relativeY <= labelPosY + textHeight / 2
+        ) {
+          return { element, label };
+        }
+      }
+    }
+
+    return null;
+  }
+
   // Debug method to track selection changes
   private debugLogSelection(action: string, element?: ElectricalElement) {
     console.log(`🔍 Selection ${action}:`, {
@@ -222,6 +313,55 @@ export class ElectricalElementsRendererService {
     offsetY: number,
     isMultiSelect: boolean
   ): void {
+    // Check for label first
+    const labelUnderCursor = this.findLabelUnderCursor(
+      x,
+      y,
+      scale,
+      offsetX,
+      offsetY
+    );
+
+    // If a label was clicked, its parent element is selected
+    if (labelUnderCursor) {
+      // Store the selected label for double-click handling
+      this.selectedLabel = labelUnderCursor;
+
+      // Store the previous selection state
+      const previousSelection = new Set(this.selectedElements);
+      this.debugLogSelection("before selection change");
+
+      const elementUnderCursor = labelUnderCursor.element;
+
+      if (isMultiSelect) {
+        // Multi-select mode
+        if (this.selectedElements.has(elementUnderCursor)) {
+          this.debugLogSelection("removing", elementUnderCursor);
+          this.selectedElements.delete(elementUnderCursor);
+        } else {
+          this.debugLogSelection("adding", elementUnderCursor);
+          this.selectedElements.add(elementUnderCursor);
+        }
+      } else {
+        // Single select mode
+        this.debugLogSelection("setting", elementUnderCursor);
+        this.selectedElements = new Set([elementUnderCursor]);
+      }
+
+      this.debugLogSelection("after selection change");
+
+      // Only update hover if selection actually changed
+      if (!this.setsAreEqual(previousSelection, this.selectedElements)) {
+        this.updateMousePosition(x, y, scale, offsetX, offsetY);
+      }
+
+      return;
+    } else {
+      // Clear selected label if clicking elsewhere
+      this.selectedLabel = null;
+    }
+
+    // If no label was clicked, continue with regular element selection
     const elementUnderCursor = this.findElementUnderCursor(
       x,
       y,
@@ -288,9 +428,57 @@ export class ElectricalElementsRendererService {
     // If mouse is outside canvas, clear hover but keep selection
     if (x < 0 || y < 0) {
       this.hoveredElement = null;
+      this.hoveredLabel = null;
       return;
     }
 
+    // First check if mouse is over any label
+    const labelUnderCursor = this.findLabelUnderCursor(
+      x,
+      y,
+      scale,
+      offsetX,
+      offsetY
+    );
+
+    // If hovering over a label, also highlight its parent element
+    if (labelUnderCursor) {
+      // Clear previous hover state if exists
+      if (
+        this.hoveredLabel &&
+        (this.hoveredLabel.element.id !== labelUnderCursor.element.id ||
+          this.hoveredLabel.label.name !== labelUnderCursor.label.name)
+      ) {
+        console.log(
+          `🖱️ Left label: ${this.hoveredLabel.element.id}:${this.hoveredLabel.label.name}`
+        );
+      }
+
+      // Update hover state for label and its parent element
+      console.log(
+        `🖱️ Entered label: ${labelUnderCursor.element.id}:${labelUnderCursor.label.name}`
+      );
+      this.hoveredLabel = labelUnderCursor;
+
+      // Only highlight parent element if not selected
+      if (!this.selectedElements.has(labelUnderCursor.element)) {
+        this.hoveredElement = labelUnderCursor.element;
+      } else {
+        this.hoveredElement = null;
+      }
+
+      return;
+    } else {
+      // Clear label hover state if no label is under cursor
+      if (this.hoveredLabel) {
+        console.log(
+          `🖱️ Left label: ${this.hoveredLabel.element.id}:${this.hoveredLabel.label.name}`
+        );
+        this.hoveredLabel = null;
+      }
+    }
+
+    // If not hovering over a label, check for elements as before
     const elementUnderCursor = this.findElementUnderCursor(
       x,
       y,
@@ -333,6 +521,8 @@ export class ElectricalElementsRendererService {
     // Take a snapshot of the current state to prevent any changes during render
     const currentSelection = new Set(this.selectedElements);
     const currentHovered = this.hoveredElement;
+    const currentHoveredLabel = this.hoveredLabel;
+    const currentSelectedLabel = this.selectedLabel;
 
     // Render each element using the generic renderer
     this.elements.forEach((element) => {
@@ -368,6 +558,49 @@ export class ElectricalElementsRendererService {
         this.mouseX,
         this.mouseY
       );
+
+      // Render label highlights if needed
+      if (element.labels?.length) {
+        // Check for hovered label
+        if (
+          currentHoveredLabel &&
+          currentHoveredLabel.element.id === element.id
+        ) {
+          const labelToHighlight = element.labels.find(
+            (l) => l.name === currentHoveredLabel.label.name
+          );
+          if (labelToHighlight) {
+            this.renderer.highlightLabel(
+              element,
+              labelToHighlight,
+              scale,
+              offsetX,
+              offsetY,
+              false // isSelected = false for hover
+            );
+          }
+        }
+
+        // Check for selected label
+        if (
+          currentSelectedLabel &&
+          currentSelectedLabel.element.id === element.id
+        ) {
+          const labelToHighlight = element.labels.find(
+            (l) => l.name === currentSelectedLabel.label.name
+          );
+          if (labelToHighlight) {
+            this.renderer.highlightLabel(
+              element,
+              labelToHighlight,
+              scale,
+              offsetX,
+              offsetY,
+              true // isSelected = true for selection
+            );
+          }
+        }
+      }
     });
 
     this.debugLogSelection("after render");
@@ -443,5 +676,20 @@ export class ElectricalElementsRendererService {
     if (this.renderer) {
       this.renderer.setActivePage(page);
     }
+  }
+
+  // Add methods to get the current hovered/selected label
+  public getHoveredLabel(): {
+    element: ElectricalElement;
+    label: Label;
+  } | null {
+    return this.hoveredLabel;
+  }
+
+  public getSelectedLabel(): {
+    element: ElectricalElement;
+    label: Label;
+  } | null {
+    return this.selectedLabel;
   }
 }
