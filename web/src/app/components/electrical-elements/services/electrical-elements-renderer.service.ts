@@ -6,6 +6,7 @@ import {
 } from "../interfaces/electrical-element.interface";
 import { GenericElementRenderer } from "../renderers/generic-element-renderer";
 import { ElementFactoryService } from "./element-factory.service";
+import { SchemePage } from "../../../components/electrical-cad-canvas/models/scheme-page.model";
 
 @Injectable({
   providedIn: "root",
@@ -22,6 +23,7 @@ export class ElectricalElementsRendererService {
   private draggedElements: Set<ElectricalElement> = new Set();
   private originalPositions: Map<ElectricalElement, { x: number; y: number }> =
     new Map();
+  private activePage!: SchemePage;
 
   constructor(
     private httpService: HttpService,
@@ -36,12 +38,15 @@ export class ElectricalElementsRendererService {
   /**
    * Initialize the service with canvas context
    */
-  initialize(ctx: CanvasRenderingContext2D): void {
+  initialize(ctx: CanvasRenderingContext2D, page?: SchemePage): void {
     console.log("Initializing renderer with context:", ctx);
     this.ctx = ctx;
 
+    // Initialize with default page if not provided
+    this.activePage = page || new SchemePage();
+
     // Initialize the generic renderer
-    this.renderer = new GenericElementRenderer(ctx);
+    this.renderer = new GenericElementRenderer(ctx, this.activePage);
 
     // Load elements from JSON file if not already loaded
     if (!this.isElementsLoaded) {
@@ -159,12 +164,12 @@ export class ElectricalElementsRendererService {
     offsetY: number
   ): ElectricalElement | null {
     // Convert screen coordinates to element coordinates
-    // The LABEL_SIZE constant (24 pixels) accounts for the row label width and column label height
+    // The labelSize accounts for the row label width and column label height
     // that are drawn on the canvas. These labels take up space at the top and left of the grid,
     // so we need to subtract this offset when converting screen coordinates to element coordinates
-    const LABEL_SIZE = 24;
-    const elementX = (x - offsetX - LABEL_SIZE * scale) / scale;
-    const elementY = (y - offsetY - LABEL_SIZE * scale) / scale;
+    const labelSize = this.activePage.labelSize;
+    const elementX = (x - offsetX - labelSize * scale) / scale;
+    const elementY = (y - offsetY - labelSize * scale) / scale;
 
     // Filter elements that contain the point
     const elementsUnderCursor = this.elements.filter((element) => {
@@ -428,5 +433,15 @@ export class ElectricalElementsRendererService {
    */
   getElements(): ElectricalElement[] {
     return [...this.elements];
+  }
+
+  /**
+   * Update the active page reference
+   */
+  setActivePage(page: SchemePage): void {
+    this.activePage = page;
+    if (this.renderer) {
+      this.renderer.setActivePage(page);
+    }
   }
 }

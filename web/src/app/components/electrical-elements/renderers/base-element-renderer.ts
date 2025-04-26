@@ -3,6 +3,7 @@ import {
   Label,
   Terminal,
 } from "../interfaces/electrical-element.interface";
+import { SchemePage } from "../../../components/electrical-cad-canvas/models/scheme-page.model";
 
 export abstract class BaseElementRenderer {
   // Constants for terminal rendering
@@ -10,7 +11,11 @@ export abstract class BaseElementRenderer {
   protected static readonly TERMINAL_HIGHLIGHT_RADIUS = 6; // Base radius in pixels
   protected static readonly TERMINAL_HIGHLIGHT_THRESHOLD = 10; // Base threshold in pixels
 
-  constructor(protected ctx: CanvasRenderingContext2D) {}
+  protected activePage: SchemePage;
+
+  constructor(protected ctx: CanvasRenderingContext2D, page?: SchemePage) {
+    this.activePage = page || new SchemePage();
+  }
 
   abstract render(
     element: ElectricalElement,
@@ -18,6 +23,13 @@ export abstract class BaseElementRenderer {
     offsetX: number,
     offsetY: number
   ): void;
+
+  /**
+   * Update the active page reference
+   */
+  setActivePage(page: SchemePage): void {
+    this.activePage = page;
+  }
 
   /**
    * Common method to draw all element's labels
@@ -112,13 +124,13 @@ export abstract class BaseElementRenderer {
     offsetX: number,
     offsetY: number
   ): void {
-    // Need to account for the row label width and column label height which are 24 pixels each
-    const LABEL_SIZE = 24;
+    // Need to account for the row label width and column label height
+    const labelSize = this.activePage.labelSize;
 
     this.ctx.save();
     this.ctx.translate(
-      element.x * scale + offsetX + LABEL_SIZE * scale,
-      element.y * scale + offsetY + LABEL_SIZE * scale
+      element.x * scale + offsetX + labelSize * scale,
+      element.y * scale + offsetY + labelSize * scale
     );
 
     if (element.rotation !== 0) {
@@ -150,12 +162,12 @@ export abstract class BaseElementRenderer {
     let minDistance = Infinity;
     const threshold = this.getTerminalThreshold(scale);
 
-    // Need to account for the row label width and column label height which are 24 pixels each
-    const LABEL_SIZE = 24;
+    // Need to account for the row label width and column label height
+    const labelSize = this.activePage.labelSize;
 
     // Convert mouse coordinates to element space, matching findElementUnderCursor logic
-    const mouseElementX = (mouseX - offsetX - LABEL_SIZE * scale) / scale;
-    const mouseElementY = (mouseY - offsetY - LABEL_SIZE * scale) / scale;
+    const mouseElementX = (mouseX - offsetX - labelSize * scale) / scale;
+    const mouseElementY = (mouseY - offsetY - labelSize * scale) / scale;
 
     // Apply rotation matrix for terminal positions
     const cosRotation = Math.cos((element.rotation * Math.PI) / 180);
@@ -208,13 +220,13 @@ export abstract class BaseElementRenderer {
   ): void {
     this.ctx.save();
 
-    // Need to account for the row label width and column label height which are 24 pixels each
-    const LABEL_SIZE = 24;
+    // Need to account for the row label width and column label height
+    const labelSize = this.activePage.labelSize;
 
     // Apply element transform with label offset
     this.ctx.translate(
-      element.x * scale + offsetX + LABEL_SIZE * scale,
-      element.y * scale + offsetY + LABEL_SIZE * scale
+      element.x * scale + offsetX + labelSize * scale,
+      element.y * scale + offsetY + labelSize * scale
     );
 
     if (element.rotation !== 0) {

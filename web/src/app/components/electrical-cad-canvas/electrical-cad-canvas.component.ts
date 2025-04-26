@@ -82,6 +82,12 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       });
     }
 
+    // Ensure the renderer is aware of the active page
+    // This will be re-done in ngAfterViewInit but we set it here to be safe
+    if (this.electricalElementsRenderer) {
+      this.electricalElementsRenderer.setActivePage(this.activePage);
+    }
+
     // Center the page in the canvas view initially
     this.centerPage();
   }
@@ -92,7 +98,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.container = this.containerRef.nativeElement;
 
     // Initialize the electrical elements renderer
-    this.electricalElementsRenderer.initialize(this.ctx);
+    this.electricalElementsRenderer.initialize(this.ctx, this.activePage);
 
     this.setupCanvas();
     this.draw();
@@ -203,9 +209,9 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   private drawGrid(): void {
     const pageDimensions = this.activePage.getDimensions();
 
-    // Fixed sizes for labels
-    const rowLabelWidth = 24 * this.scale;
-    const columnLabelHeight = 24 * this.scale;
+    // Use labelSize from the activePage
+    const rowLabelWidth = this.activePage.labelSize * this.scale;
+    const columnLabelHeight = this.activePage.labelSize * this.scale;
 
     // Get or create PageDots for active page
     let pageDots = this.pageDotsMap.get(this.activePage);
@@ -278,8 +284,8 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   }
 
   private drawQuadTreeStructure(pageDots: PageDots): void {
-    const rowLabelWidth = 24 * this.scale;
-    const columnLabelHeight = 24 * this.scale;
+    const rowLabelWidth = this.activePage.labelSize * this.scale;
+    const columnLabelHeight = this.activePage.labelSize * this.scale;
 
     this.ctx.strokeStyle = "#00ff00";
     this.ctx.lineWidth = 0.5;
@@ -314,9 +320,9 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
     const pageDimensions = this.activePage.getDimensions();
 
-    // Fixed sizes for labels
-    const rowLabelWidth = 24 * this.scale;
-    const columnLabelHeight = 24 * this.scale;
+    // Use labelSize from the activePage
+    const rowLabelWidth = this.activePage.labelSize * this.scale;
+    const columnLabelHeight = this.activePage.labelSize * this.scale;
 
     // Calculate available space for grid
     const availableWidth = pageDimensions.width * this.scale - rowLabelWidth;

@@ -7,4 +7,6 @@ export interface SchemePageConfig {
   rows: number;
   /** Number of columns in the grid */
   columns: number;
+  /** Size in pixels for row and column labels */
+  labelSize?: number;
 }

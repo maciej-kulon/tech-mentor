@@ -23,6 +23,8 @@ export class SchemePage implements PageMetadata, PageDates {
   reviewedBy: string = "";
   rows: number = 9;
   columns: number = 9;
+  /** Size in pixels for row and column labels */
+  labelSize: number = 24;
 
   private dimensions: PaperDimensions = {
     width: 1123,

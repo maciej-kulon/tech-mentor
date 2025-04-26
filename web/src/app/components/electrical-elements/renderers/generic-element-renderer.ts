@@ -4,6 +4,7 @@ import {
   ElectricalElementShapeHighlightOverride,
 } from "../interfaces/electrical-element.interface";
 import { BaseElementRenderer } from "./base-element-renderer";
+import { SchemePage } from "../../../components/electrical-cad-canvas/models/scheme-page.model";
 
 /**
  * Generic renderer for electrical elements based on their JSON definition
