@@ -344,12 +344,21 @@ export class ElectricalElementsRendererService {
 
       // First render highlight if element is selected or hovered
       if (isSelected || isHovered) {
-        this.renderer.renderHighlight(
+        this.renderer.render(
           element,
           scale,
           offsetX,
           offsetY,
-          isSelected ? 1.0 : 0.5
+          this.mouseX,
+          this.mouseY,
+          {
+            lineWidthMultiplier: isSelected ? 4 : isHovered ? 3 : undefined,
+            lineColor: isSelected
+              ? "#00BFFF"
+              : isHovered
+              ? "rgba(0, 191, 255, 0.5)"
+              : undefined,
+          }
         );
       }
 

@@ -1,4 +1,8 @@
-import { ElectricalElement } from "../interfaces/electrical-element.interface";
+import {
+  ElectricalElement,
+  ElectricalElementShape,
+  ElectricalElementShapeHighlightOverride,
+} from "../interfaces/electrical-element.interface";
 import { BaseElementRenderer } from "./base-element-renderer";
 
 /**
@@ -11,7 +15,8 @@ export class GenericElementRenderer extends BaseElementRenderer {
     offsetX: number,
     offsetY: number,
     mouseX?: number,
-    mouseY?: number
+    mouseY?: number,
+    overrides?: ElectricalElementShapeHighlightOverride
   ): void {
     // Save the current context state
     this.ctx.save();
@@ -24,7 +29,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
 
     // Get the drawing instructions from the element or use default drawing logic
     if (element.shape && Array.isArray(element.shape)) {
-      this.renderElementShape(element.shape, width, height, scale);
+      this.renderElementShape(element.shape, width, height, overrides);
     } else {
       // Default rendering if no shape is defined
       this.renderDefaultElement(width, height);
@@ -84,27 +89,27 @@ export class GenericElementRenderer extends BaseElementRenderer {
     shape: any[],
     width: number,
     height: number,
-    scale: number
+    overrides?: ElectricalElementShapeHighlightOverride
   ): void {
     for (const part of shape) {
       switch (part.type) {
         case "line":
-          this.drawLine(part, width, height);
+          this.drawLine(part, width, height, overrides);
           break;
         case "rect":
-          this.drawRect(part, width, height);
+          this.drawRect(part, width, height, overrides);
           break;
         case "circle":
-          this.drawCircle(part, width, height);
+          this.drawCircle(part, width, height, overrides);
           break;
         case "path":
-          this.drawPath(part, width, height);
+          this.drawPath(part, width, height, overrides);
           break;
         case "arc":
-          this.drawArc(part, width, height);
+          this.drawArc(part, width, height, overrides);
           break;
         case "bezier":
-          this.drawBezier(part, width, height);
+          this.drawBezier(part, width, height, overrides);
           break;
       }
     }
@@ -113,10 +118,21 @@ export class GenericElementRenderer extends BaseElementRenderer {
   /**
    * Draw a line based on relative coordinates
    */
-  private drawLine(line: any, width: number, height: number): void {
+  private drawLine(
+    line: any,
+    width: number,
+    height: number,
+    overrides?: ElectricalElementShapeHighlightOverride
+  ): void {
+    const { lineWidthMultiplier, lineColor } = overrides || {};
     this.ctx.beginPath();
-    this.ctx.strokeStyle = line.strokeStyle || "#000000";
+    this.ctx.strokeStyle = lineColor
+      ? lineColor
+      : line.strokeStyle || "#000000";
     this.ctx.lineWidth = this.calculateLineWidth(line, width, height);
+    this.ctx.lineWidth = lineWidthMultiplier
+      ? this.ctx.lineWidth * lineWidthMultiplier
+      : this.ctx.lineWidth;
 
     // Convert relative coordinates to actual coordinates
     const x1 = line.x1 * width - width / 2;
@@ -132,11 +148,20 @@ export class GenericElementRenderer extends BaseElementRenderer {
   /**
    * Draw a rectangle based on relative coordinates
    */
-  private drawRect(rect: any, width: number, height: number): void {
+  private drawRect(
+    rect: any,
+    width: number,
+    height: number,
+    overrides?: ElectricalElementShapeHighlightOverride
+  ): void {
+    const { lineWidthMultiplier, lineColor } = overrides || {};
     this.ctx.beginPath();
     this.ctx.fillStyle = rect.fillStyle || "#FFFFFF";
-    this.ctx.strokeStyle = rect.strokeStyle || "#000000";
+    this.ctx.strokeStyle = lineColor || rect.strokeStyle || "#000000";
     this.ctx.lineWidth = this.calculateLineWidth(rect, width, height);
+    this.ctx.lineWidth = lineWidthMultiplier
+      ? this.ctx.lineWidth * lineWidthMultiplier
+      : this.ctx.lineWidth;
 
     // Convert relative coordinates to actual coordinates
     const x = rect.x * width - width / 2;
@@ -157,11 +182,20 @@ export class GenericElementRenderer extends BaseElementRenderer {
   /**
    * Draw a circle based on relative coordinates
    */
-  private drawCircle(circle: any, width: number, height: number): void {
+  private drawCircle(
+    circle: any,
+    width: number,
+    height: number,
+    overrides?: ElectricalElementShapeHighlightOverride
+  ): void {
+    const { lineWidthMultiplier, lineColor } = overrides || {};
     this.ctx.beginPath();
     this.ctx.fillStyle = circle.fillStyle || "#FFFFFF";
-    this.ctx.strokeStyle = circle.strokeStyle || "#000000";
+    this.ctx.strokeStyle = lineColor || circle.strokeStyle || "#000000";
     this.ctx.lineWidth = this.calculateLineWidth(circle, width, height);
+    this.ctx.lineWidth = lineWidthMultiplier
+      ? this.ctx.lineWidth * lineWidthMultiplier
+      : this.ctx.lineWidth;
 
     // Convert relative coordinates to actual coordinates
     const x = circle.x * width - width / 2;
@@ -181,13 +215,22 @@ export class GenericElementRenderer extends BaseElementRenderer {
   /**
    * Draw a path based on relative coordinates
    */
-  private drawPath(path: any, width: number, height: number): void {
+  private drawPath(
+    path: any,
+    width: number,
+    height: number,
+    overrides?: ElectricalElementShapeHighlightOverride
+  ): void {
+    const { lineWidthMultiplier, lineColor } = overrides || {};
     if (!path.commands || !Array.isArray(path.commands)) return;
 
     this.ctx.beginPath();
     this.ctx.fillStyle = path.fillStyle || "#FFFFFF";
-    this.ctx.strokeStyle = path.strokeStyle || "#000000";
+    this.ctx.strokeStyle = lineColor || path.strokeStyle || "#000000";
     this.ctx.lineWidth = this.calculateLineWidth(path, width, height);
+    this.ctx.lineWidth = lineWidthMultiplier
+      ? this.ctx.lineWidth * lineWidthMultiplier
+      : this.ctx.lineWidth;
 
     for (const cmd of path.commands) {
       const type = cmd.type;
@@ -223,10 +266,19 @@ export class GenericElementRenderer extends BaseElementRenderer {
   /**
    * Draw an arc using either center-radius-angle or start-end-radius method
    */
-  private drawArc(arc: any, width: number, height: number): void {
+  private drawArc(
+    arc: any,
+    width: number,
+    height: number,
+    overrides?: ElectricalElementShapeHighlightOverride
+  ): void {
+    const { lineWidthMultiplier, lineColor } = overrides || {};
     this.ctx.beginPath();
-    this.ctx.strokeStyle = arc.strokeStyle || "#000000";
+    this.ctx.strokeStyle = lineColor || arc.strokeStyle || "#000000";
     this.ctx.lineWidth = this.calculateLineWidth(arc, width, height);
+    this.ctx.lineWidth = lineWidthMultiplier
+      ? this.ctx.lineWidth * lineWidthMultiplier
+      : this.ctx.lineWidth;
 
     if (arc.x !== undefined && arc.radius !== undefined) {
       // Method 1: center point, radius, angles
@@ -289,10 +341,19 @@ export class GenericElementRenderer extends BaseElementRenderer {
   /**
    * Draw a bezier curve based on relative coordinates
    */
-  private drawBezier(bezier: any, width: number, height: number): void {
+  private drawBezier(
+    bezier: any,
+    width: number,
+    height: number,
+    overrides?: ElectricalElementShapeHighlightOverride
+  ): void {
+    const { lineWidthMultiplier, lineColor } = overrides || {};
     this.ctx.beginPath();
-    this.ctx.strokeStyle = bezier.strokeStyle || "#000000";
+    this.ctx.strokeStyle = lineColor || bezier.strokeStyle || "#000000";
     this.ctx.lineWidth = this.calculateLineWidth(bezier, width, height);
+    this.ctx.lineWidth = lineWidthMultiplier
+      ? this.ctx.lineWidth * lineWidthMultiplier
+      : this.ctx.lineWidth;
 
     // Convert relative coordinates to actual coordinates
     const x1 = bezier.x1 * width - width / 2;

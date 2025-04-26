@@ -1,11 +1,11 @@
-/* eslint-disable no-console */
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable, map, shareReplay, tap } from 'rxjs';
+ 
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { Observable, map, shareReplay, tap } from "rxjs";
 import {
   ElectricalElement,
   Label,
-} from '../interfaces/electrical-element.interface';
+} from "../interfaces/electrical-element.interface";
 
 interface ElementTemplate {
   id: string;
@@ -21,12 +21,12 @@ interface ElementTemplate {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class ElementFactoryService {
   private templates: ElementTemplate[] = [];
   private templatesLoaded$ = this.http
-    .get<{ templates: ElementTemplate[] }>('assets/data/element-templates.json')
+    .get<{ templates: ElementTemplate[] }>("assets/data/element-templates.json")
     .pipe(
       map(response => response.templates),
       tap(templates => (this.templates = templates)),

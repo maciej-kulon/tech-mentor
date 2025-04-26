@@ -1,4 +1,4 @@
-import { Point } from '../interfaces/point.interface';
+import { Point } from "../interfaces/point.interface";
 
 /**
  * Interface for defining bounds of a quadtree node

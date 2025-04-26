@@ -1,5 +1,5 @@
-import { Point } from '../interfaces/point.interface';
-import { QuadTree, QuadTreeBounds } from './quad-tree.model';
+import { Point } from "../interfaces/point.interface";
+import { QuadTree, QuadTreeBounds } from "./quad-tree.model";
 
 /**
  * Class managing the grid dots system for the electrical CAD canvas

@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
-import { environment } from 'src/environments/environment';
+import { Injectable } from "@angular/core";
+import { environment } from "src/environments/environment";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class LoggerService {
   error(message: string): void {

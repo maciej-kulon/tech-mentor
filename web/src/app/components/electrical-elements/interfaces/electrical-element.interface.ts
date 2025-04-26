@@ -86,6 +86,11 @@ export type ElectricalElementShape =
   | ArcAngleShape
   | ArcPointsShape;
 
+export interface ElectricalElementShapeHighlightOverride {
+  lineWidthMultiplier?: number;
+  lineColor?: string;
+}
+
 export interface ElectricalElement {
   id: string;
   type: string;

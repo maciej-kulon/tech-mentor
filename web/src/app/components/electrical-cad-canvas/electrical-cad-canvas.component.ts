@@ -58,8 +58,6 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
   // Element dragging properties
   private isDraggingElement = false;
-  private dragStartElementPosition = { x: 0, y: 0 };
-  private dragOffset = { x: 0, y: 0 };
 
   private get keyBindings() {
     return navigator.platform.toLowerCase().includes("mac")
@@ -136,7 +134,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
   private draw(): void {
     if (!this.ctx) {
-      console.warn("Cannot draw: missing context");
+      console.error("Cannot draw: missing context");
       return;
     }
 
@@ -479,18 +477,6 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
         this.isDraggingElement = true;
         this.dragStartX = event.offsetX;
         this.dragStartY = event.offsetY;
-
-        // Convert to element coordinates
-        const elementX =
-          (event.offsetX - this.offsetX - 24 * this.scale) / this.scale;
-        const elementY =
-          (event.offsetY - this.offsetY - 24 * this.scale) / this.scale;
-
-        // Calculate offset from element center to click position
-        this.dragOffset = {
-          x: elementX - elementUnderCursor.x,
-          y: elementY - elementUnderCursor.y,
-        };
 
         // Set dragged elements
         this.electricalElementsRenderer.setDraggedElements(

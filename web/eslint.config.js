@@ -21,6 +21,7 @@ export default [
         console: "readonly",
         document: "readonly",
         window: "readonly",
+        navigator: "readonly",
       },
     },
     plugins: {
@@ -28,7 +29,7 @@ export default [
       "@angular-eslint": angulareslint,
     },
     rules: {
-      quotes: ["error", "single"],
+      quotes: ["error", "double"],
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": [
         "warn",
