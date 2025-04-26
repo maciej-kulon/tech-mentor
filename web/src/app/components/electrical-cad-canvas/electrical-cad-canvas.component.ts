@@ -59,6 +59,8 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
   // Element dragging properties
   private isDraggingElement = false;
+  // Add label dragging properties
+  private isDraggingLabel = false;
 
   private get keyBindings() {
     return navigator.platform.toLowerCase().includes("mac")
@@ -459,6 +461,29 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
   private onMouseDown(event: MouseEvent): void {
     if (event.button === 0) {
+      // First check if a label is under the cursor
+      const labelUnderCursor =
+        this.electricalElementsRenderer.findLabelUnderCursor(
+          event.offsetX,
+          event.offsetY,
+          this.scale,
+          this.offsetX,
+          this.offsetY
+        );
+
+      if (labelUnderCursor) {
+        // Prepare for label dragging
+        this.isDraggingLabel = true;
+        this.dragStartX = event.offsetX;
+        this.dragStartY = event.offsetY;
+
+        // Set dragged label
+        this.electricalElementsRenderer.setDraggedLabel(labelUnderCursor);
+        this.canvas.style.cursor = "move";
+        return;
+      }
+
+      // If not dragging a label, proceed with element selection/dragging
       // Left click - Handle element selection first
       const elementUnderCursor =
         this.electricalElementsRenderer.findElementUnderCursor(
@@ -520,6 +545,13 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
   private onMouseUp(event: MouseEvent): void {
     const wasDraggingElement = this.isDraggingElement;
+    const wasDraggingLabel = this.isDraggingLabel;
+
+    if (this.isDraggingLabel) {
+      this.isDraggingLabel = false;
+      // Clear dragged label state
+      this.electricalElementsRenderer.clearDraggedLabel();
+    }
 
     if (this.isDraggingElement) {
       this.isDraggingElement = false;
@@ -531,17 +563,30 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.isDragging = false;
     }
 
-    // Only update cursor if we weren't dragging an element
-    if (!wasDraggingElement) {
-      const elementUnderCursor =
-        this.electricalElementsRenderer.findElementUnderCursor(
+    // Update cursor based on what's under it
+    if (!wasDraggingElement && !wasDraggingLabel) {
+      const labelUnderCursor =
+        this.electricalElementsRenderer.findLabelUnderCursor(
           event.offsetX,
           event.offsetY,
           this.scale,
           this.offsetX,
           this.offsetY
         );
-      this.canvas.style.cursor = elementUnderCursor ? "pointer" : "crosshair";
+
+      if (labelUnderCursor) {
+        this.canvas.style.cursor = "text";
+      } else {
+        const elementUnderCursor =
+          this.electricalElementsRenderer.findElementUnderCursor(
+            event.offsetX,
+            event.offsetY,
+            this.scale,
+            this.offsetX,
+            this.offsetY
+          );
+        this.canvas.style.cursor = elementUnderCursor ? "pointer" : "crosshair";
+      }
     } else {
       this.canvas.style.cursor = "pointer";
     }
@@ -559,6 +604,12 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   }
 
   private onMouseLeave(): void {
+    if (this.isDraggingLabel) {
+      this.isDraggingLabel = false;
+      // Clear dragged label state
+      this.electricalElementsRenderer.clearDraggedLabel();
+    }
+
     if (this.isDraggingElement) {
       this.isDraggingElement = false;
       // Only clear dragged elements state but keep selection
@@ -593,7 +644,25 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
     let needsRedraw = false;
 
-    if (this.isDraggingElement) {
+    if (this.isDraggingLabel) {
+      // Get the dragged label and its element
+      const draggedLabel = this.electricalElementsRenderer.getDraggedLabel();
+
+      if (draggedLabel) {
+        // Calculate the movement in screen pixels
+        const mouseDeltaX = this.currentMouseX - this.dragStartX;
+        const mouseDeltaY = this.currentMouseY - this.dragStartY;
+
+        // Convert to element-relative coordinates by dividing by both scale AND element dimensions
+        // This ensures the label moves at the same rate as the mouse
+        const dx = mouseDeltaX / (this.scale * draggedLabel.element.width);
+        const dy = mouseDeltaY / (this.scale * draggedLabel.element.height);
+
+        // Move the label
+        this.electricalElementsRenderer.moveLabel(dx, dy);
+        needsRedraw = true;
+      }
+    } else if (this.isDraggingElement) {
       // Calculate the movement in element coordinates
       const dx = (this.currentMouseX - this.dragStartX) / this.scale;
       const dy = (this.currentMouseY - this.dragStartY) / this.scale;
@@ -615,6 +684,30 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.dragStartY = event.offsetY;
 
       needsRedraw = true;
+    } else {
+      // Not dragging, check if cursor is over a label to update cursor style
+      const labelUnderCursor =
+        this.electricalElementsRenderer.findLabelUnderCursor(
+          event.offsetX,
+          event.offsetY,
+          this.scale,
+          this.offsetX,
+          this.offsetY
+        );
+
+      if (labelUnderCursor) {
+        this.canvas.style.cursor = "text";
+      } else {
+        const elementUnderCursor =
+          this.electricalElementsRenderer.findElementUnderCursor(
+            event.offsetX,
+            event.offsetY,
+            this.scale,
+            this.offsetX,
+            this.offsetY
+          );
+        this.canvas.style.cursor = elementUnderCursor ? "pointer" : "crosshair";
+      }
     }
 
     // Update mouse position in the renderer

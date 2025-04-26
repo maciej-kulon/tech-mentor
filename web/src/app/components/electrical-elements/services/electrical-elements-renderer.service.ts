@@ -28,6 +28,9 @@ export class ElectricalElementsRendererService {
     null;
   private selectedLabel: { element: ElectricalElement; label: Label } | null =
     null;
+  private draggedLabel: { element: ElectricalElement; label: Label } | null =
+    null;
+  private originalLabelPosition: { x: number; y: number } | null = null;
 
   constructor(
     private httpService: HttpService,
@@ -691,5 +694,64 @@ export class ElectricalElementsRendererService {
     label: Label;
   } | null {
     return this.selectedLabel;
+  }
+
+  /**
+   * Set label being dragged and store its original position
+   */
+  setDraggedLabel(
+    labelInfo: { element: ElectricalElement; label: Label } | null
+  ): void {
+    this.draggedLabel = labelInfo;
+
+    if (labelInfo) {
+      // Store original position
+      this.originalLabelPosition = {
+        x: labelInfo.label.x,
+        y: labelInfo.label.y,
+      };
+      console.log(
+        `🏷️ Started dragging label: ${labelInfo.element.id}:${labelInfo.label.name}`,
+        this.originalLabelPosition
+      );
+    } else {
+      this.originalLabelPosition = null;
+    }
+  }
+
+  /**
+   * Move dragged label by the specified delta
+   */
+  moveLabel(dx: number, dy: number): void {
+    if (!this.draggedLabel || !this.originalLabelPosition) return;
+
+    // Calculate the new position
+    const label = this.draggedLabel.label;
+    label.x = this.originalLabelPosition.x + dx;
+    label.y = this.originalLabelPosition.y + dy;
+
+    console.log(
+      `🏷️ Moving label to: ${label.x.toFixed(2)}, ${label.y.toFixed(2)}`
+    );
+  }
+
+  /**
+   * Clear dragged label state
+   */
+  clearDraggedLabel(): void {
+    if (this.draggedLabel) {
+      console.log(
+        `🏷️ Finished dragging label: ${this.draggedLabel.element.id}:${this.draggedLabel.label.name}`
+      );
+    }
+    this.draggedLabel = null;
+    this.originalLabelPosition = null;
+  }
+
+  /**
+   * Get currently dragged label
+   */
+  getDraggedLabel(): { element: ElectricalElement; label: Label } | null {
+    return this.draggedLabel;
   }
 }
