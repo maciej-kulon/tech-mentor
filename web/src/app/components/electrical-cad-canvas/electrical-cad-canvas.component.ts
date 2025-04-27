@@ -9,8 +9,8 @@ import {
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { SchemePage } from "./models/scheme-page.model";
+import { Project } from "./models/project.model";
 import { PageDots } from "./models/page-dots.model";
-import { SchemePageConfig } from "./interfaces/scheme-page-config.interface";
 import { Point } from "./interfaces/point.interface";
 import { ElectricalElementsModule } from "../electrical-elements/electrical-elements.module";
 import { ElectricalElementsRendererService } from "../electrical-elements/services/electrical-elements-renderer.service";
@@ -19,6 +19,7 @@ import { WindowsKeyBindings } from "@app/config/key-bindings.windows";
 import { MatDialogModule } from "@angular/material/dialog";
 import { DebugInfoDialogComponent } from "./debug-info-dialog/debug-info-dialog.component";
 import { DialogService } from "@app/services/dialog.service";
+import { ElectricalElement } from "../electrical-elements/interfaces/electrical-element.interface";
 
 @Component({
   selector: "app-electrical-cad-canvas",
@@ -31,24 +32,25 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   @ViewChild("cadCanvas") canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild("canvasContainer") containerRef!: ElementRef<HTMLDivElement>;
 
-  @Input() schemeConfig: SchemePageConfig = { rows: 9, columns: 14 };
-  @Input() page?: SchemePage;
-  @Input() dotsPerPageLength = 50;
+  @Input() project!: Project;
   @Input() debugDraw = false;
   @Input() dotSize = 1.5; // in pixels
+  @Input() dotsPerLength = 50; // dots per page width
 
   private canvas!: HTMLCanvasElement;
   private ctx!: CanvasRenderingContext2D;
   private container!: HTMLDivElement;
-  private activePage!: SchemePage;
-  private pageDotsMap = new Map<SchemePage, PageDots>();
+  private pages: SchemePage[] = [];
+  private pageDotsMap = new Map<number, PageDots>(); // Map pageNumber to PageDots
+  private pagePositions = new Map<number, { x: number; y: number }>();
+  public activePage: SchemePage | null = null; // Track the active page - made public for template access
   private closestDot: Point | null = null;
   private currentQuadTreeNode: Point[] = [];
 
   // Canvas properties
   private scale = 1;
-  private MIN_SCALE = 0.5;
-  private MAX_SCALE = 5;
+  private MIN_SCALE = 0.1;
+  private MAX_SCALE = 8;
   private offsetX = 0;
   private offsetY = 0;
   private isDragging = false;
@@ -59,8 +61,33 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
   // Element dragging properties
   private isDraggingElement = false;
+  private currentElementPage: SchemePage | null = null;
   // Add label dragging properties
   private isDraggingLabel = false;
+  private draggedLabel: any | null = null;
+  private isMouseDown = false;
+  private lastMouseX = 0;
+  private lastMouseY = 0;
+  private hoveredElement: ElectricalElement | null = null;
+  private hoveredLabel: any | null = null;
+
+  // Add component properties
+  private isDraggingElements = false;
+
+  private isDraggingPage = false;
+
+  // Add new properties for tracking world coordinates
+  private lastWorldX = 0;
+  private lastWorldY = 0;
+
+  // Path2D cache for grid dots (active page only)
+  private gridDotsPathCache: {
+    pageNumber: number;
+    scale: number;
+    offsetX: number;
+    offsetY: number;
+    path: Path2D;
+  } | null = null;
 
   private get keyBindings() {
     return navigator.platform.toLowerCase().includes("mac")
@@ -74,24 +101,70 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Initialize the active page
-    if (this.page) {
-      this.activePage = this.page;
-    } else {
-      this.activePage = new SchemePage({
-        rows: this.schemeConfig.rows,
-        columns: this.schemeConfig.columns,
+    // Validate project input
+    if (
+      !this.project ||
+      !this.project.pages ||
+      this.project.pages.length === 0
+    ) {
+      console.error("Project with pages is required");
+      // Create a default project with 2 pages
+      this.project = new Project({
+        name: "Default Project",
+        settings: {
+          defaultPaperFormat: "A4",
+          units: "mm",
+          defaultBackgroundColor: "white",
+          defaultGridSize: {
+            rows: 9,
+            columns: 14,
+          },
+        },
+      });
+
+      // Remove default pages (Project creates 3 by default)
+      while (this.project.pages.length > 0) {
+        this.project.removePage(1);
+      }
+
+      // Add our 2 custom pages
+      this.project.addPage({
+        pageNumber: 1,
+        paperFormat: "A3",
+        orientation: "landscape",
+      });
+      this.project.addPage({
+        pageNumber: 2,
+        paperFormat: "A4",
+        orientation: "landscape",
       });
     }
 
-    // Ensure the renderer is aware of the active page
-    // This will be re-done in ngAfterViewInit but we set it here to be safe
-    if (this.electricalElementsRenderer) {
+    this.pages = this.project.pages;
+    this.calculatePagePositions();
+
+    // Initialize PageDots for each page
+    this.pages.forEach((page) => {
+      const dims = page.getDimensions();
+      this.pageDotsMap.set(
+        page.pageNumber,
+        new PageDots(dims.width, dims.height, this.dotsPerLength)
+      );
+    });
+
+    // Set the first page as active initially
+    this.activePage = this.pages[0] || null;
+
+    // Initialize renderer with active page
+    if (this.activePage) {
       this.electricalElementsRenderer.setActivePage(this.activePage);
     }
 
-    // Center the page in the canvas view initially
-    this.centerPage();
+    // Center the pages in the canvas view initially
+    this.centerPages();
+
+    // Invalidate grid dots cache on active page change
+    this.invalidateGridDotsCache();
   }
 
   ngAfterViewInit(): void {
@@ -99,42 +172,65 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.ctx = this.canvas.getContext("2d")!;
     this.container = this.containerRef.nativeElement;
 
-    // Initialize the electrical elements renderer
-    this.electricalElementsRenderer.initialize(this.ctx, this.activePage);
+    // Initialize renderer with context and active page
+    this.electricalElementsRenderer.initialize(
+      this.ctx,
+      this.activePage || undefined
+    );
 
     this.setupCanvas();
     this.draw();
   }
 
-  private centerPage(): void {
-    // This will be called after canvas setup
-    if (this.canvas) {
-      const pageDimensions = this.activePage.getDimensions();
-      this.offsetX =
-        (this.canvas.width - pageDimensions.width * this.scale) / 2;
-      this.offsetY =
-        (this.canvas.height - pageDimensions.height * this.scale) / 2;
-    }
+  private calculatePagePositions(): void {
+    let currentX = 0;
+    this.pages.forEach((page) => {
+      const dims = page.getDimensions();
+      page.setXOffset(currentX);
+      this.pagePositions.set(page.pageNumber, { x: currentX, y: 0 });
+      currentX += dims.width + 40; // 40px gap between pages
+    });
+  }
+
+  private calculateCanvasSize(): { width: number; height: number } {
+    let maxWidth = 0;
+    let maxHeight = 0;
+
+    this.pages.forEach((page) => {
+      const dims = page.getDimensions();
+      const pos = this.pagePositions.get(page.pageNumber)!;
+      maxWidth = Math.max(maxWidth, pos.x + dims.width);
+      maxHeight = Math.max(maxHeight, dims.height);
+    });
+
+    return {
+      width: maxWidth + 40, // extra gap at the end
+      height: maxHeight,
+    };
+  }
+
+  private centerPages(): void {
+    if (!this.canvas) return;
+
+    const canvasSize = this.calculateCanvasSize();
+    this.offsetX = (this.canvas.width - canvasSize.width * this.scale) / 2;
+    this.offsetY = (this.canvas.height - canvasSize.height * this.scale) / 2;
   }
 
   private setupCanvas(): void {
-    // Make the canvas fill its container
     this.resizeCanvas();
 
-    // Add event listeners for canvas interactions
     this.canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
     this.canvas.addEventListener("mouseup", this.onMouseUp.bind(this));
     this.canvas.addEventListener("mousemove", this.onMouseMove.bind(this));
     this.canvas.addEventListener("mouseleave", this.onMouseLeave.bind(this));
     this.canvas.addEventListener("dblclick", this.onDoubleClick.bind(this));
 
-    // Center the page after canvas setup
-    this.centerPage();
+    this.centerPages();
   }
 
   @HostListener("window:resize")
   private resizeCanvas(): void {
-    // Set canvas dimensions to match container size
     const rect = this.container.getBoundingClientRect();
     this.canvas.width = rect.width;
     this.canvas.height = rect.height;
@@ -142,10 +238,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   }
 
   private draw(): void {
-    if (!this.ctx) {
-      console.error("Cannot draw: missing context");
-      return;
-    }
+    if (!this.ctx) return;
 
     // Clear the entire canvas and reset transformations
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -154,12 +247,16 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     // Save the context state
     this.ctx.save();
 
-    // Draw canvas background (not the page)
+    // Draw canvas background
     this.ctx.fillStyle = "#f0f0f0";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Draw the page
-    this.drawPage();
+    // Draw each page with its labels
+    this.pages.forEach((page) => {
+      this.drawPage(page);
+      // Draw labels for each page, not just active
+      this.drawLabels(page);
+    });
 
     // Draw electrical elements
     this.electricalElementsRenderer.renderElements(
@@ -168,124 +265,144 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.offsetY
     );
 
-    // Draw crosshair cursor
-    this.drawCrosshair();
+    // Draw crosshair cursor only for active page
+    if (this.activePage) {
+      this.drawCrosshair();
+    }
 
     // Restore the context state
     this.ctx.restore();
   }
 
-  private drawPage(): void {
-    const pageDimensions = this.activePage.getDimensions();
+  private drawPage(page: SchemePage): void {
+    const pageDimensions = page.getDimensions();
+    const pagePosition = this.pagePositions.get(page.pageNumber)!;
+
+    const scaledX = pagePosition.x * this.scale + this.offsetX;
+    const scaledY = pagePosition.y * this.scale + this.offsetY;
     const scaledWidth = pageDimensions.width * this.scale;
     const scaledHeight = pageDimensions.height * this.scale;
 
+    // Draw active page glow (outside only)
+    if (this.activePage && page.pageNumber === this.activePage.pageNumber) {
+      this.ctx.save();
+      this.ctx.shadowColor = "rgba(135, 206, 250, 0.7)"; // sky blue
+      this.ctx.shadowBlur = 24 * this.scale; // balanced default
+      this.ctx.lineWidth = 8 * this.scale;
+      this.ctx.strokeStyle = "rgba(135, 206, 250, 0.7)";
+      // Draw a slightly larger rectangle for the glow
+      this.ctx.strokeRect(
+        scaledX - 4 * this.scale,
+        scaledY - 4 * this.scale,
+        scaledWidth + 8 * this.scale,
+        scaledHeight + 8 * this.scale
+      );
+      this.ctx.restore();
+    }
+
     // Draw page background
-    this.ctx.fillStyle = this.activePage.backgroundColor;
-    this.ctx.fillRect(this.offsetX, this.offsetY, scaledWidth, scaledHeight);
+    this.ctx.fillStyle = page.backgroundColor;
+    this.ctx.fillRect(scaledX, scaledY, scaledWidth, scaledHeight);
 
     // Draw page border
     this.ctx.strokeStyle = "#000000";
     this.ctx.lineWidth = 1;
-    this.ctx.strokeRect(this.offsetX, this.offsetY, scaledWidth, scaledHeight);
+    this.ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
+
+    // Draw page info above the page
+    this.drawPageInfo(page, scaledX, scaledY);
 
     // Setup clipping to restrict drawing inside the page
     this.ctx.save();
     this.ctx.beginPath();
-    this.ctx.rect(this.offsetX, this.offsetY, scaledWidth, scaledHeight);
+    this.ctx.rect(scaledX, scaledY, scaledWidth, scaledHeight);
     this.ctx.clip();
 
-    // Draw grid only inside the page
-    this.drawGrid();
+    // Draw grid for this page
+    this.drawGrid(page);
 
-    // Draw row letters and column numbers
-    this.drawLabels();
-
-    // Restore context (removes clipping)
+    // Restore context after clipping
     this.ctx.restore();
-
-    // Draw page info
-    this.drawPageInfo();
   }
 
-  private drawGrid(): void {
-    const pageDimensions = this.activePage.getDimensions();
+  private drawGrid(page: SchemePage): void {
+    // Only draw for the active page
+    if (!this.activePage || page.pageNumber !== this.activePage.pageNumber)
+      return;
 
-    // Use labelSize from the activePage
-    const rowLabelWidth = this.activePage.labelSize * this.scale;
-    const columnLabelHeight = this.activePage.labelSize * this.scale;
-
-    // Get or create PageDots for active page
-    let pageDots = this.pageDotsMap.get(this.activePage);
-    if (!pageDots) {
-      pageDots = new PageDots(
-        pageDimensions.width,
-        pageDimensions.height,
-        this.dotsPerPageLength
-      );
-      this.pageDotsMap.set(this.activePage, pageDots);
-    }
+    const pageDots = this.pageDotsMap.get(page.pageNumber)!;
+    const pagePosition = this.pagePositions.get(page.pageNumber)!;
 
     // Update dots based on current scale
     pageDots.calculateDots(this.scale);
 
-    // Get current mouse position in page coordinates
-    const mousePageX =
-      (this.currentMouseX - this.offsetX - rowLabelWidth) / this.scale;
-    const mousePageY =
-      (this.currentMouseY - this.offsetY - columnLabelHeight) / this.scale;
-
-    // Find closest dot and dots in current node
-    if (this.currentMouseX >= 0 && this.currentMouseY >= 0) {
-      this.closestDot = pageDots.findClosestDot({
-        x: mousePageX,
-        y: mousePageY,
-      });
-      this.currentQuadTreeNode = pageDots.getDotsInNode({
-        x: mousePageX,
-        y: mousePageY,
-      });
-    } else {
-      this.closestDot = null;
-      this.currentQuadTreeNode = [];
+    // Check if we can use the cache
+    let useCache = false;
+    if (
+      this.gridDotsPathCache &&
+      this.gridDotsPathCache.pageNumber === page.pageNumber &&
+      this.gridDotsPathCache.scale === this.scale &&
+      this.gridDotsPathCache.offsetX === this.offsetX &&
+      this.gridDotsPathCache.offsetY === this.offsetY
+    ) {
+      useCache = true;
     }
 
-    // Draw debug information if enabled
+    let path: Path2D;
+    if (useCache) {
+      path = this.gridDotsPathCache!.path;
+    } else {
+      path = new Path2D();
+      // Only add dots that are visible on the canvas
+      const canvasWidth = this.canvas.width;
+      const canvasHeight = this.canvas.height;
+      for (const dot of pageDots.getAllDots()) {
+        // Calculate the absolute position of the dot in world coordinates
+        const x = pagePosition.x + dot.x;
+        const y = pagePosition.y + dot.y;
+        // Transform to screen coordinates
+        const screenX = x * this.scale + this.offsetX;
+        const screenY = y * this.scale + this.offsetY;
+        // Only add if visible
+        if (
+          screenX >= 0 &&
+          screenX <= canvasWidth &&
+          screenY >= 0 &&
+          screenY <= canvasHeight
+        ) {
+          path.moveTo(screenX + this.dotSize, screenY); // moveTo avoids connecting arcs
+          path.arc(screenX, screenY, this.dotSize, 0, Math.PI * 2);
+        }
+      }
+      // Cache the path
+      this.gridDotsPathCache = {
+        pageNumber: page.pageNumber,
+        scale: this.scale,
+        offsetX: this.offsetX,
+        offsetY: this.offsetY,
+        path,
+      };
+    }
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+    this.ctx.fill(path);
+
     if (this.debugDraw) {
       this.drawQuadTreeStructure(pageDots);
     }
+  }
 
-    // Draw all dots
-    const dots = pageDots.getAllDots();
-    for (const dot of dots) {
-      const screenX = dot.x * this.scale + this.offsetX + rowLabelWidth;
-      const screenY = dot.y * this.scale + this.offsetY + columnLabelHeight;
-
-      // Only draw if within grid boundaries
-      if (
-        screenX >= this.offsetX + rowLabelWidth &&
-        screenX <= this.offsetX + pageDimensions.width * this.scale &&
-        screenY >= this.offsetY + columnLabelHeight &&
-        screenY <= this.offsetY + pageDimensions.height * this.scale
-      ) {
-        // Determine dot color and size
-        if (this.debugDraw && this.currentQuadTreeNode.includes(dot)) {
-          this.ctx.fillStyle = "#ff0000";
-        } else {
-          this.ctx.fillStyle = "#aaaaaa";
-        }
-
-        const isClosestDot = this.closestDot === dot;
-        const dotSize = this.dotSize * (isClosestDot ? 1.5 : 1);
-
-        this.ctx.beginPath();
-        this.ctx.arc(screenX, screenY, dotSize, 0, Math.PI * 2);
-        this.ctx.fill();
+  private getTopmostPageAtPoint(x: number, y: number): SchemePage | null {
+    for (let i = this.pages.length - 1; i >= 0; i--) {
+      if (this.pages[i].containsPoint(x, y)) {
+        return this.pages[i];
       }
     }
+    return null;
   }
 
   private drawQuadTreeStructure(pageDots: PageDots): void {
+    if (!this.activePage) return;
+
     const rowLabelWidth = this.activePage.labelSize * this.scale;
     const columnLabelHeight = this.activePage.labelSize * this.scale;
 
@@ -316,15 +433,13 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.ctx.strokeRect(position.x, position.y, size.width, size.height);
   }
 
-  private drawLabels(): void {
-    this.ctx.fillStyle = "#333333";
-    this.ctx.font = `${10 * this.scale}px Arial`;
+  private drawLabels(page: SchemePage): void {
+    const pageDimensions = page.getDimensions();
+    const pagePosition = this.pagePositions.get(page.pageNumber)!;
 
-    const pageDimensions = this.activePage.getDimensions();
-
-    // Use labelSize from the activePage
-    const rowLabelWidth = this.activePage.labelSize * this.scale;
-    const columnLabelHeight = this.activePage.labelSize * this.scale;
+    // Use labelSize from the page
+    const rowLabelWidth = page.labelSize * this.scale;
+    const columnLabelHeight = page.labelSize * this.scale;
 
     // Calculate available space for grid
     const availableWidth = pageDimensions.width * this.scale - rowLabelWidth;
@@ -332,209 +447,230 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       pageDimensions.height * this.scale - columnLabelHeight;
 
     // Calculate exact row height and column width
-    const rowHeight = availableHeight / this.activePage.rows;
-    const columnWidth = availableWidth / this.activePage.columns;
+    const rowHeight = availableHeight / page.rows;
+    const columnWidth = availableWidth / page.columns;
+
+    const scaledX = pagePosition.x * this.scale + this.offsetX;
+    const scaledY = pagePosition.y * this.scale + this.offsetY;
+
+    // Set font size based on scale
+    const fontSize = 12 * this.scale;
+    this.ctx.font = `${fontSize}px Arial`;
 
     // Create empty top-left corner cell
     this.drawLabelFrame(
-      { x: this.offsetX, y: this.offsetY },
+      {
+        x: scaledX,
+        y: scaledY,
+      },
       { width: rowLabelWidth, height: columnLabelHeight },
       true
     );
 
     // Create header row for column numbers
-    for (
-      let columnIndex = 0;
-      columnIndex < this.activePage.columns;
-      columnIndex++
-    ) {
+    for (let columnIndex = 0; columnIndex < page.columns; columnIndex++) {
       const labelPositionX =
-        this.offsetX + rowLabelWidth + columnIndex * columnWidth;
+        scaledX + rowLabelWidth + columnIndex * columnWidth;
 
       // Draw label background and border
       this.drawLabelFrame(
-        { x: labelPositionX, y: this.offsetY },
+        { x: labelPositionX, y: scaledY },
         { width: columnWidth, height: columnLabelHeight },
         true
       );
 
       // Draw column number
       this.ctx.fillStyle = "#333333";
+      const text = `${columnIndex + 1}`;
+      const textMetrics = this.ctx.measureText(text);
       this.ctx.fillText(
-        `${columnIndex + 1}`,
-        labelPositionX + columnWidth / 2 - 3 * this.scale,
-        this.offsetY + columnLabelHeight / 2 + 3 * this.scale
+        text,
+        labelPositionX + columnWidth / 2 - textMetrics.width / 2,
+        scaledY + columnLabelHeight / 2 + fontSize / 3
       );
     }
 
     // Create header column for row letters
-    for (let rowIndex = 0; rowIndex < this.activePage.rows; rowIndex++) {
+    for (let rowIndex = 0; rowIndex < page.rows; rowIndex++) {
       const letter = String.fromCharCode(65 + rowIndex);
-      const labelPositionY =
-        this.offsetY + columnLabelHeight + rowIndex * rowHeight;
+      const labelPositionY = scaledY + columnLabelHeight + rowIndex * rowHeight;
 
       // Draw label background and border
       this.drawLabelFrame(
-        { x: this.offsetX, y: labelPositionY },
+        { x: scaledX, y: labelPositionY },
         { width: rowLabelWidth, height: rowHeight },
         true
       );
 
       // Draw row letter
       this.ctx.fillStyle = "#333333";
+      const textMetrics = this.ctx.measureText(letter);
       this.ctx.fillText(
         letter,
-        this.offsetX + rowLabelWidth / 2 - 3 * this.scale,
-        labelPositionY + rowHeight / 2 + 3 * this.scale
+        scaledX + rowLabelWidth / 2 - textMetrics.width / 2,
+        labelPositionY + rowHeight / 2 + fontSize / 3
       );
     }
   }
 
-  private drawPageInfo(): void {
-    const pageDimensions = this.activePage.getDimensions();
+  private drawPageInfo(
+    page: SchemePage,
+    scaledX: number,
+    scaledY: number
+  ): void {
+    const dims = page.getDimensions();
 
-    // Draw title at the top of the page
-    if (this.activePage.title) {
-      this.ctx.fillStyle = "#000000";
-      this.ctx.font = `bold ${16 * this.scale}px Arial`;
+    // Draw page info above the page
+    this.ctx.fillStyle = "#000000";
+    this.ctx.font = "12px Arial";
+
+    // Draw page number above the page
+    this.ctx.fillText(`Page ${page.pageNumber}`, scaledX, scaledY - 25);
+
+    // If this is the active page, draw additional info
+    if (page === this.activePage) {
       this.ctx.fillText(
-        this.activePage.title,
-        this.offsetX + 20 * this.scale,
-        this.offsetY + 20 * this.scale
+        `${dims.width}x${dims.height}mm`,
+        scaledX,
+        scaledY - 10
       );
     }
-
-    // Draw page format and version info at the bottom right
-    const formatText = `${this.activePage.paperFormat} ${this.activePage.orientation}`;
-    const versionText = `v${this.activePage.version}`;
-
-    this.ctx.fillStyle = "#333333";
-    this.ctx.font = `${10 * this.scale}px Arial`;
-
-    // Draw at bottom right with some padding
-    this.ctx.fillText(
-      formatText,
-      this.offsetX + pageDimensions.width * this.scale - 100 * this.scale,
-      this.offsetY + pageDimensions.height * this.scale - 15 * this.scale
-    );
-
-    this.ctx.fillText(
-      versionText,
-      this.offsetX + pageDimensions.width * this.scale - 100 * this.scale,
-      this.offsetY + pageDimensions.height * this.scale - 5 * this.scale
-    );
   }
 
   private drawCrosshair(): void {
-    if (this.currentMouseX < 0 || this.currentMouseY < 0) return;
+    if (!this.activePage || this.currentMouseX < 0 || this.currentMouseY < 0)
+      return;
 
-    // Only draw crosshair when mouse is inside the page
     const pageDimensions = this.activePage.getDimensions();
+    const pagePosition = this.pagePositions.get(this.activePage.pageNumber)!;
+    const scaledX = pagePosition.x * this.scale + this.offsetX;
+    const scaledY = pagePosition.y * this.scale + this.offsetY;
+    const scaledWidth = pageDimensions.width * this.scale;
+    const scaledHeight = pageDimensions.height * this.scale;
+
+    // Check if mouse is within page bounds
     if (
-      this.currentMouseX >= this.offsetX &&
-      this.currentMouseX <= this.offsetX + pageDimensions.width * this.scale &&
-      this.currentMouseY >= this.offsetY &&
-      this.currentMouseY <= this.offsetY + pageDimensions.height * this.scale
+      this.currentMouseX >= scaledX &&
+      this.currentMouseX <= scaledX + scaledWidth &&
+      this.currentMouseY >= scaledY &&
+      this.currentMouseY <= scaledY + scaledHeight
     ) {
       this.ctx.strokeStyle = "#555555";
       this.ctx.lineWidth = 0.5;
 
       // Draw horizontal line (only within page)
       this.ctx.beginPath();
-      this.ctx.moveTo(this.offsetX, this.currentMouseY);
-      this.ctx.lineTo(
-        this.offsetX + pageDimensions.width * this.scale,
-        this.currentMouseY
-      );
+      this.ctx.moveTo(scaledX, this.currentMouseY);
+      this.ctx.lineTo(scaledX + scaledWidth, this.currentMouseY);
       this.ctx.stroke();
 
       // Draw vertical line (only within page)
       this.ctx.beginPath();
-      this.ctx.moveTo(this.currentMouseX, this.offsetY);
-      this.ctx.lineTo(
-        this.currentMouseX,
-        this.offsetY + pageDimensions.height * this.scale
-      );
+      this.ctx.moveTo(this.currentMouseX, scaledY);
+      this.ctx.lineTo(this.currentMouseX, scaledY + scaledHeight);
       this.ctx.stroke();
     }
   }
 
+  private screenToWorld(x: number, y: number): Point {
+    // Convert screen coordinates to world coordinates
+    const worldX = (x - this.offsetX) / this.scale;
+    const worldY = (y - this.offsetY) / this.scale;
+    return { x: worldX, y: worldY };
+  }
+
   private onMouseDown(event: MouseEvent): void {
+    // --- FIX: Update hover state at the very start ---
+    this.electricalElementsRenderer.updateMousePosition(
+      event.offsetX,
+      event.offsetY,
+      this.scale,
+      this.offsetX,
+      this.offsetY
+    );
+    this.hoveredLabel = this.electricalElementsRenderer.getHoveredLabel();
+    this.hoveredElement = this.electricalElementsRenderer.getHoveredElement();
+
     if (event.button === 0) {
-      // First check if a label is under the cursor
-      const labelUnderCursor =
-        this.electricalElementsRenderer.findLabelUnderCursor(
-          event.offsetX,
-          event.offsetY,
-          this.scale,
-          this.offsetX,
-          this.offsetY
-        );
+      // Left click
+      this.isMouseDown = true;
+      this.lastMouseX = event.offsetX;
+      this.lastMouseY = event.offsetY;
 
-      if (labelUnderCursor) {
-        // Prepare for label dragging
+      // Always handle selection first
+      const isMultiSelect =
+        this.keyBindings.multiSelect === "Meta" ? event.metaKey : event.ctrlKey;
+      this.electricalElementsRenderer.handleElementSelection(
+        event.offsetX,
+        event.offsetY,
+        this.scale,
+        this.offsetX,
+        this.offsetY,
+        isMultiSelect
+      );
+
+      // Update local hover states after selection
+      this.hoveredLabel = this.electricalElementsRenderer.getHoveredLabel();
+      this.hoveredElement = this.electricalElementsRenderer.getHoveredElement();
+
+      // Reset all dragging states
+      this.isDraggingLabel = false;
+      this.isDraggingElement = false;
+      this.isDraggingPage = false;
+
+      const hoveredLabel = this.hoveredLabel;
+      const hoveredElement = this.hoveredElement;
+
+      if (hoveredLabel) {
+        // Handle label dragging
         this.isDraggingLabel = true;
-        this.dragStartX = event.offsetX;
-        this.dragStartY = event.offsetY;
-
-        // Set dragged label
-        this.electricalElementsRenderer.setDraggedLabel(labelUnderCursor);
-        this.canvas.style.cursor = "move";
-        return;
-      }
-
-      // If not dragging a label, proceed with element selection/dragging
-      // Left click - Handle element selection first
-      const elementUnderCursor =
-        this.electricalElementsRenderer.findElementUnderCursor(
-          event.offsetX,
-          event.offsetY,
-          this.scale,
-          this.offsetX,
-          this.offsetY
-        );
-
-      if (elementUnderCursor) {
-        // Handle selection
-        this.electricalElementsRenderer.handleElementSelection(
-          event.offsetX,
-          event.offsetY,
-          this.scale,
-          this.offsetX,
-          this.offsetY,
-          event.getModifierState(this.keyBindings.multiSelect)
-        );
-
-        // Prepare for dragging
+        this.draggedLabel = hoveredLabel;
+        this.electricalElementsRenderer.setDraggedLabel(hoveredLabel);
+      } else if (hoveredElement) {
+        // Handle element dragging
         this.isDraggingElement = true;
-        this.dragStartX = event.offsetX;
-        this.dragStartY = event.offsetY;
-
-        // Set dragged elements
-        this.electricalElementsRenderer.setDraggedElements(
-          this.electricalElementsRenderer.getSelectedElements()
-        );
-        this.canvas.style.cursor = "move";
+        // Set dragged elements (use the current selection)
+        const selectedElements =
+          this.electricalElementsRenderer.getSelectedElements();
+        this.electricalElementsRenderer.setDraggedElements(selectedElements);
       } else {
-        // Start page dragging when clicking empty space
-        this.isDragging = true;
-        this.dragStartX = event.offsetX;
-        this.dragStartY = event.offsetY;
-        this.canvas.style.cursor = "grabbing";
+        // --- FIX: Fallback for selected element under cursor ---
+        const elementAtPoint =
+          this.electricalElementsRenderer.getElementAtPoint(
+            event.offsetX,
+            event.offsetY,
+            this.scale,
+            this.offsetX,
+            this.offsetY
+          );
+        if (
+          elementAtPoint &&
+          this.electricalElementsRenderer.isElementSelected(elementAtPoint)
+        ) {
+          // Start element drag even if not hovered
+          this.isDraggingElement = true;
+          const selectedElements =
+            this.electricalElementsRenderer.getSelectedElements();
+          this.electricalElementsRenderer.setDraggedElements(selectedElements);
+        } else {
+          // Check if we clicked on a page
+          const clickedPage = this.getTopmostPageAtPoint(
+            (event.offsetX - this.offsetX) / this.scale,
+            (event.offsetY - this.offsetY) / this.scale
+          );
 
-        // Clear selection when clicking empty space
-        this.electricalElementsRenderer.handleElementSelection(
-          event.offsetX,
-          event.offsetY,
-          this.scale,
-          this.offsetX,
-          this.offsetY,
-          false
-        );
+          if (clickedPage) {
+            this.isDraggingPage = true;
+            this.dragStartX = event.offsetX;
+            this.dragStartY = event.offsetY;
+            this.canvas.style.cursor = "grabbing";
+          }
+        }
       }
     } else if (event.button === 1 || event.button === 2) {
       // Middle or right click - Always allow page dragging
-      this.isDragging = true;
+      event.preventDefault(); // Prevent context menu
+      this.isDraggingPage = true;
       this.dragStartX = event.offsetX;
       this.dragStartY = event.offsetY;
       this.canvas.style.cursor = "grabbing";
@@ -543,53 +679,36 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.draw();
   }
 
+  @HostListener("contextmenu", ["$event"])
+  onContextMenu(event: MouseEvent) {
+    // Prevent context menu when right-clicking
+    event.preventDefault();
+  }
+
   private onMouseUp(event: MouseEvent): void {
-    const wasDraggingElement = this.isDraggingElement;
-    const wasDraggingLabel = this.isDraggingLabel;
-
-    if (this.isDraggingLabel) {
-      this.isDraggingLabel = false;
-      // Clear dragged label state
-      this.electricalElementsRenderer.clearDraggedLabel();
-    }
-
-    if (this.isDraggingElement) {
-      this.isDraggingElement = false;
-      // Only clear dragged elements state but keep selection
-      this.electricalElementsRenderer.clearDraggedElements();
-    }
-
-    if (this.isDragging) {
-      this.isDragging = false;
+    if (event.button === 0) {
+      // Left click
+      this.isMouseDown = false;
+      if (this.isDraggingLabel) {
+        this.isDraggingLabel = false;
+        this.draggedLabel = null;
+        this.electricalElementsRenderer.clearDraggedLabel();
+      }
+      if (this.isDraggingElement) {
+        this.isDraggingElement = false;
+        this.electricalElementsRenderer.clearDraggedElements();
+      }
+      if (this.isDraggingPage) {
+        this.isDraggingPage = false;
+      }
+      this.redrawCanvas();
+    } else if (event.button === 1 || event.button === 2) {
+      // Middle or right click
+      this.isDraggingPage = false;
     }
 
     // Update cursor based on what's under it
-    if (!wasDraggingElement && !wasDraggingLabel) {
-      const labelUnderCursor =
-        this.electricalElementsRenderer.findLabelUnderCursor(
-          event.offsetX,
-          event.offsetY,
-          this.scale,
-          this.offsetX,
-          this.offsetY
-        );
-
-      if (labelUnderCursor) {
-        this.canvas.style.cursor = "text";
-      } else {
-        const elementUnderCursor =
-          this.electricalElementsRenderer.findElementUnderCursor(
-            event.offsetX,
-            event.offsetY,
-            this.scale,
-            this.offsetX,
-            this.offsetY
-          );
-        this.canvas.style.cursor = elementUnderCursor ? "pointer" : "crosshair";
-      }
-    } else {
-      this.canvas.style.cursor = "pointer";
-    }
+    this.updateCursor();
 
     // Update mouse position to maintain proper hover state
     this.electricalElementsRenderer.updateMousePosition(
@@ -632,102 +751,108 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.offsetY
     );
 
+    // --- ACTIVE PAGE LOGIC ---
+    if (this.activePage !== null) {
+      this.activePage = null;
+      // Do not call setActivePage with undefined/null, just skip it
+      this.invalidateGridDotsCache();
+    }
+
     this.draw();
   }
 
   private onMouseMove(event: MouseEvent): void {
-    const prevMouseX = this.currentMouseX;
-    const prevMouseY = this.currentMouseY;
+    const currentX = event.offsetX;
+    const currentY = event.offsetY;
 
-    this.currentMouseX = event.offsetX;
-    this.currentMouseY = event.offsetY;
+    // Update current mouse position for crosshair
+    this.currentMouseX = currentX;
+    this.currentMouseY = currentY;
 
-    let needsRedraw = false;
+    if (this.isMouseDown) {
+      // --- FIX: Do not update drag state here, only perform drag for current state ---
+      if (this.isDraggingLabel) {
+        // Fix: Convert delta to element-local label space
+        const draggedLabelInfo =
+          this.electricalElementsRenderer.getDraggedLabel();
+        let deltaX = 0;
+        let deltaY = 0;
+        if (draggedLabelInfo) {
+          const element = draggedLabelInfo.element;
+          // Convert mouse delta to world coordinates
+          const worldDeltaX = (currentX - this.lastMouseX) / this.scale;
+          const worldDeltaY = (currentY - this.lastMouseY) / this.scale;
+          // Convert world delta to element-local label space
+          deltaX = worldDeltaX / element.width;
+          deltaY = worldDeltaY / element.height;
+        }
+        // Update label position with incremental delta in label space
+        this.electricalElementsRenderer.updateDraggedLabelPosition(
+          deltaX,
+          deltaY
+        );
+        this.draw();
+      } else if (this.isDraggingElement) {
+        // Simple screen-space delta for elements too
+        const deltaX = (currentX - this.lastMouseX) / this.scale;
+        const deltaY = (currentY - this.lastMouseY) / this.scale;
 
-    if (this.isDraggingLabel) {
-      // Get the dragged label and its element
-      const draggedLabel = this.electricalElementsRenderer.getDraggedLabel();
-
-      if (draggedLabel) {
-        // Calculate the movement in screen pixels
-        const mouseDeltaX = this.currentMouseX - this.dragStartX;
-        const mouseDeltaY = this.currentMouseY - this.dragStartY;
-
-        // Convert to element-relative coordinates by dividing by both scale AND element dimensions
-        // This ensures the label moves at the same rate as the mouse
-        const dx = mouseDeltaX / (this.scale * draggedLabel.element.width);
-        const dy = mouseDeltaY / (this.scale * draggedLabel.element.height);
-
-        // Move the label
-        this.electricalElementsRenderer.moveLabel(dx, dy);
-        needsRedraw = true;
-      }
-    } else if (this.isDraggingElement) {
-      // Calculate the movement in element coordinates
-      const dx = (this.currentMouseX - this.dragStartX) / this.scale;
-      const dy = (this.currentMouseY - this.dragStartY) / this.scale;
-
-      // Move the elements
-      this.electricalElementsRenderer.moveElements(dx, dy);
-      needsRedraw = true;
-    } else if (this.isDragging) {
-      // Calculate the drag distance
-      const dragDistanceX = event.offsetX - this.dragStartX;
-      const dragDistanceY = event.offsetY - this.dragStartY;
-
-      // Update offset by the drag distance
-      this.offsetX += dragDistanceX;
-      this.offsetY += dragDistanceY;
-
-      // Reset the drag start position
-      this.dragStartX = event.offsetX;
-      this.dragStartY = event.offsetY;
-
-      needsRedraw = true;
-    } else {
-      // Not dragging, check if cursor is over a label to update cursor style
-      const labelUnderCursor =
-        this.electricalElementsRenderer.findLabelUnderCursor(
-          event.offsetX,
-          event.offsetY,
-          this.scale,
-          this.offsetX,
-          this.offsetY
+        // Update element position with incremental delta
+        this.electricalElementsRenderer.updateDraggedElementsPosition(
+          deltaX,
+          deltaY
         );
 
-      if (labelUnderCursor) {
-        this.canvas.style.cursor = "text";
-      } else {
-        const elementUnderCursor =
-          this.electricalElementsRenderer.findElementUnderCursor(
-            event.offsetX,
-            event.offsetY,
-            this.scale,
-            this.offsetX,
-            this.offsetY
-          );
-        this.canvas.style.cursor = elementUnderCursor ? "pointer" : "crosshair";
+        this.draw();
+      } else if (this.isDraggingPage) {
+        // Handle page dragging - use screen coordinates directly
+        const deltaX = currentX - this.dragStartX;
+        const deltaY = currentY - this.dragStartY;
+        this.offsetX += deltaX;
+        this.offsetY += deltaY;
+        this.dragStartX = currentX;
+        this.dragStartY = currentY;
+        this.invalidateGridDotsCache(); // <--- Invalidate cache
+        this.draw();
       }
-    }
-
-    // Update mouse position in the renderer
-    if (
-      prevMouseX !== this.currentMouseX ||
-      prevMouseY !== this.currentMouseY
-    ) {
+    } else {
+      // Update hover states
       this.electricalElementsRenderer.updateMousePosition(
-        this.currentMouseX,
-        this.currentMouseY,
+        currentX,
+        currentY,
         this.scale,
         this.offsetX,
         this.offsetY
       );
-      needsRedraw = true;
+
+      // Update local hover states
+      this.hoveredLabel = this.electricalElementsRenderer.getHoveredLabel();
+      this.hoveredElement = this.electricalElementsRenderer.getHoveredElement();
+
+      // --- ACTIVE PAGE LOGIC ---
+      // Convert to world coordinates
+      const world = this.screenToWorld(currentX, currentY);
+      const newActivePage = this.getTopmostPageAtPoint(world.x, world.y);
+      if (newActivePage !== this.activePage) {
+        this.activePage = newActivePage;
+        if (this.activePage) {
+          this.electricalElementsRenderer.setActivePage(this.activePage);
+        }
+        this.invalidateGridDotsCache();
+        this.draw();
+        // Early return to avoid double draw
+        return;
+      }
+
+      // Update cursor based on what's under it
+      this.updateCursor();
     }
 
-    if (needsRedraw) {
-      this.draw();
-    }
+    this.lastMouseX = currentX;
+    this.lastMouseY = currentY;
+
+    // Always redraw to update crosshair and highlighting
+    this.draw();
   }
 
   @HostListener("wheel", ["$event"])
@@ -758,11 +883,14 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.offsetX = mousePositionX - mouseCoordinateX * this.scale;
       this.offsetY = mousePositionY - mouseCoordinateY * this.scale;
 
+      this.invalidateGridDotsCache(); // <--- Invalidate cache
       this.draw();
     }
   }
 
   private async onDoubleClick(event: MouseEvent): Promise<void> {
+    if (!this.activePage) return;
+
     // First check if a label is under the cursor
     const labelUnderCursor =
       this.electricalElementsRenderer.findLabelUnderCursor(
@@ -817,13 +945,20 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
           this.draw(); // Redraw to show changes
         }
       } else {
-        // Check if click is within page bounds
+        // Check if click is within page bounds (for the active page)
         const pageDimensions = this.activePage.getDimensions();
+        const pagePosition = this.pagePositions.get(
+          this.activePage.pageNumber
+        )!;
+        const scaledX = pagePosition.x * this.scale + this.offsetX;
+        const scaledY = pagePosition.y * this.scale + this.offsetY;
+        const scaledWidth = pageDimensions.width * this.scale;
+        const scaledHeight = pageDimensions.height * this.scale;
         const isWithinPage =
-          event.offsetX >= this.offsetX &&
-          event.offsetX <= this.offsetX + pageDimensions.width * this.scale &&
-          event.offsetY >= this.offsetY &&
-          event.offsetY <= this.offsetY + pageDimensions.height * this.scale;
+          event.offsetX >= scaledX &&
+          event.offsetX <= scaledX + scaledWidth &&
+          event.offsetY >= scaledY &&
+          event.offsetY <= scaledY + scaledHeight;
 
         if (isWithinPage) {
           // Show page debug info
@@ -843,5 +978,31 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
         }
       }
     }
+  }
+
+  private redrawCanvas(): void {
+    this.draw();
+  }
+
+  private updateCursor(): void {
+    if (this.isDraggingPage) {
+      this.canvas.style.cursor = "grabbing";
+    } else if (this.hoveredLabel) {
+      this.canvas.style.cursor = "text";
+    } else if (this.hoveredElement) {
+      this.canvas.style.cursor = "move";
+    } else {
+      // Show grab cursor when over a page
+      const pageUnderCursor = this.getTopmostPageAtPoint(
+        (this.currentMouseX - this.offsetX) / this.scale,
+        (this.currentMouseY - this.offsetY) / this.scale
+      );
+      this.canvas.style.cursor = pageUnderCursor ? "grab" : "default";
+    }
+  }
+
+  // Invalidate grid dots cache on zoom/pan/page change
+  private invalidateGridDotsCache(): void {
+    this.gridDotsPathCache = null;
   }
 }

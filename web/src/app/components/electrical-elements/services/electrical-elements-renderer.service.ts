@@ -20,9 +20,11 @@ export class ElectricalElementsRendererService {
   private isElementsLoaded = false;
   private mouseX: number = 0;
   private mouseY: number = 0;
-  private draggedElements: Set<ElectricalElement> = new Set();
-  private originalPositions: Map<ElectricalElement, { x: number; y: number }> =
-    new Map();
+  private draggedElements: Set<ElectricalElement> | null = null;
+  private originalElementPositions: Map<
+    ElectricalElement,
+    { x: number; y: number }
+  > | null = null;
   private activePage!: SchemePage;
   private hoveredLabel: { element: ElectricalElement; label: Label } | null =
     null;
@@ -610,43 +612,34 @@ export class ElectricalElementsRendererService {
   }
 
   /**
-   * Set elements being dragged and store their original positions
+   * Set elements being dragged
    */
   setDraggedElements(elements: Set<ElectricalElement>): void {
-    this.debugLogSelection("before drag");
-    // Create a new Set to avoid reference issues
-    this.draggedElements = new Set(elements);
-    // Store original positions
-    this.originalPositions.clear();
-    elements.forEach((element) => {
-      this.originalPositions.set(element, { x: element.x, y: element.y });
-    });
-    this.debugLogSelection("after drag setup");
+    this.draggedElements = elements;
+    // No need to store original positions since we're using incremental deltas
   }
 
   /**
    * Move dragged elements by the specified delta
    */
   moveElements(dx: number, dy: number): void {
-    this.debugLogSelection("before move");
+    if (!this.draggedElements || !this.originalElementPositions) return;
+
     this.draggedElements.forEach((element) => {
-      const original = this.originalPositions.get(element);
+      const original = this.originalElementPositions?.get(element);
       if (original) {
         element.x = original.x + dx;
         element.y = original.y + dy;
       }
     });
-    this.debugLogSelection("after move");
+    this.draw();
   }
 
   /**
    * Clear dragged elements state
    */
   clearDraggedElements(): void {
-    this.debugLogSelection("before clear drag");
-    this.draggedElements.clear();
-    this.originalPositions.clear();
-    this.debugLogSelection("after clear drag");
+    this.draggedElements = null;
   }
 
   /**
@@ -696,56 +689,38 @@ export class ElectricalElementsRendererService {
     return this.selectedLabel;
   }
 
+  // --- FIX: Helper to check if an element is selected ---
+  public isElementSelected(element: ElectricalElement): boolean {
+    return Array.from(this.selectedElements).some((el) => el.id === element.id);
+  }
+
   /**
-   * Set label being dragged and store its original position
+   * Set label being dragged
    */
   setDraggedLabel(
     labelInfo: { element: ElectricalElement; label: Label } | null
   ): void {
     this.draggedLabel = labelInfo;
-
-    if (labelInfo) {
-      // Store original position
-      this.originalLabelPosition = {
-        x: labelInfo.label.x,
-        y: labelInfo.label.y,
-      };
-      console.log(
-        `🏷️ Started dragging label: ${labelInfo.element.id}:${labelInfo.label.name}`,
-        this.originalLabelPosition
-      );
-    } else {
-      this.originalLabelPosition = null;
-    }
+    // No need to store original position since we're using incremental deltas
   }
 
   /**
    * Move dragged label by the specified delta
    */
   moveLabel(dx: number, dy: number): void {
-    if (!this.draggedLabel || !this.originalLabelPosition) return;
+    if (!this.draggedLabel) return;
 
     // Calculate the new position
     const label = this.draggedLabel.label;
-    label.x = this.originalLabelPosition.x + dx;
-    label.y = this.originalLabelPosition.y + dy;
-
-    console.log(
-      `🏷️ Moving label to: ${label.x.toFixed(2)}, ${label.y.toFixed(2)}`
-    );
+    label.x += dx;
+    label.y += dy;
   }
 
   /**
    * Clear dragged label state
    */
   clearDraggedLabel(): void {
-    if (this.draggedLabel) {
-      console.log(
-        `🏷️ Finished dragging label: ${this.draggedLabel.element.id}:${this.draggedLabel.label.name}`
-      );
-    }
     this.draggedLabel = null;
-    this.originalLabelPosition = null;
   }
 
   /**
@@ -753,5 +728,80 @@ export class ElectricalElementsRendererService {
    */
   getDraggedLabel(): { element: ElectricalElement; label: Label } | null {
     return this.draggedLabel;
+  }
+
+  /**
+   * Update the position of the dragged label
+   */
+  updateDraggedLabelPosition(deltaX: number, deltaY: number): void {
+    if (!this.draggedLabel) return;
+
+    const { label } = this.draggedLabel;
+
+    // Apply the delta incrementally to the current position
+    label.x += deltaX;
+    label.y += deltaY;
+
+    // We don't call draw() here as it will be handled by the component
+  }
+
+  /**
+   * Update the position of dragged elements
+   */
+  updateDraggedElementsPosition(deltaX: number, deltaY: number): void {
+    if (!this.draggedElements) return;
+
+    this.draggedElements.forEach((element) => {
+      // Apply incremental delta to current position
+      element.x += deltaX;
+      element.y += deltaY;
+    });
+
+    // No need to call draw() here - component will handle it
+  }
+
+  public getHoveredElement(): ElectricalElement | null {
+    return this.hoveredElement;
+  }
+
+  public getElementAtPoint(
+    x: number,
+    y: number,
+    scale: number,
+    offsetX: number,
+    offsetY: number
+  ): ElectricalElement | null {
+    if (!this.elements) return null;
+
+    // Account for label size in hit testing
+    const labelSize = this.activePage.labelSize || 0;
+    const adjustedX = (x - offsetX - labelSize * scale) / scale;
+    const adjustedY = (y - offsetY - labelSize * scale) / scale;
+
+    for (const element of this.elements) {
+      const elementBounds = {
+        left: element.x - element.width / 2,
+        right: element.x + element.width / 2,
+        top: element.y - element.height / 2,
+        bottom: element.y + element.height / 2,
+      };
+
+      if (
+        adjustedX >= elementBounds.left &&
+        adjustedX <= elementBounds.right &&
+        adjustedY >= elementBounds.top &&
+        adjustedY <= elementBounds.bottom
+      ) {
+        return element;
+      }
+    }
+
+    return null;
+  }
+
+  private draw(): void {
+    if (this.ctx) {
+      this.renderElements(1, 0, 0);
+    }
   }
 }
