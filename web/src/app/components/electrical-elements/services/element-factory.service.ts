@@ -4,6 +4,7 @@ import {
   ElectricalElement,
   Label,
 } from "../interfaces/electrical-element.interface";
+import { SchemePage } from "../../electrical-cad-canvas/models/scheme-page.model";
 
 interface ElementTemplate {
   id: string;
@@ -57,7 +58,8 @@ export class ElementFactoryService {
     y: number,
     labels?: Label[],
     properties?: Record<string, any>,
-    rotation: number = 0
+    rotation: number = 0,
+    page?: SchemePage
   ): Promise<ElectricalElement | null> {
     try {
       const templates = await this.getTemplates();
@@ -89,6 +91,7 @@ export class ElementFactoryService {
         shape: [...template.shape], // Clone the shape array
         pinPoints: template.pinPositions.map((pos) => ({ ...pos })), // Clone pin positions
         properties: { ...template.properties, ...properties }, // Merge properties
+        page: page,
       };
 
       return element;
@@ -106,7 +109,8 @@ export class ElementFactoryService {
     x: number,
     y: number,
     labels: Label[],
-    rotation: number = 0
+    rotation: number = 0,
+    page?: SchemePage
   ): ElectricalElement | null {
     // Find matching template by type
     const template = this.templates.find((t) => t.type === type);
@@ -127,6 +131,7 @@ export class ElementFactoryService {
       labels,
       shape: [...template.shape],
       pinPoints: template.pinPositions.map((pos) => ({ ...pos })),
+      page: page,
     };
   }
 }

@@ -143,6 +143,13 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.pages = this.project.pages;
     this.calculatePagePositions();
 
+    // Assign page to all elements after loading
+    if (this.electricalElementsRenderer.getElements) {
+      this.electricalElementsRenderer.getElements().forEach((el) => {
+        this.assignElementPage(el);
+      });
+    }
+
     // Initialize PageDots for each page
     this.pages.forEach((page) => {
       const dims = page.getDimensions();
@@ -262,7 +269,9 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     this.electricalElementsRenderer.renderElements(
       this.scale,
       this.offsetX,
-      this.offsetY
+      this.offsetY,
+      this.project,
+      this.activePage
     );
 
     // Draw crosshair cursor only for active page
@@ -696,6 +705,10 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       }
       if (this.isDraggingElement) {
         this.isDraggingElement = false;
+        // Update page for all selected elements
+        const selectedElements =
+          this.electricalElementsRenderer.getSelectedElements();
+        selectedElements.forEach((el) => this.assignElementPage(el));
         this.electricalElementsRenderer.clearDraggedElements();
       }
       if (this.isDraggingPage) {
@@ -1004,5 +1017,14 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   // Invalidate grid dots cache on zoom/pan/page change
   private invalidateGridDotsCache(): void {
     this.gridDotsPathCache = null;
+  }
+
+  // Helper to assign the correct page to an element based on its position
+  private assignElementPage(element: ElectricalElement): void {
+    // Use the element's center position
+    const x = element.x;
+    const y = element.y;
+    const page = this.getTopmostPageAtPoint(x, y);
+    element.page = page || undefined;
   }
 }

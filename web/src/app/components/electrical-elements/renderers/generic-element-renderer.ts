@@ -17,7 +17,9 @@ export class GenericElementRenderer extends BaseElementRenderer {
     offsetY: number,
     mouseX?: number,
     mouseY?: number,
-    overrides?: ElectricalElementShapeHighlightOverride
+    overrides?: ElectricalElementShapeHighlightOverride,
+    project?: any,
+    page?: any
   ): void {
     // Save the current context state
     this.ctx.save();
@@ -43,7 +45,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
     this.ctx.save();
 
     // Draw labels with their own transformation context
-    this.drawLabels(element, scale, offsetX, offsetY);
+    this.drawLabels(element, scale, offsetX, offsetY, project, page);
 
     // Restore context after labels
     this.ctx.restore();

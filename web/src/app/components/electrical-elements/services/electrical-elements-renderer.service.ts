@@ -7,6 +7,7 @@ import {
 import { GenericElementRenderer } from "../renderers/generic-element-renderer";
 import { ElementFactoryService } from "./element-factory.service";
 import { SchemePage } from "../../../components/electrical-cad-canvas/models/scheme-page.model";
+import { Project } from "@app/components/electrical-cad-canvas/models/project.model";
 
 @Injectable({
   providedIn: "root",
@@ -515,7 +516,13 @@ export class ElectricalElementsRendererService {
   /**
    * Render all electrical elements
    */
-  renderElements(scale: number, offsetX: number, offsetY: number): void {
+  renderElements(
+    scale: number,
+    offsetX: number,
+    offsetY: number,
+    project?: Project,
+    page: SchemePage | null = null
+  ): void {
     if (!this.ctx || !this.renderer) {
       console.warn("Cannot render: missing context or renderer");
       return;
@@ -533,6 +540,7 @@ export class ElectricalElementsRendererService {
     this.elements.forEach((element) => {
       const isSelected = currentSelection.has(element);
       const isHovered = !isSelected && element === currentHovered;
+      const elementPage = element.page || null;
 
       // First render highlight if element is selected or hovered
       if (isSelected || isHovered) {
@@ -550,7 +558,9 @@ export class ElectricalElementsRendererService {
               : isHovered
               ? "rgba(0, 191, 255, 0.5)"
               : undefined,
-          }
+          },
+          project,
+          elementPage
         );
       }
 
@@ -561,7 +571,10 @@ export class ElectricalElementsRendererService {
         offsetX,
         offsetY,
         this.mouseX,
-        this.mouseY
+        this.mouseY,
+        undefined,
+        project,
+        elementPage
       );
 
       // Render label highlights if needed
@@ -581,7 +594,9 @@ export class ElectricalElementsRendererService {
               scale,
               offsetX,
               offsetY,
-              false // isSelected = false for hover
+              false, // isSelected = false for hover
+              project,
+              elementPage
             );
           }
         }
@@ -601,7 +616,9 @@ export class ElectricalElementsRendererService {
               scale,
               offsetX,
               offsetY,
-              true // isSelected = true for selection
+              true, // isSelected = true for selection
+              project,
+              elementPage
             );
           }
         }

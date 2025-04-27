@@ -1,3 +1,5 @@
+import { SchemePage } from "../../electrical-cad-canvas/models/scheme-page.model";
+
 export interface Terminal {
   x: number; // Relative position (0-1)
   y: number; // Relative position (0-1)
@@ -5,6 +7,10 @@ export interface Terminal {
 }
 
 export interface Label {
+  /**
+   * The text to display. Supports variable substitution using @variable or @object.property syntax.
+   * See documentation in the repo for details.
+   */
   name: string;
   text: string;
   fontSize: number;
@@ -104,4 +110,9 @@ export interface ElectricalElement {
   shape?: ElectricalElementShape[];
   properties?: Record<string, any>;
   terminals?: Terminal[];
+  /**
+   * Reference to the page this element belongs to. Used for label variable resolution (e.g., @page.*).
+   * May be undefined if the element is not associated with any page.
+   */
+  page?: SchemePage;
 }

@@ -75,7 +75,8 @@ export class DebugInfoDialogComponent implements OnInit {
 
   validateJson(value: string) {
     try {
-      JSON.parse(value);
+      // Use relaxed parsing for validation as well
+      JSON.parse(this.relaxJsonEscapes(value));
       this.jsonError = null;
     } catch (e) {
       this.jsonError = "Invalid JSON format";
@@ -85,7 +86,9 @@ export class DebugInfoDialogComponent implements OnInit {
   onSave() {
     if (!this.jsonError) {
       try {
-        const parsedData = JSON.parse(this.jsonString);
+        // Pre-process the string to allow single backslashes
+        const relaxed = this.relaxJsonEscapes(this.jsonString);
+        const parsedData = JSON.parse(relaxed);
         this.dialogRef.close(parsedData);
       } catch (e) {
         // This shouldn't happen since we validate on change
@@ -96,5 +99,16 @@ export class DebugInfoDialogComponent implements OnInit {
 
   onCancel() {
     this.dialogRef.close();
+  }
+
+  /**
+   * Converts single backslashes not followed by a valid JSON escape char
+   * into double backslashes, so JSON.parse will succeed.
+   * Valid JSON escapes: " \ / b f n r t u
+   */
+  private relaxJsonEscapes(input: string): string {
+    // Replace single backslashes not followed by a valid JSON escape char with double backslashes
+    // Valid JSON escapes: " \ / b f n r t u
+    return input.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
   }
 }

@@ -38,7 +38,9 @@ export abstract class BaseElementRenderer {
     element: ElectricalElement,
     scale: number,
     offsetX: number,
-    offsetY: number
+    offsetY: number,
+    project?: any,
+    page?: any
   ): void {
     if (!element.labels) return;
 
@@ -53,9 +55,20 @@ export abstract class BaseElementRenderer {
       this.ctx.rotate((element.rotation * Math.PI) / 180);
     }
 
+    // Always use element.page if present, otherwise fallback to passed-in page
+    const labelPage = element.page || page;
+
     // Draw each label
     element.labels.forEach((label) => {
-      this.drawLabel(label, element.width, element.height, scale);
+      this.drawLabel(
+        label,
+        element.width,
+        element.height,
+        scale,
+        element,
+        project,
+        labelPage
+      );
     });
 
     this.ctx.restore();
@@ -68,7 +81,10 @@ export abstract class BaseElementRenderer {
     label: Label,
     elementWidth: number,
     elementHeight: number,
-    scale: number
+    scale: number,
+    element: ElectricalElement,
+    project?: any,
+    page?: any
   ): void {
     this.ctx.save();
 
@@ -100,19 +116,171 @@ export abstract class BaseElementRenderer {
     this.ctx.textBaseline = "middle";
 
     // Handle variable references
-    const text = this.processLabelText(label.text);
+    const text = this.processLabelText(label.text, {
+      project: project,
+      page: page,
+      element: element,
+    });
     this.ctx.fillText(text, 0, 0);
 
     this.ctx.restore();
   }
 
   /**
-   * Process label text to handle variable references
+   * Process label text to handle variable references, supporting both old (@var.prop) and new (@{...}) syntax.
+   * In @{...}, any character can be escaped with \ (including dot, braces, etc.).
+   * Supports array indices (e.g., @{foo.bar[0]}).
+   * Unresolved variables are left as-is.
+   *
+   * FIX: Now supports a single backslash (e.g. \. in the text) as an escape for the next character, and the backslash is not rendered in the output.
    */
-  private processLabelText(text: string): string {
-    // Replace @variable with actual values if available
-    // For now, just remove the @ symbol
-    return text.replace(/@(\w+)/g, "$1");
+  protected processLabelText(
+    text: string,
+    context: { project?: any; page?: any; element?: any }
+  ): string {
+    // Step 1: Replace @@ with a placeholder
+    const AT_PLACEHOLDER = "__AT__";
+    let processed = text.replace(/@@/g, AT_PLACEHOLDER);
+
+    // Step 2: Replace @{...} syntax (with universal escaping)
+    processed = processed.replace(/@\{((?:[^\\}]|\\.)*)\}/g, (match, inner) => {
+      // Parse the property chain, removing escapes for output
+      let propChain = "";
+      let i = 0;
+      while (i < inner.length) {
+        if (inner[i] === "\\" && i + 1 < inner.length) {
+          propChain += inner[i + 1]; // Add only the escaped character
+          i += 2;
+        } else {
+          propChain += inner[i];
+          i++;
+        }
+      }
+      // Resolve the property chain (with array indices)
+      const value = this.resolvePropertyChain(propChain, context);
+      return value !== undefined && value !== null ? String(value) : match;
+    });
+
+    // Step 3: Replace @variable or @object.property references (old style)
+    processed = processed.replace(/@([a-zA-Z_][\w.]+)/g, (match, variable) => {
+      // Support dot notation
+      const parts = variable.split(".");
+      let value: any = undefined;
+      if (parts.length === 1) {
+        // Try element property first
+        value = context.element && context.element[parts[0]];
+        if (value === undefined) {
+          // Try page
+          value = context.page && context.page[parts[0]];
+        }
+        if (value === undefined) {
+          // Try project
+          value = context.project && context.project[parts[0]];
+        }
+      } else {
+        // Try object.property chain
+        let root = undefined;
+        if (parts[0] === "element") root = context.element;
+        else if (parts[0] === "page") root = context.page;
+        else if (parts[0] === "project") root = context.project;
+        if (root) {
+          value = parts
+            .slice(1)
+            .reduce(
+              (obj: any, key: string) =>
+                obj && obj[key] !== undefined ? obj[key] : undefined,
+              root
+            );
+        }
+      }
+      // If value is undefined/null, leave as-is
+      return value !== undefined && value !== null ? String(value) : match;
+    });
+
+    // Step 4: Restore @@ placeholders to @
+    processed = processed.replace(new RegExp(AT_PLACEHOLDER, "g"), "@");
+
+    // Step 5: Remove any remaining escape backslashes (e.g., \. -> .)
+    processed = processed.replace(/\\(.)/g, "$1");
+    return processed;
+  }
+
+  /**
+   * Helper to resolve a property chain with dot notation and array indices, e.g. foo.bar[0].baz
+   * Handles property names with dots/braces if escaped in the input.
+   * Does not execute arbitrary JS code.
+   *
+   * FIX: Now expects the input chain to have all escapes removed (handled in processLabelText).
+   */
+  private resolvePropertyChain(
+    chain: string,
+    context: { project?: any; page?: any; element?: any }
+  ): any {
+    // Split by dot, but ignore dots inside brackets (for array indices)
+    const parts: string[] = [];
+    let current = "";
+    let inBracket = false;
+    for (let i = 0; i < chain.length; i++) {
+      if (!inBracket && chain[i] === ".") {
+        parts.push(current);
+        current = "";
+      } else if (chain[i] === "[" && !inBracket) {
+        inBracket = true;
+        current += chain[i];
+      } else if (chain[i] === "]" && inBracket) {
+        inBracket = false;
+        current += chain[i];
+      } else {
+        current += chain[i];
+      }
+    }
+    if (current.length > 0) parts.push(current);
+
+    // Determine root
+    let root: any = undefined;
+    if (parts[0] === "element") root = context.element;
+    else if (parts[0] === "page") root = context.page;
+    else if (parts[0] === "project") root = context.project;
+    else {
+      // Try element, then page, then project
+      root =
+        context.element && context.element[parts[0]] !== undefined
+          ? context.element
+          : context.page && context.page[parts[0]] !== undefined
+          ? context.page
+          : context.project && context.project[parts[0]] !== undefined
+          ? context.project
+          : undefined;
+      if (root) parts[0] = parts[0]; // keep as is
+      else return undefined;
+    }
+
+    let value = root;
+    for (
+      let i =
+        root === context.element ||
+        root === context.page ||
+        root === context.project
+          ? 1
+          : 0;
+      i < parts.length;
+      i++
+    ) {
+      let part = parts[i];
+      // Handle array indices, e.g. foo[0]
+      const arrayMatch = part.match(/^([\w$]+)\[(\d+)\]$/);
+      if (arrayMatch) {
+        const prop = arrayMatch[1];
+        const idx = parseInt(arrayMatch[2], 10);
+        value =
+          value && value[prop] && Array.isArray(value[prop])
+            ? value[prop][idx]
+            : undefined;
+      } else {
+        value = value && value[part] !== undefined ? value[part] : undefined;
+      }
+    }
+    return value;
   }
 
   /**
@@ -271,7 +439,9 @@ export abstract class BaseElementRenderer {
     scale: number,
     offsetX: number,
     offsetY: number,
-    isSelected: boolean = false
+    isSelected: boolean = false,
+    project?: any,
+    page?: any
   ): void {
     this.ctx.save();
 
@@ -309,7 +479,11 @@ export abstract class BaseElementRenderer {
     }
 
     // Approximate label text width and height
-    const text = this.processLabelText(label.text);
+    const text = this.processLabelText(label.text, {
+      project: project,
+      page: page,
+      element: element,
+    });
     const textWidth = text.length * fontSize * 0.6;
     const textHeight = fontSize * 1.2;
 
