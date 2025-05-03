@@ -56,6 +56,13 @@ import { MatInputModule } from "@angular/material/input";
         font-family: monospace;
         min-height: 200px;
       }
+      .editing-notice {
+        background-color: #fff8e1;
+        padding: 8px;
+        border-left: 4px solid #ffc107;
+        margin-bottom: 16px;
+        font-size: 14px;
+      }
     `,
   ],
 })
@@ -89,6 +96,15 @@ export class DebugInfoDialogComponent implements OnInit {
         // Pre-process the string to allow single backslashes
         const relaxed = this.relaxJsonEscapes(this.jsonString);
         const parsedData = JSON.parse(relaxed);
+
+        // Compare with original data
+        const originalDataStr = JSON.stringify(this.data);
+        const parsedDataStr = JSON.stringify(parsedData);
+
+        console.log("Debug - Original data:", this.data);
+        console.log("Debug - Parsed data:", parsedData);
+        console.log("Debug - Data changed:", originalDataStr !== parsedDataStr);
+
         this.dialogRef.close(parsedData);
       } catch (e) {
         // This shouldn't happen since we validate on change
@@ -98,7 +114,7 @@ export class DebugInfoDialogComponent implements OnInit {
   }
 
   onCancel() {
-    this.dialogRef.close();
+    this.dialogRef.close(undefined);
   }
 
   /**

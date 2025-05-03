@@ -1,9 +1,7 @@
-import {
-  ElectricalElement,
-  Label,
-  Terminal,
-} from "../interfaces/electrical-element.interface";
+import { Label, Terminal } from "../interfaces/electrical-element.interface";
 import { SchemePage } from "../../../components/electrical-cad-canvas/models/scheme-page.model";
+import { ElectricalElement } from "../models/electrical-element";
+import { Project } from "../../../components/electrical-cad-canvas/models/project.model";
 
 export abstract class BaseElementRenderer {
   // Constants for terminal rendering
@@ -39,15 +37,17 @@ export abstract class BaseElementRenderer {
     scale: number,
     offsetX: number,
     offsetY: number,
-    project?: any,
-    page?: any
+    project?: Project,
+    page?: SchemePage
   ): void {
     if (!element.labels) return;
 
     this.ctx.save();
+    // The element's center should be at (x, y) visually, but the shape's center is at centerOffset
+    // So we translate to element position, then adjust for the center offset
     this.ctx.translate(
-      element.x * scale + offsetX + (element.width * scale) / 2,
-      element.y * scale + offsetY + (element.height * scale) / 2
+      element.x * scale + offsetX,
+      element.y * scale + offsetY
     );
 
     // Apply element rotation if any
@@ -83,15 +83,14 @@ export abstract class BaseElementRenderer {
     elementHeight: number,
     scale: number,
     element: ElectricalElement,
-    project?: any,
-    page?: any
+    project?: Project,
+    page?: SchemePage
   ): void {
     this.ctx.save();
 
     // Position the label relative to the element's center
-    const scaledWidth = elementWidth * scale;
-    const scaledHeight = elementHeight * scale;
-    this.ctx.translate(label.x * scaledWidth, label.y * scaledHeight);
+    // Use direct label position values from mock-elements.json, only scaled by the view scale
+    this.ctx.translate(label.x * scale, label.y * scale);
 
     // Calculate base font size relative to the element's base size (unscaled)
     const baseFontSize = label.fontSize * Math.min(elementWidth, elementHeight);
@@ -251,8 +250,7 @@ export abstract class BaseElementRenderer {
           : context.project && context.project[parts[0]] !== undefined
           ? context.project
           : undefined;
-      if (root) parts[0] = parts[0]; // keep as is
-      else return undefined;
+      if (!root) return undefined;
     }
 
     let value = root;
@@ -293,9 +291,15 @@ export abstract class BaseElementRenderer {
     offsetY: number
   ): void {
     // Need to account for the row label width and column label height
-    const labelSize = this.activePage.labelSize;
+    const labelSize = this.activePage.labelSize || 0;
 
     this.ctx.save();
+
+    // The transform needs to account for:
+    // 1. Element position (scaled)
+    // 2. Canvas offset (pan position)
+    // 3. Label size offset
+    // 4. Element is drawn centered at its position (x,y)
     this.ctx.translate(
       element.x * scale + offsetX + labelSize * scale,
       element.y * scale + offsetY + labelSize * scale
@@ -343,8 +347,9 @@ export abstract class BaseElementRenderer {
 
     for (const terminal of element.terminals) {
       // Calculate terminal position in element space
-      const terminalX = element.x + (terminal.x - 0.5) * element.width;
-      const terminalY = element.y + (terminal.y - 0.5) * element.height;
+      // Use direct terminal position values from mock-elements.json
+      const terminalX = element.x + terminal.x;
+      const terminalY = element.y + terminal.y;
 
       // Apply rotation around element center
       const relX = terminalX - element.x;
@@ -401,9 +406,9 @@ export abstract class BaseElementRenderer {
       this.ctx.rotate((element.rotation * Math.PI) / 180);
     }
 
-    // Calculate terminal position relative to element center
-    const x = (terminal.x - 0.5) * element.width * scale;
-    const y = (terminal.y - 0.5) * element.height * scale;
+    // Use direct terminal position values from mock-elements.json, only scaled by the view scale
+    const x = terminal.x * scale;
+    const y = terminal.y * scale;
 
     // Draw highlight
     this.ctx.beginPath();
@@ -447,8 +452,8 @@ export abstract class BaseElementRenderer {
 
     // Position at element's center
     this.ctx.translate(
-      element.x * scale + offsetX + (element.width * scale) / 2,
-      element.y * scale + offsetY + (element.height * scale) / 2
+      element.x * scale + offsetX,
+      element.y * scale + offsetY
     );
 
     // Apply element rotation if any
@@ -457,9 +462,8 @@ export abstract class BaseElementRenderer {
     }
 
     // Position the label relative to the element's center
-    const scaledWidth = element.width * scale;
-    const scaledHeight = element.height * scale;
-    this.ctx.translate(label.x * scaledWidth, label.y * scaledHeight);
+    // Use direct label position values from mock-elements.json, only scaled by the view scale
+    this.ctx.translate(label.x * scale, label.y * scale);
 
     // Calculate base font size relative to the element's base size (unscaled)
     const baseFontSize =

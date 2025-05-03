@@ -1,11 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpService } from "../../../services/http.service";
-import {
-  ElectricalElement,
-  Label,
-} from "../interfaces/electrical-element.interface";
+import { Label } from "../interfaces/electrical-element.interface";
 import { SchemePage } from "../../electrical-cad-canvas/models/scheme-page.model";
-
+import { ElectricalElement } from "../models/electrical-element";
 interface ElementTemplate {
   id: string;
   type: string;
@@ -79,59 +76,23 @@ export class ElementFactoryService {
       const elementLabels = labels || template.defaultLabels;
 
       // Create element with merged properties
-      const element: ElectricalElement = {
+      const element = new ElectricalElement({
         id: elementId,
         type: template.type,
         x,
         y,
-        width: template.width,
-        height: template.height,
         rotation,
         labels: elementLabels,
         shape: [...template.shape], // Clone the shape array
         pinPoints: template.pinPositions.map((pos) => ({ ...pos })), // Clone pin positions
         properties: { ...template.properties, ...properties }, // Merge properties
         page: page,
-      };
+      });
 
       return element;
     } catch (error) {
       console.error("Error creating element:", error);
       return null;
     }
-  }
-
-  /**
-   * Create an element directly (synchronous version, only works if templates are already loaded)
-   */
-  createElement(
-    type: string,
-    x: number,
-    y: number,
-    labels: Label[],
-    rotation: number = 0,
-    page?: SchemePage
-  ): ElectricalElement | null {
-    // Find matching template by type
-    const template = this.templates.find((t) => t.type === type);
-    if (!template) {
-      console.error(`No template found for element type: ${type}`);
-      return null;
-    }
-
-    // Create element using the template
-    return {
-      id: `${type}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      type,
-      x,
-      y,
-      width: template.width,
-      height: template.height,
-      rotation,
-      labels,
-      shape: [...template.shape],
-      pinPoints: template.pinPositions.map((pos) => ({ ...pos })),
-      page: page,
-    };
   }
 }

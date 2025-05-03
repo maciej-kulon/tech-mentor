@@ -19,7 +19,7 @@ import { WindowsKeyBindings } from "@app/config/key-bindings.windows";
 import { MatDialogModule } from "@angular/material/dialog";
 import { DebugInfoDialogComponent } from "./debug-info-dialog/debug-info-dialog.component";
 import { DialogService } from "@app/services/dialog.service";
-import { ElectricalElement } from "../electrical-elements/interfaces/electrical-element.interface";
+import { ElectricalElement } from "../electrical-elements/models/electrical-element";
 
 @Component({
   selector: "app-electrical-cad-canvas",
@@ -270,8 +270,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.scale,
       this.offsetX,
       this.offsetY,
-      this.project,
-      this.activePage
+      this.project
     );
 
     // Draw crosshair cursor only for active page
@@ -547,37 +546,56 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   }
 
   private drawCrosshair(): void {
-    if (!this.activePage || this.currentMouseX < 0 || this.currentMouseY < 0)
-      return;
+    // Don't draw if mouse is outside the canvas
+    if (this.currentMouseX < 0 || this.currentMouseY < 0) return;
 
-    const pageDimensions = this.activePage.getDimensions();
-    const pagePosition = this.pagePositions.get(this.activePage.pageNumber)!;
-    const scaledX = pagePosition.x * this.scale + this.offsetX;
-    const scaledY = pagePosition.y * this.scale + this.offsetY;
-    const scaledWidth = pageDimensions.width * this.scale;
-    const scaledHeight = pageDimensions.height * this.scale;
+    // First draw the global crosshair
+    this.ctx.strokeStyle = "#999999";
+    this.ctx.lineWidth = 0.5;
 
-    // Check if mouse is within page bounds
-    if (
-      this.currentMouseX >= scaledX &&
-      this.currentMouseX <= scaledX + scaledWidth &&
-      this.currentMouseY >= scaledY &&
-      this.currentMouseY <= scaledY + scaledHeight
-    ) {
-      this.ctx.strokeStyle = "#555555";
-      this.ctx.lineWidth = 0.5;
+    // Draw horizontal line across the entire canvas
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, this.currentMouseY);
+    this.ctx.lineTo(this.canvas.width, this.currentMouseY);
+    this.ctx.stroke();
 
-      // Draw horizontal line (only within page)
-      this.ctx.beginPath();
-      this.ctx.moveTo(scaledX, this.currentMouseY);
-      this.ctx.lineTo(scaledX + scaledWidth, this.currentMouseY);
-      this.ctx.stroke();
+    // Draw vertical line across the entire canvas
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.currentMouseX, 0);
+    this.ctx.lineTo(this.currentMouseX, this.canvas.height);
+    this.ctx.stroke();
 
-      // Draw vertical line (only within page)
-      this.ctx.beginPath();
-      this.ctx.moveTo(this.currentMouseX, scaledY);
-      this.ctx.lineTo(this.currentMouseX, scaledY + scaledHeight);
-      this.ctx.stroke();
+    // If there's an active page, draw a more prominent crosshair within the page
+    if (this.activePage) {
+      const pageDimensions = this.activePage.getDimensions();
+      const pagePosition = this.pagePositions.get(this.activePage.pageNumber)!;
+      const scaledX = pagePosition.x * this.scale + this.offsetX;
+      const scaledY = pagePosition.y * this.scale + this.offsetY;
+      const scaledWidth = pageDimensions.width * this.scale;
+      const scaledHeight = pageDimensions.height * this.scale;
+
+      // Check if mouse is within page bounds
+      if (
+        this.currentMouseX >= scaledX &&
+        this.currentMouseX <= scaledX + scaledWidth &&
+        this.currentMouseY >= scaledY &&
+        this.currentMouseY <= scaledY + scaledHeight
+      ) {
+        this.ctx.strokeStyle = "#555555";
+        this.ctx.lineWidth = 0.7;
+
+        // Draw horizontal line (only within page)
+        this.ctx.beginPath();
+        this.ctx.moveTo(scaledX, this.currentMouseY);
+        this.ctx.lineTo(scaledX + scaledWidth, this.currentMouseY);
+        this.ctx.stroke();
+
+        // Draw vertical line (only within page)
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.currentMouseX, scaledY);
+        this.ctx.lineTo(this.currentMouseX, scaledY + scaledHeight);
+        this.ctx.stroke();
+      }
     }
   }
 
@@ -785,21 +803,18 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     if (this.isMouseDown) {
       // --- FIX: Do not update drag state here, only perform drag for current state ---
       if (this.isDraggingLabel) {
-        // Fix: Convert delta to element-local label space
+        // Get the dragged label info
         const draggedLabelInfo =
           this.electricalElementsRenderer.getDraggedLabel();
         let deltaX = 0;
         let deltaY = 0;
         if (draggedLabelInfo) {
-          const element = draggedLabelInfo.element;
-          // Convert mouse delta to world coordinates
-          const worldDeltaX = (currentX - this.lastMouseX) / this.scale;
-          const worldDeltaY = (currentY - this.lastMouseY) / this.scale;
-          // Convert world delta to element-local label space
-          deltaX = worldDeltaX / element.width;
-          deltaY = worldDeltaY / element.height;
+          // Simply convert mouse delta to world coordinates
+          // No need to divide by element dimensions since we're using direct pixel values now
+          deltaX = (currentX - this.lastMouseX) / this.scale;
+          deltaY = (currentY - this.lastMouseY) / this.scale;
         }
-        // Update label position with incremental delta in label space
+        // Update label position with incremental delta
         this.electricalElementsRenderer.updateDraggedLabelPosition(
           deltaX,
           deltaY
@@ -809,6 +824,8 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
         // Simple screen-space delta for elements too
         const deltaX = (currentX - this.lastMouseX) / this.scale;
         const deltaY = (currentY - this.lastMouseY) / this.scale;
+
+        console.log(`Dragging elements by delta: (${deltaX}, ${deltaY})`);
 
         // Update element position with incremental delta
         this.electricalElementsRenderer.updateDraggedElementsPosition(
@@ -915,22 +932,36 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       );
 
     if (labelUnderCursor) {
+      // Deep clone the label to avoid reference issues
+      const clonedLabel = JSON.parse(JSON.stringify(labelUnderCursor.label));
+
       // Open debug dialog for just the label
       const result = await this.dialogService.open(DebugInfoDialogComponent, {
-        data: labelUnderCursor.label,
+        data: clonedLabel,
         width: "600px",
       });
 
-      if (result) {
-        // Update the label with the edited data
-        // Find the label in the element and update it
+      if (result !== undefined) {
+        // Safe update for label (only update text and position properties)
         const element = labelUnderCursor.element;
         const labelIndex = element.labels?.findIndex(
           (l) => l.name === labelUnderCursor.label.name
         );
 
         if (labelIndex !== undefined && labelIndex >= 0 && element.labels) {
-          element.labels[labelIndex] = result;
+          // Update only specific properties that are safe to change
+          const originalLabel = element.labels[labelIndex];
+
+          // Safe properties to update for labels
+          if (result.text !== undefined) originalLabel.text = result.text;
+          if (result.x !== undefined) originalLabel.x = result.x;
+          if (result.y !== undefined) originalLabel.y = result.y;
+          if (result.fontSize !== undefined)
+            originalLabel.fontSize = result.fontSize;
+          if (result.fontColor !== undefined)
+            originalLabel.fontColor = result.fontColor;
+          if (result.name !== undefined) originalLabel.name = result.name;
+
           this.draw(); // Redraw to show changes
         }
       }
@@ -946,15 +977,19 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
         );
 
       if (elementUnderCursor) {
-        // Open debug dialog for the element
+        // Create a safe representation for editing
+        const editableElement =
+          this.createEditableRepresentation(elementUnderCursor);
+
+        // Open debug dialog with the editable representation
         const result = await this.dialogService.open(DebugInfoDialogComponent, {
-          data: elementUnderCursor,
+          data: editableElement,
           width: "600px",
         });
 
-        if (result) {
-          // Update the element with the edited data
-          Object.assign(elementUnderCursor, result);
+        if (result !== undefined) {
+          // Apply safe updates to the original element
+          this.applySelectiveUpdates(elementUnderCursor, result);
           this.draw(); // Redraw to show changes
         }
       } else {
@@ -974,23 +1009,139 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
           event.offsetY <= scaledY + scaledHeight;
 
         if (isWithinPage) {
+          // Create a safe subset of page properties to edit
+          const editablePage = {
+            pageNumber: this.activePage.pageNumber,
+            paperFormat: this.activePage.paperFormat,
+            orientation: this.activePage.orientation,
+            backgroundColor: this.activePage.backgroundColor,
+            rows: this.activePage.rows,
+            columns: this.activePage.columns,
+            labelSize: this.activePage.labelSize,
+          };
+
           // Show page debug info
           const result = await this.dialogService.open(
             DebugInfoDialogComponent,
             {
-              data: this.activePage,
+              data: editablePage,
               width: "600px",
             }
           );
 
-          if (result) {
-            // Update the page with the edited data
-            Object.assign(this.activePage, result);
+          if (result !== undefined) {
+            // Safe update for page (only update specific properties)
+            if (result.paperFormat)
+              this.activePage.paperFormat = result.paperFormat;
+            if (result.orientation)
+              this.activePage.orientation = result.orientation;
+            if (result.backgroundColor)
+              this.activePage.backgroundColor = result.backgroundColor;
+            if (result.rows) this.activePage.rows = result.rows;
+            if (result.columns) this.activePage.columns = result.columns;
+            if (result.labelSize) this.activePage.labelSize = result.labelSize;
+
             this.draw(); // Redraw to show changes
           }
         }
       }
     }
+  }
+
+  /**
+   * Creates a safe editable representation of an electrical element
+   * that won't break the element when edited in the dialog
+   */
+  private createEditableRepresentation(element: ElectricalElement): any {
+    // Create a simplified representation with only editable properties
+    return {
+      id: element.id,
+      type: element.type,
+      x: element.x,
+      y: element.y,
+      rotation: element.rotation,
+      labels: element.labels ? JSON.parse(JSON.stringify(element.labels)) : [],
+      properties: element.properties
+        ? JSON.parse(JSON.stringify(element.properties))
+        : {},
+      // Exclude shape, pinPoints, terminals and page as they contain class instances
+      // that shouldn't be directly edited through the dialog
+    };
+  }
+
+  /**
+   * Applies selective updates to an element, preserving its structure
+   */
+  private applySelectiveUpdates(
+    originalElement: ElectricalElement,
+    updates: any
+  ): void {
+    console.log("Applying selective updates:", {
+      original: originalElement,
+      updates,
+    });
+
+    // Update simple properties that are safe to change
+    if (updates.x !== undefined) originalElement.x = updates.x;
+    if (updates.y !== undefined) originalElement.y = updates.y;
+    if (updates.rotation !== undefined)
+      originalElement.rotation = updates.rotation;
+    if (updates.type !== undefined) originalElement.type = updates.type;
+
+    // Update properties object if it exists
+    if (updates.properties && originalElement.properties) {
+      Object.assign(originalElement.properties, updates.properties);
+    }
+
+    // Update labels if they exist
+    if (
+      updates.labels &&
+      Array.isArray(updates.labels) &&
+      originalElement.labels
+    ) {
+      // Update existing labels
+      for (
+        let i = 0;
+        i < updates.labels.length && i < originalElement.labels.length;
+        i++
+      ) {
+        const updatedLabel = updates.labels[i];
+        const originalLabel = originalElement.labels[i];
+
+        // Update specific label properties that are safe to change
+        if (updatedLabel.text !== undefined)
+          originalLabel.text = updatedLabel.text;
+        if (updatedLabel.x !== undefined) originalLabel.x = updatedLabel.x;
+        if (updatedLabel.y !== undefined) originalLabel.y = updatedLabel.y;
+        if (updatedLabel.fontSize !== undefined)
+          originalLabel.fontSize = updatedLabel.fontSize;
+        if (updatedLabel.fontColor !== undefined)
+          originalLabel.fontColor = updatedLabel.fontColor;
+        if (updatedLabel.name !== undefined)
+          originalLabel.name = updatedLabel.name;
+      }
+
+      // If the update has more labels than original, add them
+      if (updates.labels.length > originalElement.labels.length) {
+        for (
+          let i = originalElement.labels.length;
+          i < updates.labels.length;
+          i++
+        ) {
+          originalElement.labels.push(updates.labels[i]);
+        }
+      }
+
+      // If the update has fewer labels than original, remove extras
+      if (updates.labels.length < originalElement.labels.length) {
+        originalElement.labels = originalElement.labels.slice(
+          0,
+          updates.labels.length
+        );
+      }
+    }
+
+    console.log("Element after selective update:", originalElement);
   }
 
   private redrawCanvas(): void {
@@ -1005,13 +1156,16 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     } else if (this.hoveredElement) {
       this.canvas.style.cursor = "move";
     } else {
-      // Show grab cursor when over a page
+      // Show grab cursor when over a page, otherwise show crosshair
       const pageUnderCursor = this.getTopmostPageAtPoint(
         (this.currentMouseX - this.offsetX) / this.scale,
         (this.currentMouseY - this.offsetY) / this.scale
       );
-      this.canvas.style.cursor = pageUnderCursor ? "grab" : "default";
+      this.canvas.style.cursor = pageUnderCursor ? "grab" : "crosshair";
     }
+
+    // Log cursor state for debugging
+    console.log(`Cursor: ${this.canvas.style.cursor}`);
   }
 
   // Invalidate grid dots cache on zoom/pan/page change

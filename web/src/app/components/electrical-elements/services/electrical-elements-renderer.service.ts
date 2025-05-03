@@ -1,14 +1,18 @@
 import { Injectable } from "@angular/core";
 import { HttpService } from "../../../services/http.service";
-import {
-  ElectricalElement,
-  Label,
-} from "../interfaces/electrical-element.interface";
+import { Label, ShapeType } from "../interfaces/electrical-element.interface";
 import { GenericElementRenderer } from "../renderers/generic-element-renderer";
 import { ElementFactoryService } from "./element-factory.service";
 import { SchemePage } from "../../../components/electrical-cad-canvas/models/scheme-page.model";
 import { Project } from "@app/components/electrical-cad-canvas/models/project.model";
-
+import { IDrawable2D } from "../interfaces/drawable-electrical-element.interface";
+import { ShapeArc } from "../models/shape-arc";
+import { ShapeBezier } from "../models/shape-bezier";
+import { ShapeCircle } from "../models/shape-circle";
+import { ShapeLine } from "../models/shape-line";
+import { ShapePath } from "../models/shape-path";
+import { ShapeRect } from "../models/shape-rect";
+import { ElectricalElement } from "../models/electrical-element";
 @Injectable({
   providedIn: "root",
 })
@@ -68,99 +72,169 @@ export class ElectricalElementsRendererService {
    * Load electrical elements from JSON file
    */
   private async loadElementsFromJSON(): Promise<void> {
-    try {
-      const elements = await this.httpService.get<ElectricalElement[]>(
-        "assets/data/mock-elements.json"
-      );
-      this.elements = elements;
-      this.isElementsLoaded = true;
+    const elements = await this.httpService.get<ElectricalElement[]>(
+      "assets/data/mock-elements.json"
+    );
 
-      // Force redraw if canvas context is available
-      if (this.ctx) {
-        this.renderElements(1, 0, 0); // Default values for scale and offset
-      }
-    } catch (error) {
-      console.error("Error loading electrical elements:", error);
-      // Fall back to hardcoded elements in case of error
-      this.loadFallbackElements();
+    this.elements = elements.map((rawElement) => {
+      const element = new ElectricalElement({
+        ...rawElement,
+        shape: this.createDrawableElements(rawElement),
+      });
+
+      // Assign page to element based on its position
+      this.assignElementPage(element);
+
+      return element;
+    });
+
+    this.isElementsLoaded = true;
+
+    // Force redraw if canvas context is available
+    if (this.ctx) {
+      this.renderElements(1, 0, 0); // Default values for scale and offset
     }
   }
 
   /**
-   * Load fallback elements in case JSON loading fails
+   * Helper to assign the correct page to an element based on its position
    */
-  private async loadFallbackElements(): Promise<void> {
-    const createDefaultLabels = (
-      reference: string,
-      value?: string
-    ): Label[] => {
-      const labels: Label[] = [
-        {
-          name: "reference",
-          text: reference,
-          fontSize: 14,
-          fontFamily: "Arial",
-          fontWeight: "bold",
-          fontColor: "#000000",
-          x: 0.5,
-          y: -0.6,
-        },
-      ];
+  private assignElementPage(element: ElectricalElement): void {
+    // Use the element's center position
+    const x = element.x;
+    const y = element.y;
+    const page = this.getTopmostPageAtPoint(x, y);
+    element.page = page || undefined;
+  }
 
-      if (value) {
-        labels.push({
-          name: "value",
-          text: value,
-          fontSize: 12,
-          fontFamily: "Arial",
-          fontWeight: "normal",
-          fontColor: "#000000",
-          x: 0.5,
-          y: -0.3,
-        });
+  /**
+   * Find the topmost page at the given coordinates
+   */
+  private getTopmostPageAtPoint(x: number, y: number): SchemePage | null {
+    // Check if point is inside the active page
+    if (this.activePage) {
+      // Use the containsPoint method from SchemePage
+      if (this.activePage.containsPoint(x, y)) {
+        return this.activePage;
       }
-
-      return labels;
-    };
-
-    try {
-      // Create elements using the factory service
-      const resistor = await this.elementFactory.createElementFromTemplate(
-        "resistor-template",
-        200,
-        150,
-        createDefaultLabels("R1", "10kΩ")
-      );
-      if (resistor) this.elements.push(resistor);
-
-      const capacitor = await this.elementFactory.createElementFromTemplate(
-        "capacitor-template",
-        200,
-        250,
-        createDefaultLabels("C1", "100nF")
-      );
-      if (capacitor) this.elements.push(capacitor);
-
-      const switchElement = await this.elementFactory.createElementFromTemplate(
-        "switch-template",
-        300,
-        150,
-        createDefaultLabels("SW1")
-      );
-      if (switchElement) this.elements.push(switchElement);
-
-      const diode = await this.elementFactory.createElementFromTemplate(
-        "diode-template",
-        300,
-        250,
-        createDefaultLabels("D1", "1N4148")
-      );
-      if (diode) this.elements.push(diode);
-
-      this.isElementsLoaded = true;
-    } catch (error) {
-      console.error("Error creating fallback elements:", error);
     }
+
+    return null;
+  }
+
+  private createDrawableElements(element: any): IDrawable2D[] | undefined {
+    if (!element.shape || !Array.isArray(element.shape)) {
+      console.error("Tried to load element without shape");
+      return;
+    }
+
+    const shapes: IDrawable2D[] = [];
+    for (const shape of element.shape) {
+      try {
+        // Skip invalid shapes
+        if (!shape || typeof shape !== "object" || !shape.type) {
+          console.warn("Invalid shape object:", shape);
+          continue;
+        }
+
+        // Ensure common properties exist with defaults
+        shape.lineWidth = shape.lineWidth || 1;
+        shape.minWidth = shape.minWidth || 0.5;
+        shape.maxWidth = shape.maxWidth || 3;
+        shape.strokeStyle = shape.strokeStyle || "#000000";
+        shape.fillStyle = shape.fillStyle || "#FFFFFF";
+
+        let newShape: IDrawable2D | null = null;
+        switch (shape.type) {
+          case ShapeType.Arc:
+            shape.radius = shape.radius || 10;
+            shape.startAngle = shape.startAngle || 0;
+            shape.endAngle = shape.endAngle || Math.PI * 2;
+            newShape = new ShapeArc(shape);
+            break;
+          case ShapeType.Bezier:
+            // Ensure all bezier control points
+            shape.x1 = shape.x1 || 0;
+            shape.y1 = shape.y1 || 0;
+            shape.x2 = shape.x2 || 0;
+            shape.y2 = shape.y2 || 0;
+            shape.cp1x = shape.cp1x || 0;
+            shape.cp1y = shape.cp1y || 0;
+            shape.cp2x = shape.cp2x || 0;
+            shape.cp2y = shape.cp2y || 0;
+            newShape = new ShapeBezier(shape);
+            break;
+          case ShapeType.Circle:
+            shape.x = shape.x || 0;
+            shape.y = shape.y || 0;
+            shape.radius = shape.radius || 10;
+            newShape = new ShapeCircle(shape);
+            break;
+          case ShapeType.Line:
+            shape.x1 = shape.x1 || 0;
+            shape.y1 = shape.y1 || 0;
+            shape.x2 = shape.x2 || 0;
+            shape.y2 = shape.y2 || 0;
+            newShape = new ShapeLine(shape);
+            break;
+          case ShapeType.Path:
+            shape.x = shape.x || 0;
+            shape.y = shape.y || 0;
+            // Special handling for path to ensure path property exists
+            if (!shape.path) {
+              console.warn("Path shape missing path property:", shape);
+              shape.path = { commands: [] }; // Provide default empty path
+            } else if (!shape.path.commands) {
+              console.warn("Path shape missing commands array:", shape);
+              shape.path.commands = []; // Provide default empty commands array
+            } else if (!Array.isArray(shape.path.commands)) {
+              console.warn(
+                "Path shape has invalid commands (not an array):",
+                shape
+              );
+              shape.path.commands = []; // Reset to empty array
+            }
+
+            // Make sure each command has required properties
+            if (Array.isArray(shape.path.commands)) {
+              shape.path.commands = shape.path.commands.filter((cmd: any) => {
+                if (!cmd || typeof cmd !== "object" || !cmd.type) {
+                  console.warn("Filtering out invalid path command:", cmd);
+                  return false;
+                }
+                // Ensure x and y exist
+                cmd.x = cmd.x ?? 0;
+                cmd.y = cmd.y ?? 0;
+                return true;
+              });
+            }
+
+            newShape = new ShapePath(shape);
+            break;
+          case ShapeType.Rectangle:
+            shape.x = shape.x || 0;
+            shape.y = shape.y || 0;
+            shape.width = shape.width || 10;
+            shape.height = shape.height || 10;
+            newShape = new ShapeRect(shape);
+            break;
+          default:
+            console.warn(`Unknown element type: ${shape.type}`);
+            continue;
+        }
+
+        if (newShape) {
+          shapes.push(newShape);
+        }
+      } catch (error) {
+        console.error(
+          `Error creating shape of type ${shape?.type || "unknown"}:`,
+          error
+        );
+      }
+    }
+
+    return shapes;
   }
 
   /**
@@ -173,22 +247,25 @@ export class ElectricalElementsRendererService {
     offsetX: number,
     offsetY: number
   ): ElectricalElement | null {
+    if (!this.elements || this.elements.length === 0) return null;
+
+    const labelSize = this.activePage.labelSize || 0;
     // Convert screen coordinates to element coordinates
-    // The labelSize accounts for the row label width and column label height
-    // that are drawn on the canvas. These labels take up space at the top and left of the grid,
-    // so we need to subtract this offset when converting screen coordinates to element coordinates
-    const labelSize = this.activePage.labelSize;
     const elementX = (x - offsetX - labelSize * scale) / scale;
     const elementY = (y - offsetY - labelSize * scale) / scale;
 
     // Filter elements that contain the point
     const elementsUnderCursor = this.elements.filter((element) => {
-      // Calculate element bounds in absolute coordinates, centered around the element position
-      const elementLeft = element.x - element.width / 2;
-      const elementRight = element.x + element.width / 2;
-      const elementTop = element.y - element.height / 2;
-      const elementBottom = element.y + element.height / 2;
+      // Element's bounding box is centered at its (x,y) position
+      const bbox = element.getBoundingBox();
 
+      // Calculate bounds in absolute world coordinates
+      const elementLeft = element.x + bbox.minX;
+      const elementRight = element.x + bbox.maxX;
+      const elementTop = element.y + bbox.minY;
+      const elementBottom = element.y + bbox.maxY;
+
+      // Check if point is inside element bounds
       return (
         elementX >= elementLeft &&
         elementX <= elementRight &&
@@ -196,6 +273,13 @@ export class ElectricalElementsRendererService {
         elementY <= elementBottom
       );
     });
+
+    // Log the detection for debugging
+    if (elementsUnderCursor.length > 0) {
+      console.log(
+        `Found ${elementsUnderCursor.length} elements under cursor at (${elementX}, ${elementY})`
+      );
+    }
 
     if (elementsUnderCursor.length === 0) return null;
 
@@ -222,19 +306,14 @@ export class ElectricalElementsRendererService {
     offsetX: number,
     offsetY: number
   ): { element: ElectricalElement; label: Label } | null {
-    // Get the label size which affects coordinate calculations
-    const labelSize = this.activePage.labelSize;
-
     // Check each element's labels
     for (const element of this.elements) {
       if (!element.labels?.length) continue;
 
-      // In drawLabels method, the translation is:
-      // element.x * scale + offsetX + (element.width * scale) / 2,
-      // element.y * scale + offsetY + (element.height * scale) / 2
-      const centerX = element.x * scale + offsetX + (element.width * scale) / 2;
-      const centerY =
-        element.y * scale + offsetY + (element.height * scale) / 2;
+      // In the updated drawLabels method, the translation is now:
+      // element.x * scale + offsetX, element.y * scale + offsetY
+      const centerX = element.x * scale + offsetX;
+      const centerY = element.y * scale + offsetY;
 
       // Transform mouse coordinates to be relative to the element's center
       // This effectively reverses the translation in drawLabels
@@ -257,12 +336,10 @@ export class ElectricalElementsRendererService {
 
       // Check each label in element's local space
       for (const label of element.labels) {
-        // In drawLabel method, it translates to label's position with:
-        // const scaledWidth = elementWidth * scale;
-        // const scaledHeight = elementHeight * scale;
-        // this.ctx.translate(label.x * scaledWidth, label.y * scaledHeight);
-        const labelPosX = label.x * element.width * scale;
-        const labelPosY = label.y * element.height * scale;
+        // Use direct label position values from mock-elements.json, only scaled by the view scale
+        // to match the new implementation in base-element-renderer.ts
+        const labelPosX = label.x * scale;
+        const labelPosY = label.y * scale;
 
         // Calculate font size as done in drawLabel
         let fontSize =
@@ -520,8 +597,7 @@ export class ElectricalElementsRendererService {
     scale: number,
     offsetX: number,
     offsetY: number,
-    project?: Project,
-    page: SchemePage | null = null
+    project?: Project
   ): void {
     if (!this.ctx || !this.renderer) {
       console.warn("Cannot render: missing context or renderer");
@@ -559,8 +635,7 @@ export class ElectricalElementsRendererService {
               ? "rgba(0, 191, 255, 0.5)"
               : undefined,
           },
-          project,
-          elementPage
+          project
         );
       }
 
@@ -573,8 +648,7 @@ export class ElectricalElementsRendererService {
         this.mouseX,
         this.mouseY,
         undefined,
-        project,
-        elementPage
+        project
       );
 
       // Render label highlights if needed
@@ -633,17 +707,35 @@ export class ElectricalElementsRendererService {
    */
   setDraggedElements(elements: Set<ElectricalElement>): void {
     this.draggedElements = elements;
-    // No need to store original positions since we're using incremental deltas
+    // Store original positions for dragging
+    this.originalElementPositions = new Map();
+    elements.forEach((element) => {
+      this.originalElementPositions?.set(element, {
+        x: element.x,
+        y: element.y,
+      });
+    });
   }
 
   /**
    * Move dragged elements by the specified delta
    */
   moveElements(dx: number, dy: number): void {
-    if (!this.draggedElements || !this.originalElementPositions) return;
+    if (!this.draggedElements) return;
+
+    // If originalElementPositions is null, initialize it now
+    if (!this.originalElementPositions) {
+      this.originalElementPositions = new Map();
+      this.draggedElements.forEach((element) => {
+        this.originalElementPositions!.set(element, {
+          x: element.x,
+          y: element.y,
+        });
+      });
+    }
 
     this.draggedElements.forEach((element) => {
-      const original = this.originalElementPositions?.get(element);
+      const original = this.originalElementPositions!.get(element);
       if (original) {
         element.x = original.x + dx;
         element.y = original.y + dy;
@@ -796,11 +888,14 @@ export class ElectricalElementsRendererService {
     const adjustedY = (y - offsetY - labelSize * scale) / scale;
 
     for (const element of this.elements) {
+      // Use element's bounding box for hit detection
+      const bbox = element.getBoundingBox();
+
       const elementBounds = {
-        left: element.x - element.width / 2,
-        right: element.x + element.width / 2,
-        top: element.y - element.height / 2,
-        bottom: element.y + element.height / 2,
+        left: element.x + bbox.minX,
+        right: element.x + bbox.maxX,
+        top: element.y + bbox.minY,
+        bottom: element.y + bbox.maxY,
       };
 
       if (

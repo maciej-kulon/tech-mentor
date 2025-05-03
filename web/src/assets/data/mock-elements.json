@@ -4,42 +4,40 @@
     "type": "resistor",
     "x": 200,
     "y": 150,
-    "width": 60,
-    "height": 30,
     "rotation": 0,
     "labels": [
       {
         "name": "value",
         "text": "10kΩ",
-        "fontSize": 0.3,
+        "fontSize": 12,
         "fontFamily": "Arial",
         "fontWeight": "normal",
         "fontColor": "#000000",
-        "x": 0.5,
-        "y": -0.5,
+        "x": 25,
+        "y": -25,
         "minSize": 8,
         "maxSize": 14
       },
       {
         "name": "reference",
         "text": "R1",
-        "fontSize": 0.35,
+        "fontSize": 14,
         "fontFamily": "Arial",
         "fontWeight": "bold",
         "fontColor": "#000000",
-        "x": 0.5,
-        "y": -0.8,
+        "x": 25,
+        "y": -40,
         "minSize": 10,
         "maxSize": 16
       },
       {
         "name": "voltage",
         "text": "@voltage V",
-        "fontSize": 0.25,
+        "fontSize": 10,
         "fontFamily": "Arial",
         "fontWeight": "normal",
         "fontColor": "#666666",
-        "x": 1.2,
+        "x": 60,
         "y": 0,
         "minSize": 6,
         "maxSize": 12
@@ -49,32 +47,32 @@
       {
         "type": "line",
         "x1": 0,
-        "y1": 0.5,
-        "x2": 0.2,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "y1": 25,
+        "x2": 10,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       },
       {
         "type": "line",
-        "x1": 0.8,
-        "y1": 0.5,
-        "x2": 1,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "x1": 40,
+        "y1": 25,
+        "x2": 50,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       },
       {
         "type": "rect",
-        "x": 0.2,
-        "y": 0.2,
-        "width": 0.6,
-        "height": 0.6,
+        "x": 10,
+        "y": 15,
+        "width": 30,
+        "height": 15,
         "fillStyle": "#FFFFFF",
         "strokeStyle": "#000000",
-        "lineWidth": 0.04,
+        "lineWidth": 2,
         "minWidth": 1,
         "maxWidth": 2.5
       }
@@ -82,15 +80,15 @@
     "terminals": [
       {
         "x": 0,
-        "y": 0.5,
+        "y": 25,
         "properties": {
           "type": "passive",
           "name": "terminal1"
         }
       },
       {
-        "x": 1,
-        "y": 0.5,
+        "x": 50,
+        "y": 25,
         "properties": {
           "type": "passive",
           "name": "terminal2"
@@ -103,31 +101,29 @@
     "type": "capacitor",
     "x": 200,
     "y": 250,
-    "width": 60,
-    "height": 30,
     "rotation": 0,
     "labels": [
       {
         "name": "value",
         "text": "100nF",
-        "fontSize": 0.3,
+        "fontSize": 12,
         "fontFamily": "Arial",
         "fontWeight": "normal",
         "fontColor": "#000000",
-        "x": 0.5,
-        "y": -0.5,
+        "x": 25,
+        "y": -25,
         "minSize": 8,
         "maxSize": 14
       },
       {
         "name": "reference",
         "text": "C1",
-        "fontSize": 0.35,
+        "fontSize": 14,
         "fontFamily": "Arial",
         "fontWeight": "bold",
         "fontColor": "#000000",
-        "x": 0.5,
-        "y": -0.8,
+        "x": 25,
+        "y": -40,
         "minSize": 10,
         "maxSize": 16
       }
@@ -136,41 +132,41 @@
       {
         "type": "line",
         "x1": 0,
-        "y1": 0.5,
-        "x2": 0.4,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "y1": 25,
+        "x2": 20,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       },
       {
         "type": "line",
-        "x1": 0.6,
-        "y1": 0.5,
-        "x2": 1,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "x1": 30,
+        "y1": 25,
+        "x2": 50,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       },
       {
         "type": "line",
-        "x1": 0.4,
-        "y1": 0.2,
-        "x2": 0.4,
-        "y2": 0.8,
-        "lineWidth": 0.05,
+        "x1": 20,
+        "y1": 10,
+        "x2": 20,
+        "y2": 40,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3,
         "strokeStyle": "#000000"
       },
       {
         "type": "line",
-        "x1": 0.6,
-        "y1": 0.2,
-        "x2": 0.6,
-        "y2": 0.8,
-        "lineWidth": 0.05,
+        "x1": 30,
+        "y1": 10,
+        "x2": 30,
+        "y2": 40,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3,
         "strokeStyle": "#000000"
@@ -179,15 +175,15 @@
     "terminals": [
       {
         "x": 0,
-        "y": 0.5,
+        "y": 25,
         "properties": {
           "type": "passive",
           "name": "terminal1"
         }
       },
       {
-        "x": 1,
-        "y": 0.5,
+        "x": 50,
+        "y": 25,
         "properties": {
           "type": "passive",
           "name": "terminal2"
@@ -200,31 +196,29 @@
     "type": "switch",
     "x": 300,
     "y": 150,
-    "width": 60,
-    "height": 30,
     "rotation": 0,
     "labels": [
       {
         "name": "reference",
         "text": "SW1",
-        "fontSize": 0.35,
+        "fontSize": 14,
         "fontFamily": "Arial",
         "fontWeight": "bold",
         "fontColor": "#000000",
-        "x": 0.5,
-        "y": -0.5,
+        "x": 25,
+        "y": -25,
         "minSize": 10,
         "maxSize": 16
       },
       {
         "name": "state",
         "text": "@state",
-        "fontSize": 0.25,
+        "fontSize": 10,
         "fontFamily": "Arial",
         "fontWeight": "normal",
         "fontColor": "#666666",
-        "x": 0.5,
-        "y": 0.8,
+        "x": 25,
+        "y": 40,
         "minSize": 6,
         "maxSize": 12
       }
@@ -233,46 +227,46 @@
       {
         "type": "line",
         "x1": 0,
-        "y1": 0.5,
-        "x2": 0.3,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "y1": 25,
+        "x2": 15,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       },
       {
         "type": "line",
-        "x1": 0.7,
-        "y1": 0.5,
-        "x2": 1,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "x1": 35,
+        "y1": 25,
+        "x2": 50,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       },
       {
         "type": "circle",
-        "x": 0.3,
-        "y": 0.5,
-        "radius": 0.05,
+        "x": 15,
+        "y": 25,
+        "radius": 2.5,
         "fillStyle": "#000000",
         "stroke": false
       },
       {
         "type": "circle",
-        "x": 0.7,
-        "y": 0.5,
-        "radius": 0.05,
+        "x": 35,
+        "y": 25,
+        "radius": 2.5,
         "fillStyle": "#000000",
         "stroke": false
       },
       {
         "type": "line",
-        "x1": 0.3,
-        "y1": 0.5,
-        "x2": 0.65,
-        "y2": 0.3,
-        "lineWidth": 0.05,
+        "x1": 15,
+        "y1": 25,
+        "x2": 32.5,
+        "y2": 15,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3,
         "strokeStyle": "#000000"
@@ -281,15 +275,15 @@
     "terminals": [
       {
         "x": 0,
-        "y": 0.5,
+        "y": 25,
         "properties": {
           "type": "switch",
           "name": "input"
         }
       },
       {
-        "x": 1,
-        "y": 0.5,
+        "x": 50,
+        "y": 25,
         "properties": {
           "type": "switch",
           "name": "output"
@@ -298,46 +292,44 @@
     ]
   },
   {
-    "id": "diode1",
+    "id": "1",
     "type": "diode",
     "x": 300,
     "y": 250,
-    "width": 60,
-    "height": 30,
     "rotation": 0,
     "labels": [
       {
         "name": "value",
-        "text": "1N4148",
-        "fontSize": 0.3,
+        "text": "D@{page.pageNumber}.@id",
+        "fontSize": 12,
         "fontFamily": "Arial",
         "fontWeight": "normal",
         "fontColor": "#000000",
-        "x": 0.5,
-        "y": -0.5,
+        "x": 25,
+        "y": -25,
         "minSize": 8,
         "maxSize": 14
       },
       {
         "name": "reference",
         "text": "D1",
-        "fontSize": 0.35,
+        "fontSize": 14,
         "fontFamily": "Arial",
         "fontWeight": "bold",
         "fontColor": "#000000",
-        "x": 0.5,
-        "y": -0.8,
+        "x": 25,
+        "y": -40,
         "minSize": 10,
         "maxSize": 16
       },
       {
         "name": "current",
         "text": "@current mA",
-        "fontSize": 0.25,
+        "fontSize": 10,
         "fontFamily": "Arial",
         "fontWeight": "normal",
         "fontColor": "#666666",
-        "x": 1.2,
+        "x": 60,
         "y": 0,
         "minSize": 6,
         "maxSize": 12
@@ -347,44 +339,49 @@
       {
         "type": "line",
         "x1": 0,
-        "y1": 0.5,
-        "x2": 0.3,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "y1": 25,
+        "x2": 15,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       },
       {
         "type": "line",
-        "x1": 0.7,
-        "y1": 0.5,
-        "x2": 1,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "x1": 35,
+        "y1": 25,
+        "x2": 50,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       },
       {
         "type": "path",
-        "commands": [
-          { "type": "moveTo", "x": 0.3, "y": 0.2 },
-          { "type": "lineTo", "x": 0.3, "y": 0.8 },
-          { "type": "lineTo", "x": 0.7, "y": 0.5 },
-          { "type": "lineTo", "x": 0.3, "y": 0.2 }
-        ],
+        "path": {
+          "commands": [
+            { "type": "moveTo", "x": 15, "y": 10 },
+            { "type": "lineTo", "x": 15, "y": 40 },
+            { "type": "lineTo", "x": 35, "y": 25 },
+            { "type": "lineTo", "x": 15, "y": 10 },
+            { "type": "lineTo", "x": 15, "y": 40 }
+          ],
+          "fill": true,
+          "stroke": true
+        },
         "fillStyle": "#FFFFFF",
         "strokeStyle": "#000000",
-        "lineWidth": 0.04,
+        "lineWidth": 2,
         "minWidth": 1,
         "maxWidth": 2.5
       },
       {
         "type": "line",
-        "x1": 0.7,
-        "y1": 0.2,
-        "x2": 0.7,
-        "y2": 0.8,
-        "lineWidth": 0.05,
+        "x1": 35,
+        "y1": 10,
+        "x2": 35,
+        "y2": 40,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3,
         "strokeStyle": "#000000"
@@ -393,7 +390,7 @@
     "terminals": [
       {
         "x": 0,
-        "y": 0.5,
+        "y": 25,
         "properties": {
           "type": "diode",
           "name": "anode",
@@ -401,8 +398,8 @@
         }
       },
       {
-        "x": 1,
-        "y": 0.5,
+        "x": 50,
+        "y": 25,
         "properties": {
           "type": "diode",
           "name": "cathode",
@@ -416,31 +413,29 @@
     "type": "lamp",
     "x": 400,
     "y": 150,
-    "width": 60,
-    "height": 60,
     "rotation": 0,
     "labels": [
       {
         "name": "reference",
         "text": "L1",
-        "fontSize": 0.35,
+        "fontSize": 14,
         "fontFamily": "Arial",
         "fontWeight": "bold",
         "fontColor": "#000000",
-        "x": 0.5,
-        "y": -0.3,
+        "x": 25,
+        "y": -15,
         "minSize": 10,
         "maxSize": 16
       },
       {
         "name": "power",
         "text": "60W",
-        "fontSize": 0.3,
+        "fontSize": 12,
         "fontFamily": "Arial",
         "fontWeight": "normal",
         "fontColor": "#000000",
-        "x": 0.5,
-        "y": 1.2,
+        "x": 25,
+        "y": 60,
         "minSize": 8,
         "maxSize": 14
       }
@@ -449,51 +444,51 @@
       {
         "type": "line",
         "x1": 0,
-        "y1": 0.5,
-        "x2": 0.2,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "y1": 25,
+        "x2": 10,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       },
       {
         "type": "line",
-        "x1": 0.8,
-        "y1": 0.5,
-        "x2": 1,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "x1": 40,
+        "y1": 25,
+        "x2": 50,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       },
       {
         "type": "circle",
-        "x": 0.5,
-        "y": 0.5,
-        "radius": 0.3,
+        "x": 25,
+        "y": 25,
+        "radius": 15,
         "fillStyle": "#FFFFFF",
         "strokeStyle": "#000000",
-        "lineWidth": 0.04,
+        "lineWidth": 2,
         "minWidth": 1,
         "maxWidth": 2.5
       },
       {
         "type": "line",
-        "x1": 0.35,
-        "y1": 0.35,
-        "x2": 0.65,
-        "y2": 0.65,
-        "lineWidth": 0.04,
+        "x1": 17.5,
+        "y1": 17.5,
+        "x2": 32.5,
+        "y2": 32.5,
+        "lineWidth": 2,
         "minWidth": 1,
         "maxWidth": 2.5
       },
       {
         "type": "line",
-        "x1": 0.35,
-        "y1": 0.65,
-        "x2": 0.65,
-        "y2": 0.35,
-        "lineWidth": 0.04,
+        "x1": 17.5,
+        "y1": 32.5,
+        "x2": 32.5,
+        "y2": 17.5,
+        "lineWidth": 2,
         "minWidth": 1,
         "maxWidth": 2.5
       }
@@ -501,15 +496,15 @@
     "terminals": [
       {
         "x": 0,
-        "y": 0.5,
+        "y": 25,
         "properties": {
           "type": "passive",
           "name": "terminal1"
         }
       },
       {
-        "x": 1,
-        "y": 0.5,
+        "x": 50,
+        "y": 25,
         "properties": {
           "type": "passive",
           "name": "terminal2"
@@ -522,19 +517,17 @@
     "type": "coil",
     "x": 500,
     "y": 150,
-    "width": 60,
-    "height": 40,
     "rotation": 0,
     "labels": [
       {
         "name": "reference",
         "text": "L1",
-        "fontSize": 0.35,
+        "fontSize": 14,
         "fontFamily": "Arial",
         "fontWeight": "bold",
         "fontColor": "#000000",
-        "x": 0.5,
-        "y": -0.3,
+        "x": 25,
+        "y": -15,
         "minSize": 10,
         "maxSize": 16
       }
@@ -543,21 +536,21 @@
       {
         "type": "line",
         "x1": 0,
-        "y1": 0.5,
-        "x2": 0.1,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "y1": 25,
+        "x2": 5,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       },
       {
         "type": "arc",
-        "x": 0.25,
-        "y": 0.5,
-        "radius": 0.15,
+        "x": 12.5,
+        "y": 25,
+        "radius": 7.5,
         "startAngle": 3.14159,
         "endAngle": 0,
-        "lineWidth": 0.04,
+        "lineWidth": 2,
         "minWidth": 1,
         "maxWidth": 2.5,
         "strokeStyle": "#000000",
@@ -565,12 +558,12 @@
       },
       {
         "type": "arc",
-        "x": 0.5,
-        "y": 0.5,
-        "radius": 0.15,
+        "x": 25,
+        "y": 25,
+        "radius": 7.5,
         "startAngle": 3.14159,
         "endAngle": 0,
-        "lineWidth": 0.04,
+        "lineWidth": 2,
         "minWidth": 1,
         "maxWidth": 2.5,
         "strokeStyle": "#000000",
@@ -578,12 +571,12 @@
       },
       {
         "type": "arc",
-        "x": 0.75,
-        "y": 0.5,
-        "radius": 0.15,
+        "x": 37.5,
+        "y": 25,
+        "radius": 7.5,
         "startAngle": 3.14159,
         "endAngle": 0,
-        "lineWidth": 0.04,
+        "lineWidth": 2,
         "minWidth": 1,
         "maxWidth": 2.5,
         "strokeStyle": "#000000",
@@ -591,11 +584,11 @@
       },
       {
         "type": "line",
-        "x1": 0.9,
-        "y1": 0.5,
-        "x2": 1,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "x1": 45,
+        "y1": 25,
+        "x2": 50,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       }
@@ -603,15 +596,15 @@
     "terminals": [
       {
         "x": 0,
-        "y": 0.5,
+        "y": 25,
         "properties": {
           "type": "passive",
           "name": "terminal1"
         }
       },
       {
-        "x": 1,
-        "y": 0.5,
+        "x": 50,
+        "y": 25,
         "properties": {
           "type": "passive",
           "name": "terminal2"
@@ -624,31 +617,29 @@
     "type": "wave-generator",
     "x": 600,
     "y": 150,
-    "width": 80,
-    "height": 40,
     "rotation": 0,
     "labels": [
       {
         "name": "reference",
         "text": "WG1",
-        "fontSize": 0.35,
+        "fontSize": 14,
         "fontFamily": "Arial",
         "fontWeight": "bold",
         "fontColor": "#000000",
-        "x": 0.5,
-        "y": -0.6,
+        "x": 25,
+        "y": -30,
         "minSize": 10,
         "maxSize": 16
       },
       {
         "name": "frequency",
         "text": "1kHz",
-        "fontSize": 0.3,
+        "fontSize": 12,
         "fontFamily": "Arial",
         "fontWeight": "normal",
         "fontColor": "#000000",
-        "x": 0.5,
-        "y": -0.3,
+        "x": 25,
+        "y": -15,
         "minSize": 8,
         "maxSize": 14
       }
@@ -657,61 +648,61 @@
       {
         "type": "line",
         "x1": 0,
-        "y1": 0.5,
-        "x2": 0.2,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "y1": 25,
+        "x2": 10,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       },
       {
         "type": "line",
-        "x1": 0.8,
-        "y1": 0.5,
-        "x2": 1,
-        "y2": 0.5,
-        "lineWidth": 0.05,
+        "x1": 40,
+        "y1": 25,
+        "x2": 50,
+        "y2": 25,
+        "lineWidth": 2.5,
         "minWidth": 1.5,
         "maxWidth": 3
       },
       {
         "type": "rect",
-        "x": 0.2,
-        "y": 0.2,
-        "width": 0.6,
-        "height": 0.6,
+        "x": 10,
+        "y": 10,
+        "width": 30,
+        "height": 30,
         "fillStyle": "#FFFFFF",
         "strokeStyle": "#000000",
-        "lineWidth": 0.04,
+        "lineWidth": 2,
         "minWidth": 1,
         "maxWidth": 2.5
       },
       {
         "type": "bezier",
-        "x1": 0.3,
-        "y1": 0.5,
-        "cp1x": 0.35,
-        "cp1y": 0.3,
-        "cp2x": 0.45,
-        "cp2y": 0.7,
-        "x2": 0.5,
-        "y2": 0.5,
-        "lineWidth": 0.04,
+        "x1": 15,
+        "y1": 25,
+        "cp1x": 17.5,
+        "cp1y": 15,
+        "cp2x": 22.5,
+        "cp2y": 35,
+        "x2": 25,
+        "y2": 25,
+        "lineWidth": 2,
         "minWidth": 1,
         "maxWidth": 2.5,
         "strokeStyle": "#FF0000"
       },
       {
         "type": "bezier",
-        "x1": 0.5,
-        "y1": 0.5,
-        "cp1x": 0.55,
-        "cp1y": 0.3,
-        "cp2x": 0.65,
-        "cp2y": 0.7,
-        "x2": 0.7,
-        "y2": 0.5,
-        "lineWidth": 0.04,
+        "x1": 25,
+        "y1": 25,
+        "cp1x": 27.5,
+        "cp1y": 15,
+        "cp2x": 32.5,
+        "cp2y": 35,
+        "x2": 35,
+        "y2": 25,
+        "lineWidth": 2,
         "minWidth": 1,
         "maxWidth": 2.5,
         "strokeStyle": "#FF0000"
@@ -720,15 +711,15 @@
     "terminals": [
       {
         "x": 0,
-        "y": 0.5,
+        "y": 25,
         "properties": {
           "type": "output",
           "name": "output"
         }
       },
       {
-        "x": 1,
-        "y": 0.5,
+        "x": 50,
+        "y": 25,
         "properties": {
           "type": "output",
           "name": "output"
