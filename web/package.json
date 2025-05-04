@@ -22,10 +22,10 @@
     "@angular/platform-browser": "^19.2.8",
     "@angular/platform-browser-dynamic": "^19.2.8",
     "@angular/router": "^19.2.8",
-    "primeicons": "^7.0.0",
-    "primeng": "^19.1.0",
+    "golden-layout": "^2.6.0",
     "tslib": "^2.6.2",
-    "zone.js": "~0.15.0"
+    "zone.js": "~0.15.0",
+    "angular-split": "^19.0.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^19.2.8",
@@ -47,10 +47,5 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.5.0",
     "typescript-eslint": "^8.31.0"
-  },
-  "overrides": {
-    "primeng": {
-      "@angular/cdk": "19.2.11"
-    }
   }
 }

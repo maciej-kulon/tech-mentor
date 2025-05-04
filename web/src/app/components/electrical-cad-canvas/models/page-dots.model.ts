@@ -4,6 +4,7 @@ import { QuadTree, QuadTreeBounds } from "./quad-tree.model";
 /**
  * Class managing the grid dots system for the electrical CAD canvas
  * Handles dynamic dot density based on zoom level
+ * Works with centimeter-based grid (dimensions passed are in cm)
  */
 export class PageDots {
   private quadTree: QuadTree;
@@ -14,9 +15,13 @@ export class PageDots {
   constructor(
     private pageWidth: number,
     private pageHeight: number,
-    public dotsPerLength: number,
+    public dotsPerCentimeter: number
   ) {
-    this.baseSpacing = pageWidth / dotsPerLength;
+    // Calculate spacing based on dots per centimeter
+    // If dotsPerCentimeter is 1, spacing will be 1cm (or 1 unit in our coordinate system)
+    // If dotsPerCentimeter is 2, spacing will be 0.5cm
+    this.baseSpacing = 1 / dotsPerCentimeter;
+
     this.quadTree = new QuadTree({
       x: 0,
       y: 0,
@@ -82,6 +87,33 @@ export class PageDots {
       width: this.pageWidth,
       height: this.pageHeight,
     });
+  }
+
+  /**
+   * Gets dots within a specific range in the grid
+   * @param range The range to query for dots
+   * @returns Array of dot positions within the range
+   */
+  getDotsInRange(range: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }): Point[] {
+    // Ensure the range is within the page bounds
+    const boundedRange = {
+      x: Math.max(0, range.x),
+      y: Math.max(0, range.y),
+      width: Math.min(this.pageWidth - range.x, range.width),
+      height: Math.min(this.pageHeight - range.y, range.height),
+    };
+
+    // Return empty array if range is invalid
+    if (boundedRange.width <= 0 || boundedRange.height <= 0) {
+      return [];
+    }
+
+    return this.quadTree.queryRange(boundedRange);
   }
 
   /**

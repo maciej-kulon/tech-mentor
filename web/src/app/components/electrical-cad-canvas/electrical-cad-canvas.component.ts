@@ -35,7 +35,7 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   @Input() project!: Project;
   @Input() debugDraw = false;
   @Input() dotSize = 1.5; // in pixels
-  @Input() dotsPerLength = 50; // dots per page width
+  @Input() dotsPerCentimeter = 0.2; // dots per centimeter (1 = 1 dot per cm, 2 = 2 dots per cm, etc.)
 
   private canvas!: HTMLCanvasElement;
   private ctx!: CanvasRenderingContext2D;
@@ -44,8 +44,6 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   private pageDotsMap = new Map<number, PageDots>(); // Map pageNumber to PageDots
   private pagePositions = new Map<number, { x: number; y: number }>();
   public activePage: SchemePage | null = null; // Track the active page - made public for template access
-  private closestDot: Point | null = null;
-  private currentQuadTreeNode: Point[] = [];
 
   // Canvas properties
   private scale = 1;
@@ -61,24 +59,15 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
   // Element dragging properties
   private isDraggingElement = false;
-  private currentElementPage: SchemePage | null = null;
   // Add label dragging properties
   private isDraggingLabel = false;
-  private draggedLabel: any | null = null;
   private isMouseDown = false;
   private lastMouseX = 0;
   private lastMouseY = 0;
   private hoveredElement: ElectricalElement | null = null;
   private hoveredLabel: any | null = null;
 
-  // Add component properties
-  private isDraggingElements = false;
-
   private isDraggingPage = false;
-
-  // Add new properties for tracking world coordinates
-  private lastWorldX = 0;
-  private lastWorldY = 0;
 
   // Path2D cache for grid dots (active page only)
   private gridDotsPathCache: {
@@ -153,9 +142,10 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
     // Initialize PageDots for each page
     this.pages.forEach((page) => {
       const dims = page.getDimensions();
+      // Convert page dimensions from mm to cm (1cm = 10mm) and pass dots per cm
       this.pageDotsMap.set(
         page.pageNumber,
-        new PageDots(dims.width, dims.height, this.dotsPerLength)
+        new PageDots(dims.width / 10, dims.height / 10, this.dotsPerCentimeter)
       );
     });
 
@@ -175,9 +165,28 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit(): void {
+    if (!this.canvasRef || !this.containerRef) {
+      console.error("Canvas or container refs not available");
+      window.setTimeout(() => this.ngAfterViewInit(), 100);
+      return;
+    }
+
     this.canvas = this.canvasRef.nativeElement;
-    this.ctx = this.canvas.getContext("2d")!;
     this.container = this.containerRef.nativeElement;
+
+    if (!this.canvas) {
+      console.error("Canvas element not available");
+      return;
+    }
+
+    const context = this.canvas.getContext("2d");
+
+    if (!context) {
+      console.error("Failed to get 2D context from canvas");
+      return;
+    }
+
+    this.ctx = context;
 
     // Initialize renderer with context and active page
     this.electricalElementsRenderer.initialize(
@@ -187,6 +196,11 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
     this.setupCanvas();
     this.draw();
+
+    // Force a resize after init to ensure everything is properly sized
+    window.setTimeout(() => {
+      this.resizeCanvas();
+    }, 100);
   }
 
   private calculatePagePositions(): void {
@@ -361,27 +375,69 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       path = this.gridDotsPathCache!.path;
     } else {
       path = new Path2D();
-      // Only add dots that are visible on the canvas
+
+      // Calculate the visible viewport in world coordinates
       const canvasWidth = this.canvas.width;
       const canvasHeight = this.canvas.height;
-      for (const dot of pageDots.getAllDots()) {
-        // Calculate the absolute position of the dot in world coordinates
-        const x = pagePosition.x + dot.x;
-        const y = pagePosition.y + dot.y;
+
+      // Calculate visible area in world coordinates (mm)
+      const worldMinX = (0 - this.offsetX) / this.scale;
+      const worldMinY = (0 - this.offsetY) / this.scale;
+      const worldMaxX = (canvasWidth - this.offsetX) / this.scale;
+      const worldMaxY = (canvasHeight - this.offsetY) / this.scale;
+
+      // Calculate the visible page area in page-local coordinates (mm)
+      const pageStartX = pagePosition.x;
+      const pageStartY = pagePosition.y;
+      const pageWidth = page.getDimensions().width;
+      const pageHeight = page.getDimensions().height;
+
+      // Calculate overlap between viewport and page (mm)
+      const overlapMinX = Math.max(worldMinX, pageStartX);
+      const overlapMinY = Math.max(worldMinY, pageStartY);
+      const overlapMaxX = Math.min(worldMaxX, pageStartX + pageWidth);
+      const overlapMaxY = Math.min(worldMaxY, pageStartY + pageHeight);
+
+      // Convert overlap area to page-local coordinates (cm)
+      const visiblePageX = (overlapMinX - pageStartX) / 10;
+      const visiblePageY = (overlapMinY - pageStartY) / 10;
+      const visiblePageWidth = Math.max(0, (overlapMaxX - overlapMinX) / 10);
+      const visiblePageHeight = Math.max(0, (overlapMaxY - overlapMinY) / 10);
+
+      // Skip drawing if the page is not visible
+      if (visiblePageWidth <= 0 || visiblePageHeight <= 0) {
+        this.gridDotsPathCache = {
+          pageNumber: page.pageNumber,
+          scale: this.scale,
+          offsetX: this.offsetX,
+          offsetY: this.offsetY,
+          path: new Path2D(), // Empty path
+        };
+        return;
+      }
+
+      // Query only the visible dots from the quadtree
+      const visibleDots = pageDots.getDotsInRange({
+        x: visiblePageX,
+        y: visiblePageY,
+        width: visiblePageWidth,
+        height: visiblePageHeight,
+      });
+
+      // Add only the visible dots to the path
+      for (const dot of visibleDots) {
+        // Convert dot position from cm to mm
+        const x = pagePosition.x + dot.x * 10;
+        const y = pagePosition.y + dot.y * 10;
+
         // Transform to screen coordinates
         const screenX = x * this.scale + this.offsetX;
         const screenY = y * this.scale + this.offsetY;
-        // Only add if visible
-        if (
-          screenX >= 0 &&
-          screenX <= canvasWidth &&
-          screenY >= 0 &&
-          screenY <= canvasHeight
-        ) {
-          path.moveTo(screenX + this.dotSize, screenY); // moveTo avoids connecting arcs
-          path.arc(screenX, screenY, this.dotSize, 0, Math.PI * 2);
-        }
+
+        path.moveTo(screenX + this.dotSize, screenY); // moveTo avoids connecting arcs
+        path.arc(screenX, screenY, this.dotSize, 0, Math.PI * 2);
       }
+
       // Cache the path
       this.gridDotsPathCache = {
         pageNumber: page.pageNumber,
@@ -419,10 +475,12 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
 
     const bounds = pageDots.getQuadTreeStructure();
     for (const bound of bounds) {
-      const screenX = bound.x * this.scale + this.offsetX + rowLabelWidth;
-      const screenY = bound.y * this.scale + this.offsetY + columnLabelHeight;
-      const screenWidth = bound.width * this.scale;
-      const screenHeight = bound.height * this.scale;
+      // Scale by 10 to convert from cm to mm
+      const screenX = bound.x * 10 * this.scale + this.offsetX + rowLabelWidth;
+      const screenY =
+        bound.y * 10 * this.scale + this.offsetY + columnLabelHeight;
+      const screenWidth = bound.width * 10 * this.scale;
+      const screenHeight = bound.height * 10 * this.scale;
 
       this.ctx.strokeRect(screenX, screenY, screenWidth, screenHeight);
     }
@@ -651,7 +709,6 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       if (hoveredLabel) {
         // Handle label dragging
         this.isDraggingLabel = true;
-        this.draggedLabel = hoveredLabel;
         this.electricalElementsRenderer.setDraggedLabel(hoveredLabel);
       } else if (hoveredElement) {
         // Handle element dragging
@@ -718,7 +775,6 @@ export class ElectricalCadCanvasComponent implements AfterViewInit, OnInit {
       this.isMouseDown = false;
       if (this.isDraggingLabel) {
         this.isDraggingLabel = false;
-        this.draggedLabel = null;
         this.electricalElementsRenderer.clearDraggedLabel();
       }
       if (this.isDraggingElement) {

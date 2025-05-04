@@ -726,5 +726,139 @@
         }
       }
     ]
+  },
+  {
+    "id": "primitive1",
+    "x": 700,
+    "y": 250,
+    "rotation": 0,
+    "shape": [
+      {
+        "type": "line",
+        "x1": 0,
+        "y1": 0,
+        "x2": 100,
+        "y2": 100,
+        "lineWidth": 3,
+        "minWidth": 2,
+        "maxWidth": 4,
+        "strokeStyle": "#FF0000",
+        "fillStyle": "none"
+      }
+    ]
+  },
+  {
+    "id": "primitive2",
+    "x": 850,
+    "y": 250,
+    "rotation": 0,
+    "shape": [
+      {
+        "type": "rect",
+        "x": -40,
+        "y": -30,
+        "width": 80,
+        "height": 60,
+        "lineWidth": 2,
+        "minLineWidth": 1,
+        "maxLineWidth": 3,
+        "strokeStyle": "#0000FF",
+        "fillStyle": "rgba(200, 200, 255, 0.5)"
+      }
+    ]
+  },
+  {
+    "id": "primitive3",
+    "x": 700,
+    "y": 400,
+    "rotation": 0,
+    "shape": [
+      {
+        "type": "circle",
+        "x": 0,
+        "y": 0,
+        "radius": 40,
+        "lineWidth": 2,
+        "minLineWidth": 1,
+        "maxLineWidth": 3,
+        "strokeStyle": "#00AA00",
+        "fillStyle": "rgba(200, 255, 200, 0.5)",
+        "stroke": true,
+        "fill": true
+      }
+    ]
+  },
+  {
+    "id": "primitive4",
+    "x": 850,
+    "y": 400,
+    "rotation": 0,
+    "shape": [
+      {
+        "type": "arc",
+        "x": 0,
+        "y": 0,
+        "radius": 40,
+        "startAngle": 0,
+        "endAngle": 3.14,
+        "lineWidth": 3,
+        "minLineWidth": 1.5,
+        "maxLineWidth": 4,
+        "strokeStyle": "#AA00AA",
+        "fillStyle": "none"
+      }
+    ]
+  },
+  {
+    "id": "primitive5",
+    "x": 700,
+    "y": 550,
+    "rotation": 0,
+    "shape": [
+      {
+        "type": "bezier",
+        "x1": -50,
+        "y1": 0,
+        "cp1x": -25,
+        "cp1y": -50,
+        "cp2x": 25,
+        "cp2y": 50,
+        "x2": 50,
+        "y2": 0,
+        "lineWidth": 2.5,
+        "minLineWidth": 1,
+        "maxLineWidth": 4,
+        "strokeStyle": "#FF6600",
+        "fillStyle": "none"
+      }
+    ]
+  },
+  {
+    "id": "primitive6",
+    "x": 850,
+    "y": 550,
+    "rotation": 0,
+    "shape": [
+      {
+        "type": "path",
+        "path": {
+          "commands": [
+            { "type": "moveTo", "x": 0, "y": -40 },
+            { "type": "lineTo", "x": 40, "y": 20 },
+            { "type": "lineTo", "x": -40, "y": 20 },
+            { "type": "lineTo", "x": 0, "y": -40 }
+          ],
+          "fill": true,
+          "stroke": true,
+          "fillStyle": "rgba(255, 255, 0, 0.5)",
+          "strokeStyle": "#AA6600"
+        },
+        "lineWidth": 2,
+        "minWidth": 1,
+        "maxWidth": 3,
+        "strokeStyle": "#AA6600",
+        "fillStyle": "rgba(255, 255, 0, 0.5)"
+      }
+    ]
   }
 ]

@@ -376,15 +376,6 @@ export class ElectricalElementsRendererService {
     return null;
   }
 
-  // Debug method to track selection changes
-  private debugLogSelection(action: string, element?: ElectricalElement) {
-    console.log(`🔍 Selection ${action}:`, {
-      element: element?.id || "none",
-      selectionSize: this.selectedElements.size,
-      stack: new Error().stack,
-    });
-  }
-
   /**
    * Handle element selection
    */
@@ -412,26 +403,20 @@ export class ElectricalElementsRendererService {
 
       // Store the previous selection state
       const previousSelection = new Set(this.selectedElements);
-      this.debugLogSelection("before selection change");
 
       const elementUnderCursor = labelUnderCursor.element;
 
       if (isMultiSelect) {
         // Multi-select mode
         if (this.selectedElements.has(elementUnderCursor)) {
-          this.debugLogSelection("removing", elementUnderCursor);
           this.selectedElements.delete(elementUnderCursor);
         } else {
-          this.debugLogSelection("adding", elementUnderCursor);
           this.selectedElements.add(elementUnderCursor);
         }
       } else {
         // Single select mode
-        this.debugLogSelection("setting", elementUnderCursor);
         this.selectedElements = new Set([elementUnderCursor]);
       }
-
-      this.debugLogSelection("after selection change");
 
       // Only update hover if selection actually changed
       if (!this.setsAreEqual(previousSelection, this.selectedElements)) {
@@ -455,30 +440,23 @@ export class ElectricalElementsRendererService {
 
     // Store the previous selection state
     const previousSelection = new Set(this.selectedElements);
-    this.debugLogSelection("before selection change");
 
     if (!elementUnderCursor) {
       // Clicked on empty space - clear selection
       if (this.selectedElements.size > 0) {
-        this.debugLogSelection("clearing", undefined);
         this.selectedElements.clear();
       }
     } else if (isMultiSelect) {
       // Multi-select mode
       if (this.selectedElements.has(elementUnderCursor)) {
-        this.debugLogSelection("removing", elementUnderCursor);
         this.selectedElements.delete(elementUnderCursor);
       } else {
-        this.debugLogSelection("adding", elementUnderCursor);
         this.selectedElements.add(elementUnderCursor);
       }
     } else {
       // Single select mode
-      this.debugLogSelection("setting", elementUnderCursor);
       this.selectedElements = new Set([elementUnderCursor]);
     }
-
-    this.debugLogSelection("after selection change");
 
     // Only update hover if selection actually changed
     if (!this.setsAreEqual(previousSelection, this.selectedElements)) {
@@ -604,8 +582,6 @@ export class ElectricalElementsRendererService {
       return;
     }
 
-    this.debugLogSelection("before render");
-
     // Take a snapshot of the current state to prevent any changes during render
     const currentSelection = new Set(this.selectedElements);
     const currentHovered = this.hoveredElement;
@@ -698,8 +674,6 @@ export class ElectricalElementsRendererService {
         }
       }
     });
-
-    this.debugLogSelection("after render");
   }
 
   /**

@@ -1,16 +1,16 @@
 import { Component } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterOutlet } from "@angular/router";
-import { ElectricalCadCanvasComponent } from "./components/electrical-cad-canvas/electrical-cad-canvas.component";
+import { LayoutManagerComponent } from "./components/layout-manager/layout-manager.component";
 
 @Component({
   selector: "app-root",
   standalone: true,
-  imports: [CommonModule, RouterOutlet, ElectricalCadCanvasComponent],
+  imports: [CommonModule, RouterOutlet, LayoutManagerComponent],
   template: `
     <main>
       <h1>Welcome to Tech Mentor</h1>
-      <app-electrical-cad-canvas></app-electrical-cad-canvas>
+      <app-layout-manager></app-layout-manager>
       <router-outlet></router-outlet>
     </main>
   `,
@@ -25,7 +25,7 @@ import { ElectricalCadCanvasComponent } from "./components/electrical-cad-canvas
       h1 {
         color: #333;
       }
-      app-electrical-cad-canvas {
+      app-layout-manager {
         flex: 1;
         min-height: 0;
       }
