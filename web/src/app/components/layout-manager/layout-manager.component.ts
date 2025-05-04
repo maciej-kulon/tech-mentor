@@ -8,28 +8,23 @@ import {
   ViewContainerRef,
   ComponentRef,
   NgZone,
-} from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { ElectricalCadCanvasComponent } from "../electrical-cad-canvas/electrical-cad-canvas.component";
-import { Project } from "../electrical-cad-canvas/models/project.model";
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ElectricalCadCanvasComponent } from '../electrical-cad-canvas/electrical-cad-canvas.component';
+import { Project } from '../electrical-cad-canvas/models/project.model';
 
 // Import Golden Layout properly
-import {
-  GoldenLayout,
-  LayoutConfig,
-  ComponentContainer,
-  ResolvedItemConfig,
-} from "golden-layout";
+import { GoldenLayout, LayoutConfig, ComponentContainer } from 'golden-layout';
 
 @Component({
-  selector: "app-layout-manager",
+  selector: 'app-layout-manager',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: "./layout-manager.component.html",
-  styleUrls: ["./layout-manager.component.scss"],
+  templateUrl: './layout-manager.component.html',
+  styleUrls: ['./layout-manager.component.scss'],
 })
 export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
-  @ViewChild("layoutContainer", { static: true })
+  @ViewChild('layoutContainer', { static: true })
   private layoutContainer!: ElementRef;
 
   private layoutManager: GoldenLayout | undefined;
@@ -45,11 +40,11 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
   ) {
     // Create default project
     this.defaultProject = new Project({
-      name: "Default Project",
+      name: 'Default Project',
       settings: {
-        defaultPaperFormat: "A4",
-        units: "mm",
-        defaultBackgroundColor: "white",
+        defaultPaperFormat: 'A4',
+        units: 'mm',
+        defaultBackgroundColor: 'white',
         defaultGridSize: {
           rows: 9,
           columns: 14,
@@ -66,7 +61,7 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
     this.destroyLayout();
   }
 
-  @HostListener("window:resize")
+  @HostListener('window:resize')
   onResize(): void {
     if (this.layoutManager) {
       // Get container dimensions
@@ -105,19 +100,19 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
               if (rightColumn) {
                 // Add the new component to the right column
                 rightColumn.addChild({
-                  type: "component",
+                  type: 'component',
                   componentType: componentType,
                   title: title,
                   componentState: { label: title },
                 });
 
-                console.log("Added new component to right panel");
+                console.log('Added new component to right panel');
               }
             }
           }
         }
       } catch (err) {
-        console.error("Failed to add component", err);
+        console.error('Failed to add component', err);
       }
     });
   }
@@ -136,7 +131,7 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
     try {
       // Create a configuration for the component
       const itemConfig = {
-        type: "component",
+        type: 'component',
         componentType: componentType,
         title: title,
         componentState: { label: title },
@@ -146,10 +141,10 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
       (this.layoutManager as any).createDragSource(element, itemConfig);
 
       // Make the element visually indicate it's draggable
-      element.style.cursor = "grab";
-      element.title = "Drag to add to layout";
+      element.style.cursor = 'grab';
+      element.title = 'Drag to add to layout';
     } catch (err) {
-      console.error("Failed to create drag source", err);
+      console.error('Failed to create drag source', err);
     }
   }
 
@@ -158,14 +153,14 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
    * Can be used to implement layout persistence
    */
   public saveLayout(): string {
-    if (!this.layoutManager) return "";
+    if (!this.layoutManager) return '';
 
     try {
       const config = this.layoutManager.toConfig();
       return JSON.stringify(config);
     } catch (err) {
-      console.error("Failed to save layout", err);
-      return "";
+      console.error('Failed to save layout', err);
+      return '';
     }
   }
 
@@ -179,7 +174,7 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
       const config = JSON.parse(layoutJSON);
       this.layoutManager.loadLayout(config);
     } catch (err) {
-      console.error("Failed to load layout", err);
+      console.error('Failed to load layout', err);
     }
   }
 
@@ -187,30 +182,30 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
     // Initial layout configuration
     const layoutConfig: LayoutConfig = {
       root: {
-        type: "row",
+        type: 'row',
         content: [
           {
-            type: "component",
-            componentType: "electrical-cad-canvas",
-            title: "CAD Canvas",
-            componentState: { label: "CAD Canvas" },
+            type: 'component',
+            componentType: 'electrical-cad-canvas',
+            title: 'CAD Canvas',
+            componentState: { label: 'CAD Canvas' },
             width: 80,
           },
           {
-            type: "column",
+            type: 'column',
             content: [
               {
-                type: "component",
-                componentType: "placeholder",
-                title: "Properties",
-                componentState: { label: "Properties Panel" },
+                type: 'component',
+                componentType: 'placeholder',
+                title: 'Properties',
+                componentState: { label: 'Properties Panel' },
                 height: 50,
               },
               {
-                type: "component",
-                componentType: "placeholder",
-                title: "Components",
-                componentState: { label: "Components Panel" },
+                type: 'component',
+                componentType: 'placeholder',
+                title: 'Components',
+                componentState: { label: 'Components Panel' },
                 height: 50,
               },
             ],
@@ -225,7 +220,7 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
         reorderEnabled: true, // Enable reordering
         popInOnClose: true, // Return windows to layout when closed
         constrainDragToContainer: false, // Allow dragging outside container
-        responsiveMode: "always", // Improve responsiveness
+        responsiveMode: 'always', // Improve responsiveness
       },
     };
 
@@ -263,24 +258,24 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
     if (!this.layoutManager) return;
 
     // Setup drag & drop and other layout events
-    this.layoutManager.on("stateChanged", () => {
-      console.log("Layout state changed");
+    this.layoutManager.on('stateChanged', () => {
+      console.log('Layout state changed');
     });
 
-    this.layoutManager.on("itemCreated", () => {
-      console.log("Item created in layout");
+    this.layoutManager.on('itemCreated', () => {
+      console.log('Item created in layout');
     });
 
-    this.layoutManager.on("itemDestroyed", () => {
-      console.log("Item destroyed in layout");
+    this.layoutManager.on('itemDestroyed', () => {
+      console.log('Item destroyed in layout');
     });
 
-    this.layoutManager.on("windowOpened", () => {
-      console.log("Window opened");
+    this.layoutManager.on('windowOpened', () => {
+      console.log('Window opened');
     });
 
-    this.layoutManager.on("windowClosed", () => {
-      console.log("Window closed");
+    this.layoutManager.on('windowClosed', () => {
+      console.log('Window closed');
     });
 
     // Use type assertion to bypass TypeScript event type limitations
@@ -289,12 +284,12 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
 
     // Listen for component creation to enhance them
     if (layoutManagerAny.on) {
-      layoutManagerAny.on("componentCreated", (component: any) => {
+      layoutManagerAny.on('componentCreated', (component: any) => {
         // Add any component-specific enhancements or event handlers here
-        console.log("Component created", component);
+        console.log('Component created', component);
 
         // Check if component has a componentName property
-        if (component && component.componentName === "electrical-cad-canvas") {
+        if (component && component.componentName === 'electrical-cad-canvas') {
           // Get parent of component (usually a stack)
           const parent = component._parent;
           if (parent && parent.header) {
@@ -304,8 +299,8 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
       });
 
       // Listen for stack creation to enhance stack headers
-      layoutManagerAny.on("stackCreated", (stack: any) => {
-        console.log("Stack created", stack);
+      layoutManagerAny.on('stackCreated', (stack: any) => {
+        console.log('Stack created', stack);
         // Customize stack headers here if needed
       });
     }
@@ -316,13 +311,13 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
 
     // Register the electrical CAD canvas component
     this.layoutManager.registerComponentFactoryFunction(
-      "electrical-cad-canvas",
+      'electrical-cad-canvas',
       (container: ComponentContainer) => {
         // Create wrapper element
-        const componentElement = document.createElement("div");
-        componentElement.className = "golden-layout-component";
-        componentElement.style.width = "100%";
-        componentElement.style.height = "100%";
+        const componentElement = document.createElement('div');
+        componentElement.className = 'golden-layout-component';
+        componentElement.style.width = '100%';
+        componentElement.style.height = '100%';
         container.element.appendChild(componentElement);
 
         // Create the Angular component using ViewContainerRef
@@ -339,9 +334,9 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
         componentElement.appendChild(compElement);
 
         // Make sure the component takes up the full space
-        compElement.style.width = "100%";
-        compElement.style.height = "100%";
-        compElement.style.display = "block";
+        compElement.style.width = '100%';
+        compElement.style.height = '100%';
+        compElement.style.display = 'block';
 
         // Force change detection
         componentRef.changeDetectorRef.detectChanges();
@@ -350,12 +345,12 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
         this.angularComponentRef.set(container, componentRef);
 
         // Setup resize handling
-        container.on("resize", () => {
+        container.on('resize', () => {
           this.ngZone.runOutsideAngular(() => {
             window.setTimeout(() => {
               this.ngZone.run(() => {
                 // Trigger resize event explicitly
-                window.dispatchEvent(new Event("resize"));
+                window.dispatchEvent(new Event('resize'));
                 componentRef.changeDetectorRef.detectChanges();
               });
             }, 0);
@@ -363,7 +358,7 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
         });
 
         // Handle component destruction
-        container.on("destroy", () => {
+        container.on('destroy', () => {
           componentRef.destroy();
           this.angularComponentRef.delete(container);
         });
@@ -372,17 +367,17 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
 
     // Register a placeholder component for future tool windows
     this.layoutManager.registerComponentFactoryFunction(
-      "placeholder",
+      'placeholder',
       (container: ComponentContainer) => {
         const element = container.element;
 
         // Create placeholder element
-        const placeholderElement = document.createElement("div");
-        placeholderElement.className = "placeholder-component";
+        const placeholderElement = document.createElement('div');
+        placeholderElement.className = 'placeholder-component';
 
         // Safely access the label from componentState
         const state = container.state as Record<string, any> | undefined;
-        placeholderElement.textContent = state?.["label"] || "Placeholder";
+        placeholderElement.textContent = state?.['label'] || 'Placeholder';
 
         // Add to container
         element.appendChild(placeholderElement);
@@ -397,7 +392,7 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
     }
 
     // Clean up component references
-    this.angularComponentRef.forEach((componentRef) => {
+    this.angularComponentRef.forEach(componentRef => {
       componentRef.destroy();
     });
     this.angularComponentRef.clear();

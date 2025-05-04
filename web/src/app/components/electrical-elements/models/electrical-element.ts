@@ -1,11 +1,11 @@
-import { IDrawable2D } from "../interfaces/drawable-electrical-element.interface";
+import { IDrawable2D } from '../interfaces/drawable-electrical-element.interface';
 import {
   DrawOverrides,
   Label,
   Terminal,
-} from "../interfaces/electrical-element.interface";
+} from '../interfaces/electrical-element.interface';
 
-import { SchemePage } from "../../../components/electrical-cad-canvas/models/scheme-page.model";
+import { SchemePage } from '../../../components/electrical-cad-canvas/models/scheme-page.model';
 
 /**
  * Interface for constructing an electrical element
@@ -100,7 +100,7 @@ export class ElectricalElement implements IDrawable2D {
       // Skip invalid shape primitives silently
       if (
         !shapePrimitive ||
-        typeof shapePrimitive.getBoundingBox !== "function"
+        typeof shapePrimitive.getBoundingBox !== 'function'
       ) {
         continue;
       }
@@ -110,7 +110,7 @@ export class ElectricalElement implements IDrawable2D {
       // Skip invalid bounding boxes silently
       if (
         !bbox ||
-        typeof bbox !== "object" ||
+        typeof bbox !== 'object' ||
         !isFinite(bbox.minX) ||
         !isFinite(bbox.minY) ||
         !isFinite(bbox.maxX) ||
@@ -195,13 +195,13 @@ export class ElectricalElement implements IDrawable2D {
       for (const shapePrimitive of this.shape) {
         try {
           // Make sure shapePrimitive is valid before calling draw2d
-          if (shapePrimitive && typeof shapePrimitive.draw2d === "function") {
+          if (shapePrimitive && typeof shapePrimitive.draw2d === 'function') {
             shapePrimitive.draw2d(ctx, mergedOverrides);
           } else {
-            console.warn("Invalid shape primitive found:", shapePrimitive);
+            console.warn('Invalid shape primitive found:', shapePrimitive);
           }
         } catch (error) {
-          console.error("Error drawing shape primitive:", error);
+          console.error('Error drawing shape primitive:', error);
         }
       }
     }

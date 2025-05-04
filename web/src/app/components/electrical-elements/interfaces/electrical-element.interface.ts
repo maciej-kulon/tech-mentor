@@ -1,6 +1,3 @@
-import { SchemePage } from "../../electrical-cad-canvas/models/scheme-page.model";
-import { IDrawable2D } from "./drawable-electrical-element.interface";
-
 export interface Terminal {
   x: number; // Relative position (0-1)
   y: number; // Relative position (0-1)
@@ -8,12 +5,12 @@ export interface Terminal {
 }
 
 export enum ShapeType {
-  Rectangle = "rect",
-  Circle = "circle",
-  Line = "line",
-  Path = "path",
-  Bezier = "bezier",
-  Arc = "arc",
+  Rectangle = 'rect',
+  Circle = 'circle',
+  Line = 'line',
+  Path = 'path',
+  Bezier = 'bezier',
+  Arc = 'arc',
 }
 
 export interface Label {

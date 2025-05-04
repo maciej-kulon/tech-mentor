@@ -1,4 +1,4 @@
-import { Point } from "../interfaces/point.interface";
+import { Point } from '../interfaces/point.interface';
 
 /**
  * Interface for defining bounds of a quadtree node
@@ -16,7 +16,7 @@ export interface QuadTreeBounds {
  */
 export class QuadTree {
   private points: Point[] = [];
-  private divided: boolean = false;
+  private divided = false;
   private topLeft?: QuadTree;
   private topRight?: QuadTree;
   private bottomLeft?: QuadTree;
@@ -145,7 +145,7 @@ export class QuadTree {
         ...this.topLeft!.queryRange(range),
         ...this.topRight!.queryRange(range),
         ...this.bottomLeft!.queryRange(range),
-        ...this.bottomRight!.queryRange(range),
+        ...this.bottomRight!.queryRange(range)
       );
     }
 
@@ -190,7 +190,7 @@ export class QuadTree {
         ...this.topLeft!.getNodeBounds(),
         ...this.topRight!.getNodeBounds(),
         ...this.bottomLeft!.getNodeBounds(),
-        ...this.bottomRight!.getNodeBounds(),
+        ...this.bottomRight!.getNodeBounds()
       );
     }
 
@@ -203,7 +203,7 @@ export class QuadTree {
    * @returns Object containing the node's points and bounds, or null if point is outside tree
    */
   findContainingNode(
-    point: Point,
+    point: Point
   ): { points: Point[]; bounds: QuadTreeBounds } | null {
     if (!this.contains(point)) {
       return null;

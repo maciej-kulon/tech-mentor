@@ -1,17 +1,17 @@
-import { Component, Inject, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, Inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
-} from "@angular/material/dialog";
-import { MatButtonModule } from "@angular/material/button";
-import { FormsModule } from "@angular/forms";
-import { MatFormFieldModule } from "@angular/material/form-field";
-import { MatInputModule } from "@angular/material/input";
+} from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
-  selector: "app-debug-info-dialog",
+  selector: 'app-debug-info-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -30,8 +30,7 @@ import { MatInputModule } from "@angular/material/input";
           matInput
           [(ngModel)]="jsonString"
           (ngModelChange)="validateJson($event)"
-          rows="10"
-        ></textarea>
+          rows="10"></textarea>
         <mat-error *ngIf="jsonError">{{ jsonError }}</mat-error>
       </mat-form-field>
     </mat-dialog-content>
@@ -41,8 +40,7 @@ import { MatInputModule } from "@angular/material/input";
         mat-raised-button
         color="primary"
         (click)="onSave()"
-        [disabled]="!!jsonError"
-      >
+        [disabled]="!!jsonError">
         Save
       </button>
     </mat-dialog-actions>
@@ -67,7 +65,7 @@ import { MatInputModule } from "@angular/material/input";
   ],
 })
 export class DebugInfoDialogComponent implements OnInit {
-  jsonString: string = "";
+  jsonString = '';
   jsonError: string | null = null;
 
   constructor(
@@ -86,7 +84,7 @@ export class DebugInfoDialogComponent implements OnInit {
       JSON.parse(this.relaxJsonEscapes(value));
       this.jsonError = null;
     } catch (e) {
-      this.jsonError = "Invalid JSON format";
+      this.jsonError = 'Invalid JSON format';
     }
   }
 
@@ -101,14 +99,14 @@ export class DebugInfoDialogComponent implements OnInit {
         const originalDataStr = JSON.stringify(this.data);
         const parsedDataStr = JSON.stringify(parsedData);
 
-        console.log("Debug - Original data:", this.data);
-        console.log("Debug - Parsed data:", parsedData);
-        console.log("Debug - Data changed:", originalDataStr !== parsedDataStr);
+        console.log('Debug - Original data:', this.data);
+        console.log('Debug - Parsed data:', parsedData);
+        console.log('Debug - Data changed:', originalDataStr !== parsedDataStr);
 
         this.dialogRef.close(parsedData);
       } catch (e) {
         // This shouldn't happen since we validate on change
-        this.jsonError = "Invalid JSON format";
+        this.jsonError = 'Invalid JSON format';
       }
     }
   }
@@ -125,6 +123,6 @@ export class DebugInfoDialogComponent implements OnInit {
   private relaxJsonEscapes(input: string): string {
     // Replace single backslashes not followed by a valid JSON escape char with double backslashes
     // Valid JSON escapes: " \ / b f n r t u
-    return input.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
+    return input.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
   }
 }

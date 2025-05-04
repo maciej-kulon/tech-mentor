@@ -1,4 +1,4 @@
-import { PaperFormat } from "../interfaces/paper-format.interface";
+import { PaperFormat } from '../interfaces/paper-format.interface';
 
 /**
  * Represents project-wide settings that apply to all pages

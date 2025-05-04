@@ -4,33 +4,33 @@ import {
   PaperDimensions,
   PageMetadata,
   PageDates,
-} from "../interfaces/paper-format.interface";
+} from '../interfaces/paper-format.interface';
 
 /**
  * Class representing a scheme page with all its properties and dimensions
  */
 export class SchemePage implements PageMetadata, PageDates {
   /** The page number (1-based index) in the project */
-  pageNumber: number = 1;
+  pageNumber = 1;
 
-  title: string = "New Page";
-  description: string = "";
-  paperFormat: PaperFormat = "A4";
-  backgroundColor: string = "white";
-  orientation: PageOrientation = "landscape";
-  author: string = "";
+  title = 'New Page';
+  description = '';
+  paperFormat: PaperFormat = 'A4';
+  backgroundColor = 'white';
+  orientation: PageOrientation = 'landscape';
+  author = '';
   creationDate: Date = new Date();
   reviewDate?: Date;
   lastUpdateDate: Date = new Date();
-  version: string = "1.0";
-  reviewedBy: string = "";
-  rows: number = 9;
-  columns: number = 9;
+  version = '1.0';
+  reviewedBy = '';
+  rows = 9;
+  columns = 9;
   /** Size in pixels for row and column labels */
-  labelSize: number = 24;
+  labelSize = 24;
 
   /** X offset of this page in the project canvas (in pixels at 1:1 scale) */
-  private _xOffset: number = 0;
+  private _xOffset = 0;
 
   private dimensions: PaperDimensions = {
     width: 1123,
@@ -59,7 +59,7 @@ export class SchemePage implements PageMetadata, PageDates {
   private updateDimensions(): void {
     const format = this.PAPER_FORMATS[this.paperFormat];
 
-    if (this.orientation === "landscape") {
+    if (this.orientation === 'landscape') {
       this.dimensions = { width: format.height, height: format.width };
     } else {
       this.dimensions = { width: format.width, height: format.height };

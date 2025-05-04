@@ -1,12 +1,12 @@
 /**
  * Supported paper formats for the electrical scheme
  */
-export type PaperFormat = "A4" | "A3" | "A2" | "A1" | "A0";
+export type PaperFormat = 'A4' | 'A3' | 'A2' | 'A1' | 'A0';
 
 /**
  * Page orientation options
  */
-export type PageOrientation = "portrait" | "landscape";
+export type PageOrientation = 'portrait' | 'landscape';
 
 /**
  * Interface representing paper dimensions

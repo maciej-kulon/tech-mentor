@@ -1,8 +1,8 @@
-import { Project } from "@app/components/electrical-cad-canvas/models/project.model";
-import { DrawOverrides } from "../interfaces/electrical-element.interface";
-import { BaseElementRenderer } from "./base-element-renderer";
-import { SchemePage } from "@app/components/electrical-cad-canvas/models/scheme-page.model";
-import { ElectricalElement } from "../models/electrical-element";
+import { Project } from '@app/components/electrical-cad-canvas/models/project.model';
+import { DrawOverrides } from '../interfaces/electrical-element.interface';
+import { BaseElementRenderer } from './base-element-renderer';
+import { SchemePage } from '@app/components/electrical-cad-canvas/models/scheme-page.model';
+import { ElectricalElement } from '../models/electrical-element';
 /**
  * Generic renderer for electrical elements based on their JSON definition
  */
@@ -46,7 +46,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
     this.ctx.restore();
 
     // Handle terminal highlighting if mouse position is provided
-    if (typeof mouseX === "number" && typeof mouseY === "number") {
+    if (typeof mouseX === 'number' && typeof mouseY === 'number') {
       this.ctx.save();
       this.highlightNearestTerminal(
         element,
@@ -70,7 +70,7 @@ export class GenericElementRenderer extends BaseElementRenderer {
     offsetY: number,
     opacity: number
   ): void {
-    console.log("Rendering highlight:", {
+    console.log('Rendering highlight:', {
       element,
       scale,
       offsetX,

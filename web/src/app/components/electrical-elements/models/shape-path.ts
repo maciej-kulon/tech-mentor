@@ -1,6 +1,6 @@
-import { ICommonShapeProperties } from "../interfaces/common-shape-properties.interface";
-import { IDrawable2D } from "../interfaces/drawable-electrical-element.interface";
-import { DrawOverrides } from "../interfaces/electrical-element.interface";
+import { ICommonShapeProperties } from '../interfaces/common-shape-properties.interface';
+import { IDrawable2D } from '../interfaces/drawable-electrical-element.interface';
+import { DrawOverrides } from '../interfaces/electrical-element.interface';
 
 export interface ShapePathCommand {
   type: string;
@@ -55,17 +55,17 @@ export class ShapePath implements IDrawable2D, ICommonShapeProperties {
       this.path.commands.length === 0
     ) {
       this.path.commands = [
-        { type: "moveTo", x: -5, y: -5 },
-        { type: "lineTo", x: 5, y: 5 },
-        { type: "moveTo", x: 5, y: -5 },
-        { type: "lineTo", x: -5, y: 5 },
+        { type: 'moveTo', x: -5, y: -5 },
+        { type: 'lineTo', x: 5, y: 5 },
+        { type: 'moveTo', x: 5, y: -5 },
+        { type: 'lineTo', x: -5, y: 5 },
       ];
     } else {
       // Ensure each command has required properties
-      this.path.commands = this.path.commands.map((cmd) => ({
-        type: cmd.type || "lineTo",
-        x: typeof cmd.x === "number" ? cmd.x : 0,
-        y: typeof cmd.y === "number" ? cmd.y : 0,
+      this.path.commands = this.path.commands.map(cmd => ({
+        type: cmd.type || 'lineTo',
+        x: typeof cmd.x === 'number' ? cmd.x : 0,
+        y: typeof cmd.y === 'number' ? cmd.y : 0,
         radius: cmd.radius,
         startAngle: cmd.startAngle,
         endAngle: cmd.endAngle,
@@ -76,8 +76,8 @@ export class ShapePath implements IDrawable2D, ICommonShapeProperties {
     this.lineWidth = contructOptions.lineWidth || 1;
     this.minLineWidth = contructOptions.minWidth || 0.5;
     this.maxWidth = contructOptions.maxWidth || 2;
-    this.strokeStyle = contructOptions.strokeStyle || "#000000";
-    this.fillStyle = contructOptions.fillStyle || "#FFFFFF";
+    this.strokeStyle = contructOptions.strokeStyle || '#000000';
+    this.fillStyle = contructOptions.fillStyle || '#FFFFFF';
   }
 
   draw2d(ctx: CanvasRenderingContext2D, overrides?: DrawOverrides): void {
@@ -91,7 +91,7 @@ export class ShapePath implements IDrawable2D, ICommonShapeProperties {
       this.path.commands.length === 0
     ) {
       ctx.beginPath();
-      ctx.strokeStyle = lineColor || this.strokeStyle || "#FF0000"; // Red for visibility
+      ctx.strokeStyle = lineColor || this.strokeStyle || '#FF0000'; // Red for visibility
       ctx.lineWidth = lineWidthMultiplier
         ? this.lineWidth * lineWidthMultiplier * scale
         : this.lineWidth * scale;
@@ -107,9 +107,9 @@ export class ShapePath implements IDrawable2D, ICommonShapeProperties {
     }
 
     ctx.beginPath();
-    ctx.fillStyle = this.path.fillStyle || this.fillStyle || "#FFFFFF";
+    ctx.fillStyle = this.path.fillStyle || this.fillStyle || '#FFFFFF';
     ctx.strokeStyle =
-      lineColor || this.path.strokeStyle || this.strokeStyle || "#000000";
+      lineColor || this.path.strokeStyle || this.strokeStyle || '#000000';
     ctx.lineWidth = lineWidthMultiplier
       ? this.lineWidth * lineWidthMultiplier * scale
       : this.lineWidth * scale;
@@ -118,25 +118,25 @@ export class ShapePath implements IDrawable2D, ICommonShapeProperties {
 
     for (const cmd of this.path.commands) {
       // Skip invalid commands silently
-      if (!cmd || typeof cmd !== "object") continue;
+      if (!cmd || typeof cmd !== 'object') continue;
 
       const type = cmd.type;
       if (!type) continue;
 
       try {
-        if (type === "moveTo") {
+        if (type === 'moveTo') {
           // Use normalized coordinates (0-1 range) multiplied by scale
           const x = (cmd.x || 0) * scale;
           const y = (cmd.y || 0) * scale;
           ctx.moveTo(x, y);
           drewSomething = true;
-        } else if (type === "lineTo") {
+        } else if (type === 'lineTo') {
           // Use normalized coordinates (0-1 range) multiplied by scale
           const x = (cmd.x || 0) * scale;
           const y = (cmd.y || 0) * scale;
           ctx.lineTo(x, y);
           drewSomething = true;
-        } else if (type === "arc") {
+        } else if (type === 'arc') {
           // Use normalized coordinates (0-1 range) multiplied by scale
           const x = (cmd.x || 0) * scale;
           const y = (cmd.y || 0) * scale;
@@ -157,7 +157,7 @@ export class ShapePath implements IDrawable2D, ICommonShapeProperties {
     // If we didn't draw anything valid, draw a fallback X
     if (!drewSomething) {
       ctx.beginPath();
-      ctx.strokeStyle = lineColor || "#FF0000"; // Red for visibility
+      ctx.strokeStyle = lineColor || '#FF0000'; // Red for visibility
 
       // Draw an X shape as fallback
       ctx.moveTo(-5 * scale, -5 * scale);
@@ -202,9 +202,9 @@ export class ShapePath implements IDrawable2D, ICommonShapeProperties {
 
     for (const cmd of this.path.commands) {
       // Skip invalid commands silently
-      if (!cmd || typeof cmd !== "object") continue;
+      if (!cmd || typeof cmd !== 'object') continue;
 
-      if (typeof cmd.x === "number" && typeof cmd.y === "number") {
+      if (typeof cmd.x === 'number' && typeof cmd.y === 'number') {
         minX = Math.min(minX, cmd.x);
         minY = Math.min(minY, cmd.y);
         maxX = Math.max(maxX, cmd.x);

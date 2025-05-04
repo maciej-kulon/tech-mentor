@@ -1,7 +1,7 @@
 /**
  * Represents the possible permission levels for a project contributor
  */
-export type ProjectPermission = "view" | "edit" | "comment" | "admin";
+export type ProjectPermission = 'view' | 'edit' | 'comment' | 'admin';
 
 /**
  * Represents a contributor to the project with their permissions

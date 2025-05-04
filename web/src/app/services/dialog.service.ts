@@ -1,17 +1,13 @@
-import { Injectable } from "@angular/core";
-import {
-  MatDialog,
-  MatDialogConfig,
-  MatDialogRef,
-} from "@angular/material/dialog";
-import { ComponentType } from "@angular/cdk/portal";
+import { Injectable } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ComponentType } from '@angular/cdk/portal';
 
 /**
  * A service that provides Promise-based dialog methods as an alternative to RxJS Observables.
  * This allows us to use MatDialog without RxJS dependencies in our application code.
  */
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class DialogService {
   constructor(private dialog: MatDialog) {}
@@ -26,8 +22,8 @@ export class DialogService {
   ): Promise<R | undefined> {
     const dialogRef = this.dialog.open<T, any, R>(component, config);
 
-    return new Promise<R | undefined>((resolve) => {
-      dialogRef.afterClosed().subscribe((result) => {
+    return new Promise<R | undefined>(resolve => {
+      dialogRef.afterClosed().subscribe(result => {
         resolve(result);
       });
     });

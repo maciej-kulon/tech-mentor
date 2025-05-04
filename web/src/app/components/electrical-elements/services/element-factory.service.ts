@@ -1,8 +1,8 @@
-import { Injectable } from "@angular/core";
-import { HttpService } from "../../../services/http.service";
-import { Label } from "../interfaces/electrical-element.interface";
-import { SchemePage } from "../../electrical-cad-canvas/models/scheme-page.model";
-import { ElectricalElement } from "../models/electrical-element";
+import { Injectable } from '@angular/core';
+import { HttpService } from '../../../services/http.service';
+import { Label } from '../interfaces/electrical-element.interface';
+import { SchemePage } from '../../electrical-cad-canvas/models/scheme-page.model';
+import { ElectricalElement } from '../models/electrical-element';
 interface ElementTemplate {
   id: string;
   type: string;
@@ -17,7 +17,7 @@ interface ElementTemplate {
 }
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class ElementFactoryService {
   private templates: ElementTemplate[] = [];
@@ -32,14 +32,14 @@ export class ElementFactoryService {
     if (!this.templatesPromise) {
       this.templatesPromise = this.httpService
         .get<{ templates: ElementTemplate[] }>(
-          "assets/data/element-templates.json"
+          'assets/data/element-templates.json'
         )
-        .then((response) => {
+        .then(response => {
           this.templates = response.templates;
           return this.templates;
         })
-        .catch((error) => {
-          console.error("Error loading templates:", error);
+        .catch(error => {
+          console.error('Error loading templates:', error);
           throw error;
         });
     }
@@ -55,12 +55,12 @@ export class ElementFactoryService {
     y: number,
     labels?: Label[],
     properties?: Record<string, any>,
-    rotation: number = 0,
+    rotation = 0,
     page?: SchemePage
   ): Promise<ElectricalElement | null> {
     try {
       const templates = await this.getTemplates();
-      const template = templates.find((t) => t.id === templateId);
+      const template = templates.find(t => t.id === templateId);
 
       if (!template) {
         console.error(`Template with ID ${templateId} not found`);
@@ -84,14 +84,14 @@ export class ElementFactoryService {
         rotation,
         labels: elementLabels,
         shape: [...template.shape], // Clone the shape array
-        pinPoints: template.pinPositions.map((pos) => ({ ...pos })), // Clone pin positions
+        pinPoints: template.pinPositions.map(pos => ({ ...pos })), // Clone pin positions
         properties: { ...template.properties, ...properties }, // Merge properties
         page: page,
       });
 
       return element;
     } catch (error) {
-      console.error("Error creating element:", error);
+      console.error('Error creating element:', error);
       return null;
     }
   }

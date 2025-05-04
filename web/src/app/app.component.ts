@@ -1,10 +1,10 @@
-import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { RouterOutlet } from "@angular/router";
-import { LayoutManagerComponent } from "./components/layout-manager/layout-manager.component";
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterOutlet } from '@angular/router';
+import { LayoutManagerComponent } from './components/layout-manager/layout-manager.component';
 
 @Component({
-  selector: "app-root",
+  selector: 'app-root',
   standalone: true,
   imports: [CommonModule, RouterOutlet, LayoutManagerComponent],
   template: `
@@ -33,5 +33,5 @@ import { LayoutManagerComponent } from "./components/layout-manager/layout-manag
   ],
 })
 export class AppComponent {
-  title = "tech-mentor";
+  title = 'tech-mentor';
 }

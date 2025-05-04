@@ -1,6 +1,6 @@
-import { ICommonShapeProperties } from "../interfaces/common-shape-properties.interface";
-import { IDrawable2D } from "../interfaces/drawable-electrical-element.interface";
-import { DrawOverrides } from "../interfaces/electrical-element.interface";
+import { ICommonShapeProperties } from '../interfaces/common-shape-properties.interface';
+import { IDrawable2D } from '../interfaces/drawable-electrical-element.interface';
+import { DrawOverrides } from '../interfaces/electrical-element.interface';
 
 export interface ShapeArcContructOptions {
   x: number;
@@ -44,7 +44,7 @@ export class ShapeArc implements IDrawable2D, ICommonShapeProperties {
     const { lineWidthMultiplier, lineColor, scale = 1 } = overrides || {};
 
     ctx.beginPath();
-    ctx.strokeStyle = lineColor || this.strokeStyle || "#000000";
+    ctx.strokeStyle = lineColor || this.strokeStyle || '#000000';
     ctx.lineWidth = lineWidthMultiplier
       ? this.lineWidth * lineWidthMultiplier * scale
       : this.lineWidth * scale;
@@ -56,8 +56,8 @@ export class ShapeArc implements IDrawable2D, ICommonShapeProperties {
 
     ctx.arc(x, y, radius, this.startAngle, this.endAngle);
 
-    if (this.fillStyle !== "none") {
-      ctx.fillStyle = this.fillStyle || "#FFFFFF";
+    if (this.fillStyle !== 'none') {
+      ctx.fillStyle = this.fillStyle || '#FFFFFF';
       ctx.fill();
     }
     ctx.stroke();

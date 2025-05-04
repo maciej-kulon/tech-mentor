@@ -1,6 +1,6 @@
-import { ICommonShapeProperties } from "../interfaces/common-shape-properties.interface";
-import { IDrawable2D } from "../interfaces/drawable-electrical-element.interface";
-import { DrawOverrides } from "../interfaces/electrical-element.interface";
+import { ICommonShapeProperties } from '../interfaces/common-shape-properties.interface';
+import { IDrawable2D } from '../interfaces/drawable-electrical-element.interface';
+import { DrawOverrides } from '../interfaces/electrical-element.interface';
 
 export interface ShapeBezierContructOptions {
   x1: number;
@@ -53,7 +53,7 @@ export class ShapeBezier implements IDrawable2D, ICommonShapeProperties {
     const { lineWidthMultiplier, lineColor, scale = 1 } = overrides || {};
 
     ctx.beginPath();
-    ctx.strokeStyle = lineColor || this.strokeStyle || "#000000";
+    ctx.strokeStyle = lineColor || this.strokeStyle || '#000000';
 
     // Ensure line width is at least 1 pixel after scaling
     ctx.lineWidth = lineWidthMultiplier

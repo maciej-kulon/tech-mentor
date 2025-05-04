@@ -1,6 +1,6 @@
-import { ICommonShapeProperties } from "../interfaces/common-shape-properties.interface";
-import { IDrawable2D } from "../interfaces/drawable-electrical-element.interface";
-import { DrawOverrides } from "../interfaces/electrical-element.interface";
+import { ICommonShapeProperties } from '../interfaces/common-shape-properties.interface';
+import { IDrawable2D } from '../interfaces/drawable-electrical-element.interface';
+import { DrawOverrides } from '../interfaces/electrical-element.interface';
 
 export interface ShapeRectContructOptions {
   x: number;
@@ -27,24 +27,24 @@ export class ShapeRect implements IDrawable2D, ICommonShapeProperties {
 
   constructor(contructOptions: ShapeRectContructOptions) {
     // Use safe defaults for all properties
-    this.x = typeof contructOptions.x === "number" ? contructOptions.x : 0;
-    this.y = typeof contructOptions.y === "number" ? contructOptions.y : 0;
+    this.x = typeof contructOptions.x === 'number' ? contructOptions.x : 0;
+    this.y = typeof contructOptions.y === 'number' ? contructOptions.y : 0;
 
     // Ensure positive width and height, default to 10 if invalid
     this.width =
-      typeof contructOptions.width === "number" && contructOptions.width > 0
+      typeof contructOptions.width === 'number' && contructOptions.width > 0
         ? contructOptions.width
         : 10;
     this.height =
-      typeof contructOptions.height === "number" && contructOptions.height > 0
+      typeof contructOptions.height === 'number' && contructOptions.height > 0
         ? contructOptions.height
         : 10;
 
     this.lineWidth = contructOptions.lineWidth || 1;
     this.minLineWidth = contructOptions.minLineWidth || 0.5;
     this.maxLineWidth = contructOptions.maxLineWidth || 2;
-    this.strokeStyle = contructOptions.strokeStyle || "#000000";
-    this.fillStyle = contructOptions.fillStyle || "#FFFFFF";
+    this.strokeStyle = contructOptions.strokeStyle || '#000000';
+    this.fillStyle = contructOptions.fillStyle || '#FFFFFF';
   }
 
   draw2d(ctx: CanvasRenderingContext2D, overrides?: DrawOverrides): void {
@@ -52,8 +52,8 @@ export class ShapeRect implements IDrawable2D, ICommonShapeProperties {
 
     try {
       ctx.beginPath();
-      ctx.fillStyle = this.fillStyle || "#FFFFFF";
-      ctx.strokeStyle = lineColor || this.strokeStyle || "#000000";
+      ctx.fillStyle = this.fillStyle || '#FFFFFF';
+      ctx.strokeStyle = lineColor || this.strokeStyle || '#000000';
       ctx.lineWidth = lineWidthMultiplier
         ? this.lineWidth * lineWidthMultiplier * scale
         : this.lineWidth * scale;
@@ -67,14 +67,14 @@ export class ShapeRect implements IDrawable2D, ICommonShapeProperties {
       // Draw the rectangle
       ctx.rect(x, y, width, height);
 
-      if (this.fillStyle !== "none") {
+      if (this.fillStyle !== 'none') {
         ctx.fill();
       }
       ctx.stroke();
     } catch (error) {
       // Draw a fallback shape if something goes wrong
       ctx.beginPath();
-      ctx.strokeStyle = lineColor || "#FF0000";
+      ctx.strokeStyle = lineColor || '#FF0000';
       ctx.lineWidth = 1;
 
       // Draw a small square as fallback

@@ -1,5 +1,5 @@
-import { Point } from "../interfaces/point.interface";
-import { QuadTree, QuadTreeBounds } from "./quad-tree.model";
+import { Point } from '../interfaces/point.interface';
+import { QuadTree, QuadTreeBounds } from './quad-tree.model';
 
 /**
  * Class managing the grid dots system for the electrical CAD canvas
@@ -9,8 +9,8 @@ import { QuadTree, QuadTreeBounds } from "./quad-tree.model";
 export class PageDots {
   private quadTree: QuadTree;
   private baseSpacing: number;
-  private currentDotCount: number = 0;
-  private lastScale: number = 1;
+  private currentDotCount = 0;
+  private lastScale = 1;
 
   constructor(
     private pageWidth: number,

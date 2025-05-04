@@ -1,6 +1,6 @@
-import { ICommonShapeProperties } from "../interfaces/common-shape-properties.interface";
-import { IDrawable2D } from "../interfaces/drawable-electrical-element.interface";
-import { DrawOverrides } from "../interfaces/electrical-element.interface";
+import { ICommonShapeProperties } from '../interfaces/common-shape-properties.interface';
+import { IDrawable2D } from '../interfaces/drawable-electrical-element.interface';
+import { DrawOverrides } from '../interfaces/electrical-element.interface';
 
 export interface ShapeCircleContructOptions {
   x: number;
@@ -33,15 +33,15 @@ export class ShapeCircle implements IDrawable2D, ICommonShapeProperties {
 
     // Ensure positive radius, default to 10 if invalid
     this.radius =
-      typeof contructOptions.radius === "number" && contructOptions.radius > 0
+      typeof contructOptions.radius === 'number' && contructOptions.radius > 0
         ? contructOptions.radius
         : 10;
 
     this.lineWidth = contructOptions.lineWidth || 1;
     this.minLineWidth = contructOptions.minLineWidth || 0.5;
     this.maxLineWidth = contructOptions.maxLineWidth || 2;
-    this.strokeStyle = contructOptions.strokeStyle || "#000000";
-    this.fillStyle = contructOptions.fillStyle || "#FFFFFF";
+    this.strokeStyle = contructOptions.strokeStyle || '#000000';
+    this.fillStyle = contructOptions.fillStyle || '#FFFFFF';
     this.stroke = contructOptions.stroke !== false;
     this.fill = contructOptions.fill !== false;
   }
@@ -51,8 +51,8 @@ export class ShapeCircle implements IDrawable2D, ICommonShapeProperties {
 
     try {
       ctx.beginPath();
-      ctx.fillStyle = this.fillStyle || "#FFFFFF";
-      ctx.strokeStyle = lineColor || this.strokeStyle || "#000000";
+      ctx.fillStyle = this.fillStyle || '#FFFFFF';
+      ctx.strokeStyle = lineColor || this.strokeStyle || '#000000';
       ctx.lineWidth = lineWidthMultiplier
         ? this.lineWidth * lineWidthMultiplier * scale
         : this.lineWidth * scale;
@@ -65,14 +65,14 @@ export class ShapeCircle implements IDrawable2D, ICommonShapeProperties {
       // Draw the circle
       ctx.arc(x, y, radius, 0, Math.PI * 2);
 
-      if (this.fillStyle !== "none") {
+      if (this.fillStyle !== 'none') {
         ctx.fill();
       }
       ctx.stroke();
     } catch (error) {
       // Draw a fallback shape if something goes wrong
       ctx.beginPath();
-      ctx.strokeStyle = lineColor || "#FF0000";
+      ctx.strokeStyle = lineColor || '#FF0000';
       ctx.lineWidth = 1;
 
       // Draw a smaller circle as fallback

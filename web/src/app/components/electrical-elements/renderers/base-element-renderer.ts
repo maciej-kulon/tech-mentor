@@ -1,17 +1,20 @@
-import { Label, Terminal } from "../interfaces/electrical-element.interface";
-import { SchemePage } from "../../../components/electrical-cad-canvas/models/scheme-page.model";
-import { ElectricalElement } from "../models/electrical-element";
-import { Project } from "../../../components/electrical-cad-canvas/models/project.model";
+import { Label, Terminal } from '../interfaces/electrical-element.interface';
+import { SchemePage } from '../../../components/electrical-cad-canvas/models/scheme-page.model';
+import { ElectricalElement } from '../models/electrical-element';
+import { Project } from '../../../components/electrical-cad-canvas/models/project.model';
 
 export abstract class BaseElementRenderer {
   // Constants for terminal rendering
-  protected static readonly TERMINAL_HIGHLIGHT_COLOR = "#2196F3"; // Material Blue
+  protected static readonly TERMINAL_HIGHLIGHT_COLOR = '#2196F3'; // Material Blue
   protected static readonly TERMINAL_HIGHLIGHT_RADIUS = 6; // Base radius in pixels
   protected static readonly TERMINAL_HIGHLIGHT_THRESHOLD = 10; // Base threshold in pixels
 
   protected activePage: SchemePage;
 
-  constructor(protected ctx: CanvasRenderingContext2D, page?: SchemePage) {
+  constructor(
+    protected ctx: CanvasRenderingContext2D,
+    page?: SchemePage
+  ) {
     this.activePage = page || new SchemePage();
   }
 
@@ -59,7 +62,7 @@ export abstract class BaseElementRenderer {
     const labelPage = element.page || page;
 
     // Draw each label
-    element.labels.forEach((label) => {
+    element.labels.forEach(label => {
       this.drawLabel(
         label,
         element.width,
@@ -111,8 +114,8 @@ export abstract class BaseElementRenderer {
     // Apply font properties
     this.ctx.font = `${label.fontWeight} ${fontSize}px ${label.fontFamily}`;
     this.ctx.fillStyle = label.fontColor;
-    this.ctx.textAlign = "center";
-    this.ctx.textBaseline = "middle";
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
 
     // Handle variable references
     const text = this.processLabelText(label.text, {
@@ -138,16 +141,16 @@ export abstract class BaseElementRenderer {
     context: { project?: any; page?: any; element?: any }
   ): string {
     // Step 1: Replace @@ with a placeholder
-    const AT_PLACEHOLDER = "__AT__";
+    const AT_PLACEHOLDER = '__AT__';
     let processed = text.replace(/@@/g, AT_PLACEHOLDER);
 
     // Step 2: Replace @{...} syntax (with universal escaping)
     processed = processed.replace(/@\{((?:[^\\}]|\\.)*)\}/g, (match, inner) => {
       // Parse the property chain, removing escapes for output
-      let propChain = "";
+      let propChain = '';
       let i = 0;
       while (i < inner.length) {
-        if (inner[i] === "\\" && i + 1 < inner.length) {
+        if (inner[i] === '\\' && i + 1 < inner.length) {
           propChain += inner[i + 1]; // Add only the escaped character
           i += 2;
         } else {
@@ -163,7 +166,7 @@ export abstract class BaseElementRenderer {
     // Step 3: Replace @variable or @object.property references (old style)
     processed = processed.replace(/@([a-zA-Z_][\w.]+)/g, (match, variable) => {
       // Support dot notation
-      const parts = variable.split(".");
+      const parts = variable.split('.');
       let value: any = undefined;
       if (parts.length === 1) {
         // Try element property first
@@ -179,9 +182,9 @@ export abstract class BaseElementRenderer {
       } else {
         // Try object.property chain
         let root = undefined;
-        if (parts[0] === "element") root = context.element;
-        else if (parts[0] === "page") root = context.page;
-        else if (parts[0] === "project") root = context.project;
+        if (parts[0] === 'element') root = context.element;
+        else if (parts[0] === 'page') root = context.page;
+        else if (parts[0] === 'project') root = context.project;
         if (root) {
           value = parts
             .slice(1)
@@ -197,10 +200,10 @@ export abstract class BaseElementRenderer {
     });
 
     // Step 4: Restore @@ placeholders to @
-    processed = processed.replace(new RegExp(AT_PLACEHOLDER, "g"), "@");
+    processed = processed.replace(new RegExp(AT_PLACEHOLDER, 'g'), '@');
 
     // Step 5: Remove any remaining escape backslashes (e.g., \. -> .)
-    processed = processed.replace(/\\(.)/g, "$1");
+    processed = processed.replace(/\\(.)/g, '$1');
     return processed;
   }
 
@@ -217,16 +220,16 @@ export abstract class BaseElementRenderer {
   ): any {
     // Split by dot, but ignore dots inside brackets (for array indices)
     const parts: string[] = [];
-    let current = "";
+    let current = '';
     let inBracket = false;
     for (let i = 0; i < chain.length; i++) {
-      if (!inBracket && chain[i] === ".") {
+      if (!inBracket && chain[i] === '.') {
         parts.push(current);
-        current = "";
-      } else if (chain[i] === "[" && !inBracket) {
+        current = '';
+      } else if (chain[i] === '[' && !inBracket) {
         inBracket = true;
         current += chain[i];
-      } else if (chain[i] === "]" && inBracket) {
+      } else if (chain[i] === ']' && inBracket) {
         inBracket = false;
         current += chain[i];
       } else {
@@ -237,19 +240,19 @@ export abstract class BaseElementRenderer {
 
     // Determine root
     let root: any = undefined;
-    if (parts[0] === "element") root = context.element;
-    else if (parts[0] === "page") root = context.page;
-    else if (parts[0] === "project") root = context.project;
+    if (parts[0] === 'element') root = context.element;
+    else if (parts[0] === 'page') root = context.page;
+    else if (parts[0] === 'project') root = context.project;
     else {
       // Try element, then page, then project
       root =
         context.element && context.element[parts[0]] !== undefined
           ? context.element
           : context.page && context.page[parts[0]] !== undefined
-          ? context.page
-          : context.project && context.project[parts[0]] !== undefined
-          ? context.project
-          : undefined;
+            ? context.page
+            : context.project && context.project[parts[0]] !== undefined
+              ? context.project
+              : undefined;
       if (!root) return undefined;
     }
 
@@ -264,7 +267,7 @@ export abstract class BaseElementRenderer {
       i < parts.length;
       i++
     ) {
-      let part = parts[i];
+      const part = parts[i];
       // Handle array indices, e.g. foo[0]
       const arrayMatch = part.match(/^([\w$]+)\[(\d+)\]$/);
       if (arrayMatch) {
@@ -444,7 +447,7 @@ export abstract class BaseElementRenderer {
     scale: number,
     offsetX: number,
     offsetY: number,
-    isSelected: boolean = false,
+    isSelected = false,
     project?: any,
     page?: any
   ): void {
@@ -494,8 +497,8 @@ export abstract class BaseElementRenderer {
     // Draw highlight rectangle
     this.ctx.beginPath();
     this.ctx.fillStyle = isSelected
-      ? "rgba(0, 191, 255, 0.3)" // Selected label - more opaque blue
-      : "rgba(0, 191, 255, 0.15)"; // Hovered label - translucent blue
+      ? 'rgba(0, 191, 255, 0.3)' // Selected label - more opaque blue
+      : 'rgba(0, 191, 255, 0.15)'; // Hovered label - translucent blue
     this.ctx.roundRect(
       -textWidth / 2 - fontSize * 0.3,
       -textHeight / 2 - fontSize * 0.1,
@@ -508,8 +511,8 @@ export abstract class BaseElementRenderer {
     // Add border
     this.ctx.lineWidth = isSelected ? 2 : 1;
     this.ctx.strokeStyle = isSelected
-      ? "#00BFFF" // Solid blue for selected
-      : "rgba(0, 191, 255, 0.6)"; // More transparent for hover
+      ? '#00BFFF' // Solid blue for selected
+      : 'rgba(0, 191, 255, 0.6)'; // More transparent for hover
     this.ctx.stroke();
 
     this.ctx.restore();

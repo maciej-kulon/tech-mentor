@@ -1,8 +1,8 @@
-import { v4 as uuidv4 } from "uuid";
-import { ProjectContributor } from "./project-contributor.interface";
-import { ProjectSettings } from "./project-settings.interface";
-import { ProjectMetadata } from "./project-metadata.type";
-import { SchemePage } from "./scheme-page.model";
+import { v4 as uuidv4 } from 'uuid';
+import { ProjectContributor } from './project-contributor.interface';
+import { ProjectSettings } from './project-settings.interface';
+import { ProjectMetadata } from './project-metadata.type';
+import { SchemePage } from './scheme-page.model';
 
 /**
  * Represents a project containing multiple scheme pages and project-wide settings
@@ -50,18 +50,18 @@ export class Project {
 
   constructor(params?: Partial<Project>) {
     this.id = uuidv4();
-    this.name = params?.name ?? "New Project";
-    this.description = params?.description ?? "";
-    this.author = params?.author ?? "";
+    this.name = params?.name ?? 'New Project';
+    this.description = params?.description ?? '';
+    this.author = params?.author ?? '';
     this.contributors = params?.contributors ?? [];
     this.creationDate = new Date();
     this.lastModifiedDate = new Date();
-    this.version = params?.version ?? "1.0.0";
+    this.version = params?.version ?? '1.0.0';
     this.metadata = params?.metadata ?? {};
     this.settings = params?.settings ?? {
-      defaultPaperFormat: "A4",
-      units: "mm",
-      defaultBackgroundColor: "white",
+      defaultPaperFormat: 'A4',
+      units: 'mm',
+      defaultBackgroundColor: 'white',
       defaultGridSize: {
         rows: 9,
         columns: 14,

@@ -1,30 +1,30 @@
-import { Injectable } from "@angular/core";
-import { HttpService } from "../../../services/http.service";
-import { Label, ShapeType } from "../interfaces/electrical-element.interface";
-import { GenericElementRenderer } from "../renderers/generic-element-renderer";
-import { ElementFactoryService } from "./element-factory.service";
-import { SchemePage } from "../../../components/electrical-cad-canvas/models/scheme-page.model";
-import { Project } from "@app/components/electrical-cad-canvas/models/project.model";
-import { IDrawable2D } from "../interfaces/drawable-electrical-element.interface";
-import { ShapeArc } from "../models/shape-arc";
-import { ShapeBezier } from "../models/shape-bezier";
-import { ShapeCircle } from "../models/shape-circle";
-import { ShapeLine } from "../models/shape-line";
-import { ShapePath } from "../models/shape-path";
-import { ShapeRect } from "../models/shape-rect";
-import { ElectricalElement } from "../models/electrical-element";
+import { Injectable } from '@angular/core';
+import { HttpService } from '../../../services/http.service';
+import { Label, ShapeType } from '../interfaces/electrical-element.interface';
+import { GenericElementRenderer } from '../renderers/generic-element-renderer';
+import { ElementFactoryService } from './element-factory.service';
+import { SchemePage } from '../../../components/electrical-cad-canvas/models/scheme-page.model';
+import { Project } from '@app/components/electrical-cad-canvas/models/project.model';
+import { IDrawable2D } from '../interfaces/drawable-electrical-element.interface';
+import { ShapeArc } from '../models/shape-arc';
+import { ShapeBezier } from '../models/shape-bezier';
+import { ShapeCircle } from '../models/shape-circle';
+import { ShapeLine } from '../models/shape-line';
+import { ShapePath } from '../models/shape-path';
+import { ShapeRect } from '../models/shape-rect';
+import { ElectricalElement } from '../models/electrical-element';
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class ElectricalElementsRendererService {
   private renderer!: GenericElementRenderer;
   private elements: ElectricalElement[] = [];
-  private selectedElements: Set<ElectricalElement> = new Set();
+  private selectedElements = new Set<ElectricalElement>();
   private hoveredElement: ElectricalElement | null = null;
   private ctx: CanvasRenderingContext2D | null = null;
   private isElementsLoaded = false;
-  private mouseX: number = 0;
-  private mouseY: number = 0;
+  private mouseX = 0;
+  private mouseY = 0;
   private draggedElements: Set<ElectricalElement> | null = null;
   private originalElementPositions: Map<
     ElectricalElement,
@@ -44,8 +44,8 @@ export class ElectricalElementsRendererService {
     private elementFactory: ElementFactoryService
   ) {
     // Start loading templates in the background
-    this.elementFactory.getTemplates().catch((error) => {
-      console.error("Error preloading templates:", error);
+    this.elementFactory.getTemplates().catch(error => {
+      console.error('Error preloading templates:', error);
     });
   }
 
@@ -53,7 +53,7 @@ export class ElectricalElementsRendererService {
    * Initialize the service with canvas context
    */
   initialize(ctx: CanvasRenderingContext2D, page?: SchemePage): void {
-    console.log("Initializing renderer with context:", ctx);
+    console.log('Initializing renderer with context:', ctx);
     this.ctx = ctx;
 
     // Initialize with default page if not provided
@@ -73,10 +73,10 @@ export class ElectricalElementsRendererService {
    */
   private async loadElementsFromJSON(): Promise<void> {
     const elements = await this.httpService.get<ElectricalElement[]>(
-      "assets/data/mock-elements.json"
+      'assets/data/mock-elements.json'
     );
 
-    this.elements = elements.map((rawElement) => {
+    this.elements = elements.map(rawElement => {
       const element = new ElectricalElement({
         ...rawElement,
         shape: this.createDrawableElements(rawElement),
@@ -124,7 +124,7 @@ export class ElectricalElementsRendererService {
 
   private createDrawableElements(element: any): IDrawable2D[] | undefined {
     if (!element.shape || !Array.isArray(element.shape)) {
-      console.error("Tried to load element without shape");
+      console.error('Tried to load element without shape');
       return;
     }
 
@@ -132,8 +132,8 @@ export class ElectricalElementsRendererService {
     for (const shape of element.shape) {
       try {
         // Skip invalid shapes
-        if (!shape || typeof shape !== "object" || !shape.type) {
-          console.warn("Invalid shape object:", shape);
+        if (!shape || typeof shape !== 'object' || !shape.type) {
+          console.warn('Invalid shape object:', shape);
           continue;
         }
 
@@ -141,8 +141,8 @@ export class ElectricalElementsRendererService {
         shape.lineWidth = shape.lineWidth || 1;
         shape.minWidth = shape.minWidth || 0.5;
         shape.maxWidth = shape.maxWidth || 3;
-        shape.strokeStyle = shape.strokeStyle || "#000000";
-        shape.fillStyle = shape.fillStyle || "#FFFFFF";
+        shape.strokeStyle = shape.strokeStyle || '#000000';
+        shape.fillStyle = shape.fillStyle || '#FFFFFF';
 
         let newShape: IDrawable2D | null = null;
         switch (shape.type) {
@@ -182,14 +182,14 @@ export class ElectricalElementsRendererService {
             shape.y = shape.y || 0;
             // Special handling for path to ensure path property exists
             if (!shape.path) {
-              console.warn("Path shape missing path property:", shape);
+              console.warn('Path shape missing path property:', shape);
               shape.path = { commands: [] }; // Provide default empty path
             } else if (!shape.path.commands) {
-              console.warn("Path shape missing commands array:", shape);
+              console.warn('Path shape missing commands array:', shape);
               shape.path.commands = []; // Provide default empty commands array
             } else if (!Array.isArray(shape.path.commands)) {
               console.warn(
-                "Path shape has invalid commands (not an array):",
+                'Path shape has invalid commands (not an array):',
                 shape
               );
               shape.path.commands = []; // Reset to empty array
@@ -198,8 +198,8 @@ export class ElectricalElementsRendererService {
             // Make sure each command has required properties
             if (Array.isArray(shape.path.commands)) {
               shape.path.commands = shape.path.commands.filter((cmd: any) => {
-                if (!cmd || typeof cmd !== "object" || !cmd.type) {
-                  console.warn("Filtering out invalid path command:", cmd);
+                if (!cmd || typeof cmd !== 'object' || !cmd.type) {
+                  console.warn('Filtering out invalid path command:', cmd);
                   return false;
                 }
                 // Ensure x and y exist
@@ -228,7 +228,7 @@ export class ElectricalElementsRendererService {
         }
       } catch (error) {
         console.error(
-          `Error creating shape of type ${shape?.type || "unknown"}:`,
+          `Error creating shape of type ${shape?.type || 'unknown'}:`,
           error
         );
       }
@@ -255,7 +255,7 @@ export class ElectricalElementsRendererService {
     const elementY = (y - offsetY - labelSize * scale) / scale;
 
     // Filter elements that contain the point
-    const elementsUnderCursor = this.elements.filter((element) => {
+    const elementsUnderCursor = this.elements.filter(element => {
       // Element's bounding box is centered at its (x,y) position
       const bbox = element.getBoundingBox();
 
@@ -356,7 +356,7 @@ export class ElectricalElementsRendererService {
         }
 
         // Calculate text dimensions same as in highlightLabel
-        const labelText = label.text.replace(/@(\w+)/g, "$1");
+        const labelText = label.text.replace(/@(\w+)/g, '$1');
         const textWidth = labelText.length * fontSize * 0.6;
         const textHeight = fontSize * 1.2;
 
@@ -578,7 +578,7 @@ export class ElectricalElementsRendererService {
     project?: Project
   ): void {
     if (!this.ctx || !this.renderer) {
-      console.warn("Cannot render: missing context or renderer");
+      console.warn('Cannot render: missing context or renderer');
       return;
     }
 
@@ -589,7 +589,7 @@ export class ElectricalElementsRendererService {
     const currentSelectedLabel = this.selectedLabel;
 
     // Render each element using the generic renderer
-    this.elements.forEach((element) => {
+    this.elements.forEach(element => {
       const isSelected = currentSelection.has(element);
       const isHovered = !isSelected && element === currentHovered;
       const elementPage = element.page || null;
@@ -606,10 +606,10 @@ export class ElectricalElementsRendererService {
           {
             lineWidthMultiplier: isSelected ? 4 : isHovered ? 3 : undefined,
             lineColor: isSelected
-              ? "#00BFFF"
+              ? '#00BFFF'
               : isHovered
-              ? "rgba(0, 191, 255, 0.5)"
-              : undefined,
+                ? 'rgba(0, 191, 255, 0.5)'
+                : undefined,
           },
           project
         );
@@ -635,7 +635,7 @@ export class ElectricalElementsRendererService {
           currentHoveredLabel.element.id === element.id
         ) {
           const labelToHighlight = element.labels.find(
-            (l) => l.name === currentHoveredLabel.label.name
+            l => l.name === currentHoveredLabel.label.name
           );
           if (labelToHighlight) {
             this.renderer.highlightLabel(
@@ -657,7 +657,7 @@ export class ElectricalElementsRendererService {
           currentSelectedLabel.element.id === element.id
         ) {
           const labelToHighlight = element.labels.find(
-            (l) => l.name === currentSelectedLabel.label.name
+            l => l.name === currentSelectedLabel.label.name
           );
           if (labelToHighlight) {
             this.renderer.highlightLabel(
@@ -683,7 +683,7 @@ export class ElectricalElementsRendererService {
     this.draggedElements = elements;
     // Store original positions for dragging
     this.originalElementPositions = new Map();
-    elements.forEach((element) => {
+    elements.forEach(element => {
       this.originalElementPositions?.set(element, {
         x: element.x,
         y: element.y,
@@ -700,7 +700,7 @@ export class ElectricalElementsRendererService {
     // If originalElementPositions is null, initialize it now
     if (!this.originalElementPositions) {
       this.originalElementPositions = new Map();
-      this.draggedElements.forEach((element) => {
+      this.draggedElements.forEach(element => {
         this.originalElementPositions!.set(element, {
           x: element.x,
           y: element.y,
@@ -708,7 +708,7 @@ export class ElectricalElementsRendererService {
       });
     }
 
-    this.draggedElements.forEach((element) => {
+    this.draggedElements.forEach(element => {
       const original = this.originalElementPositions!.get(element);
       if (original) {
         element.x = original.x + dx;
@@ -774,7 +774,7 @@ export class ElectricalElementsRendererService {
 
   // --- FIX: Helper to check if an element is selected ---
   public isElementSelected(element: ElectricalElement): boolean {
-    return Array.from(this.selectedElements).some((el) => el.id === element.id);
+    return Array.from(this.selectedElements).some(el => el.id === element.id);
   }
 
   /**
@@ -834,7 +834,7 @@ export class ElectricalElementsRendererService {
   updateDraggedElementsPosition(deltaX: number, deltaY: number): void {
     if (!this.draggedElements) return;
 
-    this.draggedElements.forEach((element) => {
+    this.draggedElements.forEach(element => {
       // Apply incremental delta to current position
       element.x += deltaX;
       element.y += deltaY;
