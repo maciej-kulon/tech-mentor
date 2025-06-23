@@ -4,7 +4,8 @@ import {
   Label,
   Terminal,
 } from '../interfaces/electrical-element.interface';
-
+import { IClickable } from '../interfaces/clickable.interface';
+import { Point } from '@app/components/electrical-cad-canvas/interfaces/point.interface';
 import { SchemePage } from '../../../components/electrical-cad-canvas/models/scheme-page.model';
 
 /**
@@ -28,7 +29,7 @@ export interface ElectricalElementConstructOptions {
   /** Optional array of 2D shapes that make up the element's visual representation */
   shape?: IDrawable2D[];
   /** Optional custom properties specific to the element type */
-  properties?: Record<string, any>;
+  properties?: Record<string, string | number | boolean>;
   /** Optional array of electrical terminals */
   terminals?: Terminal[];
   /** Optional reference to the page containing this element */
@@ -38,7 +39,7 @@ export interface ElectricalElementConstructOptions {
 /**
  * Class representing an electrical element in the schematic
  */
-export class ElectricalElement implements IDrawable2D {
+export class ElectricalElement implements IDrawable2D, IClickable {
   /** Unique identifier for the element */
   id: string;
   /** Type of the electrical element (e.g., 'resistor', 'capacitor', 'diode') */
@@ -56,7 +57,7 @@ export class ElectricalElement implements IDrawable2D {
   /** Optional array of 2D shapes that make up the element's visual representation */
   shape?: IDrawable2D[];
   /** Optional custom properties specific to the element type */
-  properties?: Record<string, any>;
+  properties?: Record<string, string | number | boolean>;
   /** Optional array of electrical terminals */
   terminals?: Terminal[];
   /** Optional reference to the page containing this element */
@@ -208,5 +209,37 @@ export class ElectricalElement implements IDrawable2D {
 
     // Restore the context state
     ctx.restore();
+  }
+
+  isPointOver(point: Point): boolean {
+    // Convert point to local coordinates (relative to element's center)
+    const localPoint: Point = {
+      x: point.x - this.x,
+      y: point.y - this.y,
+    };
+
+    // If element has no shapes, use bounding box as fallback
+    if (!this.shape || this.shape.length === 0) {
+      const bbox = this.getBoundingBox();
+      return (
+        localPoint.x >= bbox.minX &&
+        localPoint.x <= bbox.maxX &&
+        localPoint.y >= bbox.minY &&
+        localPoint.y <= bbox.maxY
+      );
+    }
+
+    // Check if point is over any of the element's shapes
+    for (const shape of this.shape) {
+      if (shape && 'isPointOver' in shape) {
+        const clickableShape = shape as IClickable;
+        // Pass the local point directly to the shape - let the shape handle its own coordinate system
+        if (clickableShape.isPointOver(localPoint)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }

@@ -124,7 +124,7 @@ export class ElectricalElementsRendererService {
 
   private createDrawableElements(element: any): IDrawable2D[] | undefined {
     if (!element.shape || !Array.isArray(element.shape)) {
-      console.error('Tried to load element without shape');
+      console.error('Tried to load element without shape', { element });
       return;
     }
 
@@ -251,27 +251,13 @@ export class ElectricalElementsRendererService {
 
     const labelSize = this.activePage.labelSize || 0;
     // Convert screen coordinates to element coordinates
+    // The labelSize offset is needed to match the drawing transform
     const elementX = (x - offsetX - labelSize * scale) / scale;
     const elementY = (y - offsetY - labelSize * scale) / scale;
 
-    // Filter elements that contain the point
+    // Filter elements that contain the point using isPointOver
     const elementsUnderCursor = this.elements.filter(element => {
-      // Element's bounding box is centered at its (x,y) position
-      const bbox = element.getBoundingBox();
-
-      // Calculate bounds in absolute world coordinates
-      const elementLeft = element.x + bbox.minX;
-      const elementRight = element.x + bbox.maxX;
-      const elementTop = element.y + bbox.minY;
-      const elementBottom = element.y + bbox.maxY;
-
-      // Check if point is inside element bounds
-      return (
-        elementX >= elementLeft &&
-        elementX <= elementRight &&
-        elementY >= elementTop &&
-        elementY <= elementBottom
-      );
+      return element.isPointOver({ x: elementX, y: elementY });
     });
 
     // Log the detection for debugging
@@ -337,7 +323,6 @@ export class ElectricalElementsRendererService {
       // Check each label in element's local space
       for (const label of element.labels) {
         // Use direct label position values from mock-elements.json, only scaled by the view scale
-        // to match the new implementation in base-element-renderer.ts
         const labelPosX = label.x * scale;
         const labelPosY = label.y * scale;
 
@@ -345,7 +330,6 @@ export class ElectricalElementsRendererService {
         let fontSize =
           label.fontSize * Math.min(element.width, element.height) * scale;
 
-        // Apply min/max constraints if specified, with scaling
         if (label.minSize) {
           const scaledMinSize = label.minSize * scale;
           fontSize = Math.max(fontSize, scaledMinSize);
@@ -355,18 +339,40 @@ export class ElectricalElementsRendererService {
           fontSize = Math.min(fontSize, scaledMaxSize);
         }
 
-        // Calculate text dimensions same as in highlightLabel
-        const labelText = label.text.replace(/@(\w+)/g, '$1');
-        const textWidth = labelText.length * fontSize * 0.6;
-        const textHeight = fontSize * 1.2;
+        // Set font for measurement
+        if (this.ctx) {
+          this.ctx.font = `${label.fontWeight} ${fontSize}px ${label.fontFamily}`;
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+        }
+
+        // Get processed label text (use renderer's public method if available, fallback to raw text)
+        let text = label.text;
+        if (
+          this.renderer &&
+          typeof this.renderer.getProcessedLabelText === 'function'
+        ) {
+          text = this.renderer.getProcessedLabelText(label, {
+            element,
+            page: element.page,
+            project: undefined,
+          });
+        }
+        // Use measureText for accurate width
+        let textWidth = fontSize * 2; // fallback
+        if (this.ctx) {
+          textWidth = this.ctx.measureText(text).width;
+        }
+        const textHeight = fontSize;
+        const paddingX = fontSize * 0.3;
+        const paddingY = fontSize * 0.2;
 
         // Check if transformed mouse position is inside label bounds
-        // Since the label is anchored at its center point
         if (
-          relativeX >= labelPosX - textWidth / 2 &&
-          relativeX <= labelPosX + textWidth / 2 &&
-          relativeY >= labelPosY - textHeight / 2 &&
-          relativeY <= labelPosY + textHeight / 2
+          relativeX >= labelPosX - textWidth / 2 - paddingX &&
+          relativeX <= labelPosX + textWidth / 2 + paddingX &&
+          relativeY >= labelPosY - textHeight / 2 - paddingY &&
+          relativeY <= labelPosY + textHeight / 2 + paddingY
         ) {
           return { element, label };
         }
@@ -862,22 +868,7 @@ export class ElectricalElementsRendererService {
     const adjustedY = (y - offsetY - labelSize * scale) / scale;
 
     for (const element of this.elements) {
-      // Use element's bounding box for hit detection
-      const bbox = element.getBoundingBox();
-
-      const elementBounds = {
-        left: element.x + bbox.minX,
-        right: element.x + bbox.maxX,
-        top: element.y + bbox.minY,
-        bottom: element.y + bbox.maxY,
-      };
-
-      if (
-        adjustedX >= elementBounds.left &&
-        adjustedX <= elementBounds.right &&
-        adjustedY >= elementBounds.top &&
-        adjustedY <= elementBounds.bottom
-      ) {
+      if (element.isPointOver({ x: adjustedX, y: adjustedY })) {
         return element;
       }
     }

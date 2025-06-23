@@ -1,6 +1,8 @@
 import { ICommonShapeProperties } from '../interfaces/common-shape-properties.interface';
 import { IDrawable2D } from '../interfaces/drawable-electrical-element.interface';
 import { DrawOverrides } from '../interfaces/electrical-element.interface';
+import { IClickable } from '../interfaces/clickable.interface';
+import { Point } from '@app/components/electrical-cad-canvas/interfaces/point.interface';
 
 export interface ShapeBezierContructOptions {
   x1: number;
@@ -18,7 +20,9 @@ export interface ShapeBezierContructOptions {
   fillStyle: string;
 }
 
-export class ShapeBezier implements IDrawable2D, ICommonShapeProperties {
+export class ShapeBezier
+  implements IDrawable2D, ICommonShapeProperties, IClickable
+{
   x1: number;
   y1: number;
   cp1x: number;
@@ -84,5 +88,63 @@ export class ShapeBezier implements IDrawable2D, ICommonShapeProperties {
     const maxX = Math.max(...xs);
     const maxY = Math.max(...ys);
     return { minX, minY, maxX, maxY };
+  }
+
+  isPointOver(point: Point): boolean {
+    const halfLineWidth = this.lineWidth / 2;
+
+    // Function to calculate point on Bezier curve at parameter t
+    const bezierPoint = (t: number) => {
+      const mt = 1 - t;
+      return {
+        x:
+          mt * mt * mt * this.x1 +
+          3 * mt * mt * t * this.cp1x +
+          3 * mt * t * t * this.cp2x +
+          t * t * t * this.x2,
+        y:
+          mt * mt * mt * this.y1 +
+          3 * mt * mt * t * this.cp1y +
+          3 * mt * t * t * this.cp2y +
+          t * t * t * this.y2,
+      };
+    };
+
+    // Binary search to find closest point on curve
+    let t = 0.5;
+    let step = 0.25;
+    let minDist = Infinity;
+
+    // Iterate a few times to find closest point
+    for (let i = 0; i < 8; i++) {
+      const p = bezierPoint(t);
+      const dist = Math.sqrt(
+        Math.pow(p.x - point.x, 2) + Math.pow(p.y - point.y, 2)
+      );
+
+      if (dist < minDist) {
+        minDist = dist;
+      }
+
+      // Try points on both sides
+      const p1 = bezierPoint(t - step);
+      const p2 = bezierPoint(t + step);
+      const dist1 = Math.sqrt(
+        Math.pow(p1.x - point.x, 2) + Math.pow(p1.y - point.y, 2)
+      );
+      const dist2 = Math.sqrt(
+        Math.pow(p2.x - point.x, 2) + Math.pow(p2.y - point.y, 2)
+      );
+
+      if (dist1 < dist2) {
+        t -= step;
+      } else {
+        t += step;
+      }
+      step *= 0.5;
+    }
+
+    // Check if closest point is within lineWidth/2
+    return minDist <= halfLineWidth;
   }
 }

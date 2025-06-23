@@ -14,50 +14,41 @@ const unusedImports = require('eslint-plugin-unused-imports');
  * - No exceptions, autofix where possible
  */
 
-module.exports = tseslint.config(
-  {
-    files: ['**/*.ts'],
-    plugins: {
-      'unused-imports': unusedImports,
-    },
-    extends: [
-      eslint.configs.recommended,
-      ...tseslint.configs.recommended,
-      ...tseslint.configs.stylistic,
-      ...angular.configs.tsRecommended,
-      prettierRecommended,
-    ],
-    processor: angular.processInlineTemplates,
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-unsafe-assignment': 'error',
-      '@typescript-eslint/no-unsafe-call': 'error',
-      '@typescript-eslint/no-unsafe-member-access': 'error',
-      '@typescript-eslint/no-unsafe-return': 'error',
-      'no-extra-boolean-cast': ['error', { enforceForInnerExpressions: true }],
-      'unused-imports/no-unused-imports': 'error',
-      'unused-imports/no-unused-vars': [
-        'warn',
-        {
-          vars: 'all',
-          varsIgnorePattern: '^_',
-          args: 'after-used',
-          argsIgnorePattern: '^_',
-        },
-      ],
-    },
-    languageOptions: {
-      parserOptions: {
-        project: './tsconfig.app.json',
+module.exports = tseslint.config({
+  files: ['**/*.ts'],
+  ignores: ['**/*.html', '**/node_modules/**', '**/*.d.ts'],
+  plugins: {
+    'unused-imports': unusedImports,
+  },
+  extends: [
+    eslint.configs.recommended,
+    ...tseslint.configs.recommended,
+    ...tseslint.configs.stylistic,
+    ...angular.configs.tsRecommended,
+    prettierRecommended,
+  ],
+  processor: angular.processInlineTemplates,
+  rules: {
+    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/no-unsafe-assignment': 'error',
+    '@typescript-eslint/no-unsafe-call': 'error',
+    '@typescript-eslint/no-unsafe-member-access': 'error',
+    '@typescript-eslint/no-unsafe-return': 'error',
+    'no-extra-boolean-cast': ['error', { enforceForInnerExpressions: true }],
+    'unused-imports/no-unused-imports': 'error',
+    'unused-imports/no-unused-vars': [
+      'warn',
+      {
+        vars: 'all',
+        varsIgnorePattern: '^_',
+        args: 'after-used',
+        argsIgnorePattern: '^_',
       },
+    ],
+  },
+  languageOptions: {
+    parserOptions: {
+      project: './tsconfig.app.json',
     },
   },
-  {
-    files: ['**/*.html'],
-    extends: [
-      ...angular.configs.templateRecommended,
-      ...angular.configs.templateAccessibility,
-    ],
-    rules: {},
-  }
-);
+});

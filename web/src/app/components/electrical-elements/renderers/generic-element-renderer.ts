@@ -3,6 +3,7 @@ import { DrawOverrides } from '../interfaces/electrical-element.interface';
 import { BaseElementRenderer } from './base-element-renderer';
 import { SchemePage } from '@app/components/electrical-cad-canvas/models/scheme-page.model';
 import { ElectricalElement } from '../models/electrical-element';
+import { Label } from '../interfaces/electrical-element.interface';
 /**
  * Generic renderer for electrical elements based on their JSON definition
  */
@@ -120,5 +121,16 @@ export class GenericElementRenderer extends BaseElementRenderer {
     this.ctx.beginPath();
     this.ctx.rect(-bodyWidth / 2, -bodyHeight / 2, bodyWidth, bodyHeight);
     this.ctx.stroke();
+  }
+
+  public getProcessedLabelText(
+    label: Label,
+    context: {
+      project?: Project;
+      page?: SchemePage;
+      element?: ElectricalElement;
+    }
+  ): string {
+    return this.processLabelText(label.text, context);
   }
 }

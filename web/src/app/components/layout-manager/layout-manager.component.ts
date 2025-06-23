@@ -12,9 +12,17 @@ import {
 import { CommonModule } from '@angular/common';
 import { ElectricalCadCanvasComponent } from '../electrical-cad-canvas/electrical-cad-canvas.component';
 import { Project } from '../electrical-cad-canvas/models/project.model';
+import { ToolboxPanelComponent } from '../toolbox-panel/toolbox-panel.component';
 
 // Import Golden Layout properly
-import { GoldenLayout, LayoutConfig, ComponentContainer } from 'golden-layout';
+import {
+  GoldenLayout,
+  LayoutConfig,
+  ComponentContainer,
+  ComponentItemConfig,
+  StackItemConfig,
+  RowOrColumnItemConfig,
+} from 'golden-layout';
 
 @Component({
   selector: 'app-layout-manager',
@@ -63,14 +71,13 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
 
   @HostListener('window:resize')
   onResize(): void {
-    if (this.layoutManager) {
-      // Get container dimensions
-      const container = this.layoutContainer.nativeElement as HTMLElement;
-      this.layoutManager.updateSize(
-        container.clientWidth,
-        container.clientHeight
-      );
-    }
+    if (!this.layoutManager) return;
+    // Get container dimensions
+    const container = this.layoutContainer.nativeElement as HTMLElement;
+    this.layoutManager.updateSize(
+      container.clientWidth,
+      container.clientHeight
+    );
   }
 
   /**
@@ -82,8 +89,6 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
     this.ngZone.run(() => {
       try {
         // Add directly to the right column
-        // Safely access the root property if it exists on the layout manager
-        // Using type assertion with 'as any' to bypass TypeScript's type checking
         const layoutManagerAny = this.layoutManager as any;
 
         if (layoutManagerAny.root && layoutManagerAny.root.contentItems) {
@@ -148,110 +153,125 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  /**
-   * Saves the current layout configuration
-   * Can be used to implement layout persistence
-   */
-  public saveLayout(): string {
-    if (!this.layoutManager) return '';
-
-    try {
-      const config = this.layoutManager.toConfig();
-      return JSON.stringify(config);
-    } catch (err) {
-      console.error('Failed to save layout', err);
-      return '';
-    }
-  }
-
-  /**
-   * Loads a previously saved layout configuration
-   */
-  public loadLayout(layoutJSON: string): void {
-    if (!this.layoutManager) return;
-
-    try {
-      const config = JSON.parse(layoutJSON);
-      this.layoutManager.loadLayout(config);
-    } catch (err) {
-      console.error('Failed to load layout', err);
-    }
-  }
-
   private initializeLayout(): void {
+    console.log('Initializing layout...');
+
+    // Get container dimensions
+    const container = this.layoutContainer.nativeElement as HTMLElement;
+    console.log('Container dimensions:', {
+      width: container.clientWidth,
+      height: container.clientHeight,
+    });
+
     // Initial layout configuration
     const layoutConfig: LayoutConfig = {
       root: {
-        type: 'row',
+        type: 'column',
         content: [
           {
-            type: 'component',
-            componentType: 'electrical-cad-canvas',
-            title: 'CAD Canvas',
-            componentState: { label: 'CAD Canvas' },
-            width: 80,
-          },
-          {
-            type: 'column',
+            type: 'stack',
             content: [
               {
                 type: 'component',
-                componentType: 'placeholder',
-                title: 'Properties',
-                componentState: { label: 'Properties Panel' },
-                height: 50,
-              },
+                componentType: 'toolbox-panel',
+                title: 'Toolbox',
+                componentState: { label: 'Toolbox' },
+                isClosable: false,
+              } as ComponentItemConfig,
+            ],
+            isClosable: false,
+            height: 8,
+          } as StackItemConfig,
+          {
+            type: 'row',
+            content: [
               {
                 type: 'component',
-                componentType: 'placeholder',
-                title: 'Components',
-                componentState: { label: 'Components Panel' },
-                height: 50,
-              },
+                componentType: 'project-tree',
+                title: 'Project Tree',
+                componentState: { label: 'Project Tree' },
+                width: 20,
+              } as ComponentItemConfig,
+              {
+                type: 'component',
+                componentType: 'electrical-cad-canvas',
+                title: 'CAD Canvas',
+                componentState: { label: 'CAD Canvas' },
+                width: 60,
+              } as ComponentItemConfig,
+              {
+                type: 'column',
+                content: [
+                  {
+                    type: 'component',
+                    componentType: 'placeholder',
+                    title: 'Properties',
+                    componentState: { label: 'Properties Panel' },
+                    height: 50,
+                  } as ComponentItemConfig,
+                  {
+                    type: 'component',
+                    componentType: 'placeholder',
+                    title: 'Components',
+                    componentState: { label: 'Components Panel' },
+                    height: 50,
+                  } as ComponentItemConfig,
+                ],
+                width: 20,
+              } as RowOrColumnItemConfig,
             ],
-            width: 20,
-          },
+            height: 92,
+          } as RowOrColumnItemConfig,
         ],
       },
       settings: {
-        showPopoutIcon: true, // Enable popout for floating windows
-        showMaximiseIcon: true, // Keep maximize enabled
-        showCloseIcon: true, // Enable close buttons
-        reorderEnabled: true, // Enable reordering
-        popInOnClose: true, // Return windows to layout when closed
-        constrainDragToContainer: false, // Allow dragging outside container
-        responsiveMode: 'always', // Improve responsiveness
+        showPopoutIcon: true,
+        showMaximiseIcon: true,
+        showCloseIcon: true,
+        reorderEnabled: true,
+        popInOnClose: true,
+        constrainDragToContainer: false,
+        responsiveMode: 'always',
       },
     };
 
-    // Create new layout manager
-    this.layoutManager = new GoldenLayout(this.layoutContainer.nativeElement);
+    try {
+      // Create new layout manager
+      this.layoutManager = new GoldenLayout(this.layoutContainer.nativeElement);
+      console.log('Layout manager created');
 
-    // Register component types
-    this.registerComponents();
+      // Register component types
+      this.registerComponents();
+      console.log('Components registered');
 
-    // Register event handlers for drag & drop
-    this.setupLayoutEvents();
+      // Register event handlers for drag & drop
+      this.setupLayoutEvents();
+      console.log('Events setup');
 
-    // Load the layout configuration
-    this.layoutManager.loadLayout(layoutConfig);
+      // Load the layout configuration
+      this.layoutManager.loadLayout(layoutConfig);
+      console.log('Layout configuration loaded');
 
-    // Get initial container dimensions
-    const container = this.layoutContainer.nativeElement as HTMLElement;
-
-    // Update layout size after init
-    this.ngZone.runOutsideAngular(() => {
-      window.setTimeout(() => {
-        this.ngZone.run(() => {
-          if (this.layoutManager) {
-            this.layoutManager.updateSize(
-              container.clientWidth,
-              container.clientHeight
-            );
-          }
-        });
-      }, 0);
-    });
+      // Update layout size after init
+      this.ngZone.runOutsideAngular(() => {
+        window.setTimeout(() => {
+          this.ngZone.run(() => {
+            if (this.layoutManager) {
+              this.layoutManager.updateSize(
+                container.clientWidth,
+                container.clientHeight
+              );
+              console.log('Layout size updated:', {
+                width: container.clientWidth,
+                height: container.clientHeight,
+              });
+            }
+          });
+        }, 0);
+      });
+    } catch (error) {
+      console.error('Error initializing layout:', error);
+    }
   }
 
   private setupLayoutEvents(): void {
@@ -308,6 +328,61 @@ export class LayoutManagerComponent implements AfterViewInit, OnDestroy {
 
   private registerComponents(): void {
     if (!this.layoutManager) return;
+
+    // Register the toolbox panel component
+    this.layoutManager.registerComponentFactoryFunction(
+      'toolbox-panel',
+      (container: ComponentContainer) => {
+        const componentElement = document.createElement('div');
+        componentElement.className = 'golden-layout-component';
+        componentElement.style.width = '100%';
+        componentElement.style.height = '100%';
+        container.element.appendChild(componentElement);
+
+        const componentRef = this.viewContainerRef.createComponent(
+          ToolboxPanelComponent
+        );
+        const compElement = componentRef.location.nativeElement;
+        componentElement.appendChild(compElement);
+        compElement.style.width = '100%';
+        compElement.style.height = '100%';
+        compElement.style.display = 'block';
+        componentRef.changeDetectorRef.detectChanges();
+        this.angularComponentRef.set(container, componentRef);
+        container.on('resize', () => {
+          this.ngZone.runOutsideAngular(() => {
+            window.setTimeout(() => {
+              this.ngZone.run(() => {
+                window.dispatchEvent(new Event('resize'));
+                componentRef.changeDetectorRef.detectChanges();
+              });
+            }, 0);
+          });
+        });
+        container.on('destroy', () => {
+          componentRef.destroy();
+          this.angularComponentRef.delete(container);
+        });
+      }
+    );
+
+    // Register the project tree component
+    this.layoutManager.registerComponentFactoryFunction(
+      'project-tree',
+      (container: ComponentContainer) => {
+        const componentElement = document.createElement('div');
+        componentElement.className = 'golden-layout-component';
+        componentElement.style.width = '100%';
+        componentElement.style.height = '100%';
+        container.element.appendChild(componentElement);
+
+        // For now, use placeholder content
+        const placeholderElement = document.createElement('div');
+        placeholderElement.className = 'placeholder-component';
+        placeholderElement.textContent = 'Project Tree';
+        componentElement.appendChild(placeholderElement);
+      }
+    );
 
     // Register the electrical CAD canvas component
     this.layoutManager.registerComponentFactoryFunction(

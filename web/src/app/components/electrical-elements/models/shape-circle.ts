@@ -1,6 +1,8 @@
 import { ICommonShapeProperties } from '../interfaces/common-shape-properties.interface';
 import { IDrawable2D } from '../interfaces/drawable-electrical-element.interface';
 import { DrawOverrides } from '../interfaces/electrical-element.interface';
+import { IClickable } from '../interfaces/clickable.interface';
+import { Point } from '@app/components/electrical-cad-canvas/interfaces/point.interface';
 
 export interface ShapeCircleContructOptions {
   x: number;
@@ -15,7 +17,9 @@ export interface ShapeCircleContructOptions {
   fill: boolean;
 }
 
-export class ShapeCircle implements IDrawable2D, ICommonShapeProperties {
+export class ShapeCircle
+  implements IDrawable2D, ICommonShapeProperties, IClickable
+{
   x: number;
   y: number;
   radius: number;
@@ -88,5 +92,22 @@ export class ShapeCircle implements IDrawable2D, ICommonShapeProperties {
     const maxX = this.x + this.radius;
     const maxY = this.y + this.radius;
     return { minX, minY, maxX, maxY };
+  }
+
+  isPointOver(point: Point): boolean {
+    // Calculate distance from point to circle center
+    const dx = point.x - this.x;
+    const dy = point.y - this.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Point is over the circle if it's within the radius
+    // For filled circles, check if point is inside
+    // For stroked circles, check if point is within lineWidth/2 of the radius
+    if (this.fill) {
+      return distance <= this.radius;
+    } else {
+      const halfLineWidth = this.lineWidth / 2;
+      return Math.abs(distance - this.radius) <= halfLineWidth;
+    }
   }
 }

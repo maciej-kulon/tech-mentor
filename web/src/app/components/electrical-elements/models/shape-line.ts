@@ -1,6 +1,8 @@
 import { ICommonShapeProperties } from '../interfaces/common-shape-properties.interface';
 import { IDrawable2D } from '../interfaces/drawable-electrical-element.interface';
 import { DrawOverrides } from '../interfaces/electrical-element.interface';
+import { IClickable } from '../interfaces/clickable.interface';
+import { Point } from '@app/components/electrical-cad-canvas/interfaces/point.interface';
 
 export interface ShapeLineContructOptions {
   x1: number;
@@ -14,7 +16,9 @@ export interface ShapeLineContructOptions {
   fillStyle: string;
 }
 
-export class ShapeLine implements IDrawable2D, ICommonShapeProperties {
+export class ShapeLine
+  implements IDrawable2D, ICommonShapeProperties, IClickable
+{
   x1: number;
   y1: number;
   x2: number;
@@ -65,5 +69,46 @@ export class ShapeLine implements IDrawable2D, ICommonShapeProperties {
     const maxX = Math.max(this.x1, this.x2);
     const maxY = Math.max(this.y1, this.y2);
     return { minX, minY, maxX, maxY };
+  }
+
+  isPointOver(point: Point): boolean {
+    // Calculate the distance from point to line segment
+    const halfLineWidth = this.lineWidth / 2;
+
+    // Vector from start to end of line
+    const dx = this.x2 - this.x1;
+    const dy = this.y2 - this.y1;
+    const lineLength = Math.sqrt(dx * dx + dy * dy);
+
+    if (lineLength === 0) {
+      // If line is a point, check if point is within lineWidth/2
+      const distToPoint = Math.sqrt(
+        Math.pow(point.x - this.x1, 2) + Math.pow(point.y - this.y1, 2)
+      );
+      return distToPoint <= halfLineWidth;
+    }
+
+    // Normalize direction vector
+    const nx = dx / lineLength;
+    const ny = dy / lineLength;
+
+    // Vector from start to point
+    const px = point.x - this.x1;
+    const py = point.y - this.y1;
+
+    // Project point onto line
+    const projection = px * nx + py * ny;
+
+    // Check if projection is within line segment
+    if (projection < 0 || projection > lineLength) {
+      return false;
+    }
+
+    // Calculate perpendicular distance from point to line
+    const perpX = px - projection * nx;
+    const perpY = py - projection * ny;
+    const perpDist = Math.sqrt(perpX * perpX + perpY * perpY);
+
+    return perpDist <= halfLineWidth;
   }
 }

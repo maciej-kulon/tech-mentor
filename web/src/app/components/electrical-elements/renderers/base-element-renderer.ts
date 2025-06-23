@@ -465,7 +465,6 @@ export abstract class BaseElementRenderer {
     }
 
     // Position the label relative to the element's center
-    // Use direct label position values from mock-elements.json, only scaled by the view scale
     this.ctx.translate(label.x * scale, label.y * scale);
 
     // Calculate base font size relative to the element's base size (unscaled)
@@ -485,14 +484,27 @@ export abstract class BaseElementRenderer {
       fontSize = Math.min(fontSize, scaledMaxSize);
     }
 
-    // Approximate label text width and height
+    // Set font for measurement
+    this.ctx.font = `${label.fontWeight} ${fontSize}px ${label.fontFamily}`;
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+
+    // Get processed label text
     const text = this.processLabelText(label.text, {
       project: project,
       page: page,
       element: element,
     });
-    const textWidth = text.length * fontSize * 0.6;
-    const textHeight = fontSize * 1.2;
+    // Use measureText for accurate width
+    const metrics = this.ctx.measureText(text);
+    const textWidth = metrics.width;
+    // For height, use fontSize as a good approximation
+    const textHeight = fontSize;
+
+    // Padding (in px, relative to font size)
+    const paddingX = fontSize * 0.3;
+    const paddingY = fontSize * 0.2;
+    const borderRadius = fontSize * 0.2;
 
     // Draw highlight rectangle
     this.ctx.beginPath();
@@ -500,11 +512,11 @@ export abstract class BaseElementRenderer {
       ? 'rgba(0, 191, 255, 0.3)' // Selected label - more opaque blue
       : 'rgba(0, 191, 255, 0.15)'; // Hovered label - translucent blue
     this.ctx.roundRect(
-      -textWidth / 2 - fontSize * 0.3,
-      -textHeight / 2 - fontSize * 0.1,
-      textWidth + fontSize * 0.6,
-      textHeight + fontSize * 0.2,
-      fontSize * 0.2
+      -textWidth / 2 - paddingX,
+      -textHeight / 2 - paddingY,
+      textWidth + 2 * paddingX,
+      textHeight + 2 * paddingY,
+      borderRadius
     );
     this.ctx.fill();
 
