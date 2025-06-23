@@ -93,58 +93,50 @@ export class ShapeArc
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     // Calculate angle of point relative to arc center
-    const angle = Math.atan2(dy, dx);
-    // Normalize angle to [0, 2π]
-    const normalizedAngle = angle < 0 ? angle + 2 * Math.PI : angle;
-
-    // Normalize start and end angles to [0, 2π]
-    const startAngle =
-      this.startAngle < 0 ? this.startAngle + 2 * Math.PI : this.startAngle;
-    const endAngle =
-      this.endAngle < 0 ? this.endAngle + 2 * Math.PI : this.endAngle;
-
-    console.log('Arc hit testing:', {
-      point: { x: point.x, y: point.y },
-      center: { x: this.x, y: this.y },
-      distance,
-      radius: this.radius,
-      angle: normalizedAngle * (180 / Math.PI),
-      startAngle: startAngle * (180 / Math.PI),
-      endAngle: endAngle * (180 / Math.PI),
-      counterclockwise: this.counterclockwise,
-      fillStyle: this.fillStyle,
-      lineWidth: this.lineWidth,
-    });
+    // In HTML5 Canvas, Y increases downward, so we need to negate dy for correct angle calculation
+    const angle = Math.atan2(-dy, dx);
 
     // Check if point is within the arc's angle range
+    // Use the same logic as canvas arc drawing
     let isWithinAngleRange = false;
+
+    // Normalize angles to handle negative values and 2π crossings
+    const normalizeAngle = (a: number) => {
+      while (a < 0) a += 2 * Math.PI;
+      while (a >= 2 * Math.PI) a -= 2 * Math.PI;
+      return a;
+    };
+
+    const normalizedAngle = normalizeAngle(angle);
+    const normalizedStart = normalizeAngle(this.startAngle);
+    const normalizedEnd = normalizeAngle(this.endAngle);
+
     if (this.counterclockwise) {
-      if (startAngle <= endAngle) {
+      // For counterclockwise arcs
+      if (normalizedStart > normalizedEnd) {
+        // Arc crosses 0/2π boundary
         isWithinAngleRange =
-          normalizedAngle >= startAngle && normalizedAngle <= endAngle;
+          normalizedAngle >= normalizedStart ||
+          normalizedAngle <= normalizedEnd;
       } else {
-        // Handle case where arc crosses 0/2π boundary
         isWithinAngleRange =
-          normalizedAngle >= startAngle || normalizedAngle <= endAngle;
+          normalizedAngle >= normalizedStart &&
+          normalizedAngle <= normalizedEnd;
       }
     } else {
-      if (startAngle >= endAngle) {
+      // For clockwise arcs (default)
+      if (normalizedStart > normalizedEnd) {
+        // Arc goes from start to end clockwise, crossing 0
         isWithinAngleRange =
-          normalizedAngle <= startAngle && normalizedAngle >= endAngle;
+          normalizedAngle >= normalizedEnd &&
+          normalizedAngle <= normalizedStart;
       } else {
-        // Handle case where arc crosses 0/2π boundary
+        // Normal clockwise arc
         isWithinAngleRange =
-          normalizedAngle <= startAngle || normalizedAngle >= endAngle;
+          normalizedAngle <= normalizedStart &&
+          normalizedAngle >= normalizedEnd;
       }
     }
-
-    console.log('Angle range check:', {
-      isWithinAngleRange,
-      counterclockwise: this.counterclockwise,
-      startAngle: startAngle * (180 / Math.PI),
-      endAngle: endAngle * (180 / Math.PI),
-      normalizedAngle: normalizedAngle * (180 / Math.PI),
-    });
 
     // If point is not within angle range, it's not over the arc
     if (!isWithinAngleRange) {
@@ -153,26 +145,12 @@ export class ShapeArc
 
     // For filled arcs, check if point is inside the sector
     if (this.fillStyle !== 'none') {
-      const isInside = distance <= this.radius;
-      console.log('Filled arc check:', {
-        isInside,
-        distance,
-        radius: this.radius,
-      });
-      return isInside;
+      return distance <= this.radius;
     }
 
     // For stroked arcs, check if point is within lineWidth/2 of the radius
     const halfLineWidth = this.lineWidth / 2;
     const distanceFromRadius = Math.abs(distance - this.radius);
-    const isOverStroke = distanceFromRadius <= halfLineWidth;
-    console.log('Stroked arc check:', {
-      isOverStroke,
-      distanceFromRadius,
-      halfLineWidth,
-      distance,
-      radius: this.radius,
-    });
-    return isOverStroke;
+    return distanceFromRadius <= halfLineWidth;
   }
 }
