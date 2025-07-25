@@ -23,6 +23,12 @@ export class User {
 
   @Prop({ required: true })
   public passwordHash: string;
+
+  @Prop()
+  public company?: string;
+
+  @Prop()
+  public emailVerifiedAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

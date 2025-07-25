@@ -1,0 +1,145 @@
+{
+  "common": {
+    "loading": "Ładowanie...",
+    "error": "Błąd",
+    "success": "Sukces",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "create": "Utwórz",
+    "close": "Zamknij",
+    "back": "Wstecz",
+    "next": "Dalej",
+    "previous": "Poprzedni",
+    "submit": "Wyślij",
+    "clear": "Wyczyść",
+    "search": "Szukaj",
+    "filter": "Filtruj",
+    "all": "Wszystkie",
+    "none": "Brak",
+    "required": "Wymagane",
+    "optional": "Opcjonalne"
+  },
+  "auth": {
+    "login": {
+      "title": "Witaj ponownie! 👋",
+      "subtitle": "Wprowadź swoje dane, aby uzyskać dostęp do konta",
+      "emailLabel": "Adres email",
+      "passwordLabel": "Hasło",
+      "emailPlaceholder": "Wprowadź swój email",
+      "passwordPlaceholder": "Wprowadź swoje hasło",
+      "loginButton": "Zaloguj się",
+      "loggingIn": "Logowanie...",
+      "noAccount": "Nie masz konta?",
+      "signUpLink": "Zarejestruj się tutaj",
+      "welcomeMessage": "Witaj, {{name}}! 🎉",
+      "loggedInMessage": "Zostałeś pomyślnie zalogowany.",
+      "userInfo": "Informacje o użytkowniku:",
+      "nameLabel": "Imię:",
+      "emailLabel": "Email:",
+      "companyLabel": "Firma:",
+      "logoutButton": "Wyloguj się",
+      "validation": {
+        "emailRequired": "Email jest wymagany",
+        "emailInvalid": "Wprowadź poprawny adres email",
+        "passwordRequired": "Hasło jest wymagane"
+      }
+    },
+    "register": {
+      "title": "Utwórz swoje konto 🚀",
+      "subtitle": "Dołącz do Tech Mentor i rozpocznij zarządzanie projektami",
+      "firstNameLabel": "Imię",
+      "lastNameLabel": "Nazwisko",
+      "companyLabel": "Firma (Opcjonalnie)",
+      "emailLabel": "Adres email",
+      "passwordLabel": "Hasło",
+      "confirmPasswordLabel": "Potwierdź hasło",
+      "firstNamePlaceholder": "Wprowadź swoje imię",
+      "lastNamePlaceholder": "Wprowadź swoje nazwisko",
+      "companyPlaceholder": "Wprowadź nazwę firmy",
+      "emailPlaceholder": "Wprowadź swój email",
+      "passwordPlaceholder": "Utwórz hasło (min 6 znaków)",
+      "confirmPasswordPlaceholder": "Potwierdź swoje hasło",
+      "createAccountButton": "Utwórz konto",
+      "creatingAccount": "Tworzenie konta...",
+      "hasAccount": "Masz już konto?",
+      "signInLink": "Zaloguj się tutaj",
+      "successTitle": "Rejestracja udana! 🎉",
+      "successMessage": "Twoje konto zostało pomyślnie utworzone.",
+      "redirectingMessage": "Przekierowywanie do strony logowania...",
+      "goToLoginLink": "Przejdź do logowania",
+      "validation": {
+        "nameRequired": "Imię jest wymagane",
+        "surnameRequired": "Nazwisko jest wymagane",
+        "emailRequired": "Email jest wymagany",
+        "emailInvalid": "Wprowadź poprawny adres email",
+        "passwordRequired": "Hasło jest wymagane",
+        "passwordTooShort": "Hasło musi mieć co najmniej 6 znaków",
+        "passwordsDoNotMatch": "Hasła nie są identyczne"
+      }
+    }
+  },
+  "projects": {
+    "browser": {
+      "title": "Twoje projekty",
+      "searchPlaceholder": "Szukaj projektów...",
+      "statusFilter": {
+        "all": "Wszystkie statusy",
+        "active": "Aktywny",
+        "completed": "Zakończony",
+        "paused": "Wstrzymany"
+      },
+      "createButton": "Utwórz projekt",
+      "clearFiltersButton": "Wyczyść filtry",
+      "loadingMessage": "Ładowanie projektów...",
+      "noProjectsMessage": "Nie znaleziono projektów.",
+      "noProjectsSubtitle": "Spróbuj dostosować wyszukiwanie lub filtry, lub utwórz nowy projekt.",
+      "projectCard": {
+        "statusLabel": "Status:",
+        "idLabel": "ID:",
+        "noDescription": "Brak opisu"
+      },
+      "selectedProject": {
+        "title": "Szczegóły wybranego projektu",
+        "nameLabel": "Nazwa:",
+        "descriptionLabel": "Opis:",
+        "statusLabel": "Status:",
+        "idLabel": "ID:",
+        "noDescription": "Brak opisu",
+        "openButton": "Otwórz projekt",
+        "editButton": "Edytuj informacje o projekcie"
+      },
+      "createModal": {
+        "title": "Utwórz nowy projekt"
+      }
+    },
+    "createForm": {
+      "successTitle": "Projekt utworzony pomyślnie!",
+      "successMessage": "Twój nowy projekt został dodany do listy projektów.",
+      "nameLabel": "Nazwa projektu *",
+      "descriptionLabel": "Opis projektu *",
+      "statusLabel": "Status projektu *",
+      "namePlaceholder": "Wprowadź nazwę projektu (np. Redesign strony)",
+      "descriptionPlaceholder": "Opisz swój projekt szczegółowo...",
+      "createButton": "Utwórz projekt",
+      "creatingButton": "Tworzenie projektu...",
+      "cancelButton": "Anuluj",
+      "validation": {
+        "nameRequired": "Nazwa projektu jest wymagana",
+        "nameTooShort": "Nazwa projektu musi mieć co najmniej 2 znaki",
+        "statusRequired": "Status projektu jest wymagany",
+        "notLoggedIn": "Musisz być zalogowany, aby utworzyć projekt",
+        "unexpectedError": "Wystąpił nieoczekiwany błąd. Spróbuj ponownie."
+      }
+    }
+  },
+  "modal": {
+    "closeButton": "Zamknij modal"
+  },
+  "language": {
+    "en": "English",
+    "pl": "Polski",
+    "switchLanguage": "Zmień język"
+  }
+}

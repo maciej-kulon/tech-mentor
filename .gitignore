@@ -5,6 +5,7 @@ backend/.env
 # Node modules
 node_modules/
 backend/node_modules/
+web/node_modules/
 
 # Logs
 *.log
@@ -18,4 +19,38 @@ npm-debug.log*
 
 # OS specific files
 .DS_Store
+Thumbs.db
+
+# Angular specific
+/dist/
+/tmp/
+/out-tsc/
+/bazel-out/
+web/dist/
+web/.angular/
+web/.nvmrc
+
+# Dependencies
+web/package-lock.json
+
+# Angular cache and test files
+.angular/cache/
+.sass-cache/
+/connect.lock
+/coverage/
+/libpeerconnection.log
+testem.log
+/typings/
+
+# Compiled output
+*.js.map
+*.css.map
+
+# E2E
+/e2e/*.js
+/e2e/*.map
+
+# System Files
+.DS_Store
 Thumbs.db 
+.cursor/rules/
