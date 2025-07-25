@@ -1,0 +1,471 @@
+/* ═══════════════════════════════════════════════════════════════
+   MODAL COMPONENT STYLES - Complete styling for reusable modal
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL OVERLAY - The backdrop that covers the entire screen
+   ═══════════════════════════════════════════════════════════════ */
+
+.modal-overlay {
+  /* POSITIONING - Cover the entire viewport */
+  position: fixed; /* Fixed positioning removes element from document flow */
+  top: 0; /* Start from top edge */
+  left: 0; /* Start from left edge */
+  right: 0; /* Extend to right edge */
+  bottom: 0; /* Extend to bottom edge */
+
+  /* LAYERING - Appear above all other content */
+  z-index: 1000; /* High z-index ensures modal appears above everything */
+
+  /* BACKGROUND - Semi-transparent dark backdrop */
+  background-color: rgba(0, 0, 0, 0.6); /* Black with 60% opacity */
+
+  /* VISUAL EFFECTS - Modern blur effect behind modal */
+  backdrop-filter: blur(4px); /* Blurs content behind the modal */
+  -webkit-backdrop-filter: blur(4px); /* Safari support */
+
+  /* ANIMATION - Smooth fade-in effect */
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out; /* Smooth opacity change */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL CONTAINER - Centers the modal content on screen
+   ═══════════════════════════════════════════════════════════════ */
+
+.modal-container {
+  /* FLEXBOX CENTERING - Perfect center alignment */
+  display: flex; /* Enable flexbox layout */
+  align-items: center; /* Center vertically */
+  justify-content: center; /* Center horizontally */
+
+  /* FULL SIZE - Take up entire overlay space */
+  width: 100%; /* Full width of overlay */
+  height: 100%; /* Full height of overlay */
+
+  /* SPACING - Padding for smaller screens */
+  padding: 1rem; /* 16px padding on all sides */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL CONTENT - The actual modal box
+   ═══════════════════════════════════════════════════════════════ */
+
+.modal-content {
+  /* SIZING - Responsive width with constraints */
+  width: 100%; /* Full width of container */
+  max-width: 500px; /* But never wider than 500px */
+  max-height: 90vh; /* Never taller than 90% of viewport */
+
+  /* BACKGROUND - More opaque for better readability */
+  background: rgba(30, 30, 30, 0.95); /* Dark background with high opacity */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* More visible border */
+
+  /* VISUAL STYLING - Modern rounded corners and shadow */
+  border-radius: 12px; /* Rounded corners */
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.4),
+    /* Main shadow */ 0 10px 10px -5px rgba(0, 0, 0, 0.2),
+    /* Secondary shadow */ inset 0 1px 0 rgba(255, 255, 255, 0.1); /* Inner highlight */
+
+  /* CONTENT OVERFLOW - Handle long content gracefully */
+  overflow: hidden; /* Hide overflow from children */
+
+  /* ANIMATION - Scale up from small to normal size */
+  transform: scale(1); /* Normal size */
+  transition: transform 0.2s ease-in-out; /* Smooth scaling */
+}
+
+/* ANIMATION STATE - Modal enters with scale effect */
+.modal-content {
+  animation: modalAppear 0.2s ease-out forwards;
+}
+
+/* KEYFRAME ANIMATION - Scale up from 95% to 100% */
+@keyframes modalAppear {
+  from {
+    transform: scale(0.95); /* Start slightly smaller */
+    opacity: 0.8; /* Start slightly transparent */
+  }
+  to {
+    transform: scale(1); /* End at normal size */
+    opacity: 1; /* End fully opaque */
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL HEADER - Title area with close button
+   ═══════════════════════════════════════════════════════════════ */
+
+.modal-header {
+  /* LAYOUT - Flexbox for title and close button */
+  display: flex; /* Enable flexbox */
+  justify-content: space-between; /* Space between title and button */
+  align-items: center; /* Center items vertically */
+
+  /* SPACING - Padding around header content */
+  padding: 1.5rem 1.5rem 1rem 1.5rem; /* Top, right, bottom, left */
+
+  /* BORDER - Subtle separator from body */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL TITLE - The heading text
+   ═══════════════════════════════════════════════════════════════ */
+
+.modal-title {
+  /* TYPOGRAPHY - Large, prominent heading */
+  font-size: 1.5rem; /* 24px - prominent but not overwhelming */
+  font-weight: 600; /* Semi-bold weight */
+  color: #ffffff; /* White text */
+
+  /* SPACING - Remove default margin */
+  margin: 0; /* Remove browser default margin */
+
+  /* FLEXIBILITY - Allow title to grow if needed */
+  flex: 1; /* Take up available space */
+
+  /* TEXT HANDLING - Prevent title from breaking layout */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Show ... if text is too long */
+  white-space: nowrap; /* Don't wrap to next line */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL CLOSE BUTTON - The X button in top right
+   ═══════════════════════════════════════════════════════════════ */
+
+.modal-close-button {
+  /* RESET BUTTON STYLES - Remove browser defaults */
+  background: none; /* No background */
+  border: none; /* No border */
+  cursor: pointer; /* Show pointer cursor */
+
+  /* SIZING - Make it large enough to easily click */
+  width: 40px; /* 40px width */
+  height: 40px; /* 40px height */
+
+  /* VISUAL STYLING - Rounded background on hover */
+  border-radius: 50%; /* Perfect circle */
+
+  /* TYPOGRAPHY - Large X symbol */
+  font-size: 1.5rem; /* 24px - large enough to see clearly */
+  color: #ffffff; /* White color */
+  font-weight: 300; /* Light weight for elegance */
+
+  /* LAYOUT - Center the X symbol */
+  display: flex; /* Enable flexbox */
+  align-items: center; /* Center vertically */
+  justify-content: center; /* Center horizontally */
+
+  /* INTERACTION - Smooth hover effects */
+  transition: all 0.2s ease; /* Smooth transitions */
+}
+
+/* HOVER STATE - Interactive feedback */
+.modal-close-button:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Light background */
+  transform: scale(1.1); /* Slightly larger on hover */
+}
+
+/* ACTIVE STATE - Click feedback */
+.modal-close-button:active {
+  transform: scale(0.95); /* Slightly smaller when clicked */
+}
+
+/* FOCUS STATE - Keyboard accessibility */
+.modal-close-button:focus {
+  outline: 2px solid #3b82f6; /* Blue outline for keyboard users */
+  outline-offset: 2px; /* Space between button and outline */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL BODY - The main content area
+   ═══════════════════════════════════════════════════════════════ */
+
+.modal-body {
+  /* SPACING - Comfortable padding around content */
+  padding: 1.5rem; /* 24px padding on all sides */
+
+  /* SCROLLING - Handle overflow content */
+  overflow-y: auto; /* Vertical scrolling if content is too tall */
+  max-height: calc(90vh - 120px); /* Subtract header height from max height */
+
+  /* SCROLLBAR STYLING - Custom scrollbar for consistency */
+  scrollbar-width: thin; /* Firefox: thin scrollbar */
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox: colors */
+}
+
+/* WEBKIT SCROLLBAR - Chrome, Safari, Edge */
+.modal-body::-webkit-scrollbar {
+  width: 6px; /* Thin scrollbar */
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: transparent; /* Transparent track */
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3); /* Semi-transparent thumb */
+  border-radius: 3px; /* Rounded scrollbar thumb */
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.5); /* Darker on hover */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORM STYLES INSIDE MODAL - Inherit from your existing form styles
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Form groups inside modal */
+.modal-body .form-group {
+  margin-bottom: 1.5rem; /* Space between form fields */
+}
+
+/* Labels inside modal */
+.modal-body label {
+  display: block; /* Full width labels */
+  color: #ffffff; /* White text */
+  font-weight: 500; /* Medium weight */
+  margin-bottom: 0.5rem; /* Space below label */
+  font-size: 0.875rem; /* Slightly smaller text */
+}
+
+/* Input fields inside modal */
+.modal-body input[type="text"],
+.modal-body input[type="email"],
+.modal-body textarea,
+.modal-body select {
+  /* SIZING - Full width inputs */
+  width: 100%; /* Full width of container */
+
+  /* STYLING - More visible form inputs */
+  background: rgba(40, 40, 40, 0.8); /* Darker, more opaque background */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* More visible border */
+  border-radius: 8px; /* Rounded corners */
+
+  /* TYPOGRAPHY - Readable text */
+  color: #ffffff; /* White text */
+  font-size: 1rem; /* Standard text size */
+
+  /* SPACING - Comfortable padding */
+  padding: 0.75rem 1rem; /* 12px top/bottom, 16px left/right */
+
+  /* INTERACTION - Smooth focus effects */
+  transition: all 0.2s ease; /* Smooth transitions */
+
+  /* SIZING - Consistent box model */
+  box-sizing: border-box; /* Include padding and border in width */
+}
+
+/* FOCUS STATE - When user clicks/tabs to input */
+.modal-body input:focus,
+.modal-body textarea:focus,
+.modal-body select:focus {
+  outline: none; /* Remove browser default outline */
+  border-color: #3b82f6; /* Blue border when focused */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* More visible blue glow */
+  background: rgba(
+    50,
+    50,
+    50,
+    0.9
+  ); /* Slightly lighter background when focused */
+}
+
+/* PLACEHOLDER TEXT - Styling for placeholder text */
+.modal-body input::placeholder,
+.modal-body textarea::placeholder {
+  color: rgba(255, 255, 255, 0.7); /* More visible placeholder text */
+  font-style: italic; /* Italicize placeholder for better distinction */
+}
+
+/* TEXTAREA SPECIFIC - Prevent horizontal resize */
+.modal-body textarea {
+  resize: vertical; /* Only allow vertical resizing */
+  min-height: 80px; /* Minimum height for usability */
+  font-family: inherit; /* Use same font as other inputs */
+  line-height: 1.5; /* Better line spacing for readability */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+/* SELECT DROPDOWN - Special styling for dropdowns */
+.modal-body select {
+  cursor: pointer; /* Show pointer cursor */
+}
+
+/* DISABLED FORM ELEMENTS - Styling for disabled inputs */
+.modal-body input:disabled,
+.modal-body textarea:disabled,
+.modal-body select:disabled {
+  background: rgba(20, 20, 20, 0.6); /* Darker background when disabled */
+  color: rgba(255, 255, 255, 0.5); /* Dimmed text when disabled */
+  border-color: rgba(255, 255, 255, 0.1); /* Subtle border when disabled */
+  cursor: not-allowed; /* Show not-allowed cursor */
+}
+
+/* ERROR MESSAGES - Style validation errors */
+.modal-body .error-message {
+  color: #ef4444; /* Red color for errors */
+  font-size: 0.875rem; /* Smaller text */
+  margin-top: 0.5rem; /* Space above error */
+  display: block; /* Full width */
+}
+
+/* BUTTONS INSIDE MODAL - Action buttons styling */
+.modal-body button {
+  /* SPACING - Margin between buttons */
+  margin-right: 0.75rem; /* Space to the right */
+  margin-top: 1rem; /* Space above buttons */
+}
+
+/* PRIMARY BUTTON - Main action button */
+.modal-body .btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8); /* Blue gradient */
+  color: white; /* White text */
+  border: none; /* No border */
+  padding: 0.75rem 1.5rem; /* Comfortable padding */
+  border-radius: 8px; /* Rounded corners */
+  font-weight: 500; /* Medium weight */
+  cursor: pointer; /* Pointer cursor */
+  transition: all 0.2s ease; /* Smooth transitions */
+}
+
+.modal-body .btn-primary:hover {
+  transform: translateY(-1px); /* Slight lift on hover */
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); /* Blue shadow */
+}
+
+/* SECONDARY BUTTON - Cancel/close button */
+.modal-body .btn-secondary {
+  background: rgba(60, 60, 60, 0.8); /* Darker background to match inputs */
+  color: #ffffff; /* White text */
+  border: 1px solid rgba(255, 255, 255, 0.4); /* More visible border */
+  padding: 0.75rem 1.5rem; /* Same padding as primary */
+  border-radius: 8px; /* Rounded corners */
+  font-weight: 500; /* Medium weight */
+  cursor: pointer; /* Pointer cursor */
+  transition: all 0.2s ease; /* Smooth transitions */
+}
+
+.modal-body .btn-secondary:hover {
+  background: rgba(80, 80, 80, 0.9); /* Lighter on hover */
+  border-color: rgba(255, 255, 255, 0.6); /* Brighter border on hover */
+}
+
+/* DISABLED BUTTONS - Styling for disabled buttons */
+.modal-body .btn-primary:disabled,
+.modal-body .btn-secondary:disabled {
+  opacity: 0.6; /* Reduce opacity when disabled */
+  cursor: not-allowed; /* Show not-allowed cursor */
+  transform: none; /* Disable hover transforms */
+}
+
+.modal-body .btn-primary:disabled:hover,
+.modal-body .btn-secondary:disabled:hover {
+  transform: none; /* Disable hover effects when disabled */
+  box-shadow: none; /* Remove hover shadows when disabled */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN - Mobile and tablet adjustments
+   ═══════════════════════════════════════════════════════════════ */
+
+/* TABLET BREAKPOINT - Medium screens */
+@media (max-width: 768px) {
+  .modal-content {
+    max-width: 90%; /* Wider on tablets */
+    margin: 1rem; /* Margin around modal */
+  }
+
+  .modal-header {
+    padding: 1rem; /* Less padding on smaller screens */
+  }
+
+  .modal-body {
+    padding: 1rem; /* Less padding on smaller screens */
+  }
+}
+
+/* MOBILE BREAKPOINT - Small screens */
+@media (max-width: 480px) {
+  .modal-container {
+    padding: 0.5rem; /* Less padding on mobile */
+  }
+
+  .modal-content {
+    max-width: 100%; /* Full width on mobile */
+    max-height: 95vh; /* More height on mobile */
+  }
+
+  .modal-header {
+    padding: 1rem 1rem 0.5rem 1rem; /* Adjust padding */
+  }
+
+  .modal-title {
+    font-size: 1.25rem; /* Slightly smaller title */
+  }
+
+  .modal-close-button {
+    width: 36px; /* Smaller close button */
+    height: 36px;
+    font-size: 1.25rem; /* Smaller X */
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESSIBILITY IMPROVEMENTS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* REDUCED MOTION - Respect user preferences */
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-content,
+  .modal-close-button,
+  .modal-body button {
+    transition: none; /* Disable animations for sensitive users */
+  }
+
+  .modal-content {
+    animation: none; /* Disable scale animation */
+  }
+}
+
+/* HIGH CONTRAST - Better visibility for users who need it */
+@media (prefers-contrast: high) {
+  .modal-content {
+    border: 2px solid #ffffff; /* Stronger border */
+  }
+
+  .modal-close-button:focus {
+    outline: 3px solid #ffffff; /* Stronger focus outline */
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CSS ARCHITECTURE NOTES:
+   ═══════════════════════════════════════════════════════════════ */
+
+/*
+KEY CSS CONCEPTS USED HERE:
+
+1. POSITIONING - Fixed positioning for overlay coverage
+2. FLEXBOX - Modern layout for centering and alignment  
+3. Z-INDEX - Layering modal above other content
+4. TRANSITIONS - Smooth animations for better UX
+5. RESPONSIVE DESIGN - Mobile-first responsive breakpoints
+6. ACCESSIBILITY - Focus states, reduced motion, high contrast
+7. COMPONENT SCOPING - All styles scoped to .modal- classes
+8. MODERN CSS - backdrop-filter, CSS custom properties concepts
+9. INTERACTION STATES - Hover, focus, active states
+10. SCROLLBAR STYLING - Custom scrollbars for consistency
+
+This CSS follows BEM-like naming and is designed to be:
+- Reusable across different modal content
+- Accessible to all users
+- Responsive across all devices  
+- Consistent with your app's design system
+- Maintainable and well-documented
+*/
