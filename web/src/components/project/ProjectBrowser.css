@@ -1,0 +1,547 @@
+/* ═══════════════════════════════════════════════════════════════
+   PROJECT BROWSER COMPONENT STYLES
+   ═══════════════════════════════════════════════════════════════
+   
+   This CSS file styles the ProjectBrowser React component.
+   It follows the same design system as LoginForm and RegisterForm,
+   using glassmorphism effects and responsive design principles.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN CONTAINER - Central layout for the entire page
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Main container - provides consistent spacing and max width */
+.project-browser {
+  padding: 2rem; /* Space around all edges */
+  max-width: 1200px; /* Maximum width for readability */
+  margin: 0 auto; /* Center horizontally */
+  min-height: 100vh; /* Full viewport height */
+}
+
+/* Page header styling */
+.project-browser h1 {
+  margin: 0 0 2rem 0; /* Remove top margin, add bottom spacing */
+  text-align: center; /* Center the title */
+  color: inherit; /* Inherit color from parent (adapts to theme) */
+  font-size: 2.5rem; /* Large, prominent title */
+  font-weight: 600; /* Semi-bold */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ERROR DISPLAY - Consistent error messaging
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Error container - matches LoginForm error styling */
+.error-container {
+  background: rgba(220, 53, 69, 0.1); /* Light red background */
+  border: 1px solid rgba(220, 53, 69, 0.3); /* Red border */
+  padding: 1rem; /* Inner spacing */
+  border-radius: 8px; /* Rounded corners */
+  margin-bottom: 2rem; /* Space below error */
+  backdrop-filter: blur(10px); /* Glassmorphism effect */
+}
+
+.error-message {
+  color: #ff6b7a; /* Red text color - matches LoginForm */
+  margin: 0 0 0.5rem 0; /* Space below message */
+  font-size: 0.9rem; /* Slightly smaller text */
+}
+
+/* Error clear button - subtle styling */
+.error-clear-button {
+  background: transparent; /* No background */
+  border: 1px solid rgba(220, 53, 69, 0.5); /* Red border */
+  color: #ff6b7a; /* Red text */
+  padding: 0.5rem 1rem; /* Inner spacing */
+  border-radius: 6px; /* Rounded corners */
+  font-size: 0.8rem; /* Small text */
+  cursor: pointer; /* Pointer cursor */
+  transition: all 0.25s; /* Smooth transitions */
+}
+
+.error-clear-button:hover {
+  background: rgba(220, 53, 69, 0.2); /* Light red background on hover */
+  border-color: #ff6b7a; /* Brighter border */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTROLS SECTION - Search, filters, and action buttons
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Controls container - flexible layout for form controls */
+.controls-section {
+  display: flex; /* Flexbox layout */
+  gap: 1rem; /* Space between elements */
+  margin-bottom: 2rem; /* Space below controls */
+  align-items: center; /* Vertically center items */
+  flex-wrap: wrap; /* Wrap to new line on small screens */
+
+  /* Glassmorphism container effect */
+  background: rgba(255, 255, 255, 0.05); /* Semi-transparent background */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+  border-radius: 12px; /* Rounded corners */
+  padding: 1.5rem; /* Inner spacing */
+  backdrop-filter: blur(10px); /* Blur effect */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORM INPUTS - Search and filter controls
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Search input - matches LoginForm input styling */
+.search-input {
+  padding: 0.75rem 1rem; /* Inner spacing */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+  border-radius: 8px; /* Rounded corners */
+  background: rgba(255, 255, 255, 0.05); /* Semi-transparent background */
+  color: inherit; /* Text color inherits from parent */
+  font-size: 1rem; /* Standard font size */
+  min-width: 200px; /* Minimum width */
+  flex: 1; /* Grow to fill available space */
+
+  /* Smooth transitions for interactive states */
+  transition:
+    border-color 0.25s,
+    background-color 0.25s;
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+/* Search input focus state */
+.search-input:focus {
+  outline: none; /* Remove default browser outline */
+  border-color: #646cff; /* Blue border when focused */
+  background: rgba(255, 255, 255, 0.1); /* More opaque background */
+}
+
+/* Search input placeholder text */
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5); /* Semi-transparent placeholder */
+}
+
+/* Status filter dropdown - consistent with search input */
+.status-filter {
+  padding: 0.75rem 1rem; /* Inner spacing */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+  border-radius: 8px; /* Rounded corners */
+  background: rgba(255, 255, 255, 0.05); /* Semi-transparent background */
+  color: inherit; /* Text color inherits */
+  font-size: 1rem; /* Standard font size */
+  cursor: pointer; /* Pointer cursor */
+
+  /* Smooth transitions */
+  transition:
+    border-color 0.25s,
+    background-color 0.25s;
+  box-sizing: border-box; /* Include padding in width */
+}
+
+.status-filter:focus {
+  outline: none; /* Remove default outline */
+  border-color: #646cff; /* Blue border when focused */
+  background: rgba(255, 255, 255, 0.1); /* More opaque background */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS - Consistent button styling system
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Base button styles - shared by all buttons */
+.btn {
+  padding: 0.75rem 1.5rem; /* Inner spacing */
+  border: none; /* Remove default border */
+  border-radius: 8px; /* Rounded corners */
+  font-size: 1rem; /* Standard font size */
+  font-weight: 500; /* Medium bold */
+  cursor: pointer; /* Pointer cursor */
+
+  /* Smooth transitions for all interactive effects */
+  transition:
+    background-color 0.25s,
+    opacity 0.25s,
+    transform 0.1s;
+
+  /* Prevent text selection on buttons */
+  user-select: none;
+}
+
+/* Primary button - main call-to-action styling */
+.btn-primary {
+  background: #646cff; /* Blue background - matches LoginForm */
+  color: white; /* White text */
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #535bf2; /* Darker blue on hover */
+  transform: translateY(-1px); /* Subtle lift effect */
+}
+
+/* Secondary button - less prominent actions */
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+  color: inherit; /* Inherit text color */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2); /* More opaque on hover */
+  border-color: #646cff; /* Blue border on hover */
+  transform: translateY(-1px); /* Subtle lift effect */
+}
+
+/* Disabled button state */
+.btn:disabled {
+  opacity: 0.6; /* Faded appearance */
+  cursor: not-allowed; /* Show "not allowed" cursor */
+  transform: none; /* No hover effects when disabled */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOADING STATE - User feedback during data fetching
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Loading container - centered loading message */
+.loading-container {
+  text-align: center; /* Center the text */
+  padding: 3rem; /* Generous spacing */
+
+  /* Glassmorphism effect for loading state */
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.loading-container p {
+  margin: 0; /* Remove default margin */
+  color: rgba(255, 255, 255, 0.7); /* Semi-transparent text */
+  font-size: 1.1rem; /* Slightly larger text */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROJECTS GRID - Main content display area
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Projects grid container - responsive grid layout */
+.projects-grid {
+  display: grid; /* CSS Grid layout */
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(320px, 1fr)
+  ); /* Responsive columns */
+  gap: 1.5rem; /* Space between grid items */
+  margin-bottom: 2rem; /* Space below grid */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EMPTY STATE - When no projects are found
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Empty state container - spans full grid width */
+.empty-state {
+  grid-column: 1 / -1; /* Span all grid columns */
+  text-align: center; /* Center the content */
+  padding: 3rem; /* Generous spacing */
+
+  /* Glassmorphism effect */
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.empty-state p {
+  margin: 0 0 0.5rem 0; /* Space between paragraphs */
+  color: rgba(255, 255, 255, 0.7); /* Semi-transparent text */
+}
+
+.empty-state .subtitle {
+  font-size: 0.9rem; /* Smaller subtitle text */
+  color: rgba(255, 255, 255, 0.5); /* More transparent */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROJECT CARDS - Individual project display
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Project card - glassmorphism design with hover effects */
+.project-card {
+  /* Glassmorphism base styling */
+  background: rgba(255, 255, 255, 0.05); /* Semi-transparent background */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+  border-radius: 12px; /* Rounded corners */
+  padding: 1.5rem; /* Inner spacing */
+  cursor: pointer; /* Pointer cursor to indicate clickability */
+  backdrop-filter: blur(10px); /* Blur effect */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+
+  /* Smooth transitions for all interactive effects */
+  transition: all 0.25s ease;
+}
+
+/* Project card hover effect - subtle animation */
+.project-card:hover {
+  transform: translateY(-4px); /* Lift effect on hover */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+  border-color: rgba(255, 255, 255, 0.2); /* Brighter border */
+}
+
+/* Selected project card - highlighted state */
+.project-card.selected {
+  border: 2px solid #646cff; /* Blue border for selection */
+  background: rgba(100, 108, 255, 0.1); /* Light blue background */
+  box-shadow: 0 0 0 4px rgba(100, 108, 255, 0.2); /* Blue glow effect */
+}
+
+/* Project card title */
+.project-card-title {
+  margin: 0 0 1rem 0; /* Space below title */
+  color: inherit; /* Inherit color from parent */
+  font-size: 1.25rem; /* Larger text for title */
+  font-weight: 600; /* Semi-bold */
+  line-height: 1.3; /* Comfortable line spacing */
+}
+
+/* Project card description */
+.project-card-description {
+  margin: 0 0 1rem 0; /* Space below description */
+  color: rgba(255, 255, 255, 0.7); /* Semi-transparent text */
+  font-size: 0.9rem; /* Smaller text */
+  line-height: 1.5; /* Good readability */
+}
+
+/* Project card metadata (status, ID) */
+.project-card-meta {
+  display: flex; /* Flexbox layout */
+  justify-content: space-between; /* Space items apart */
+  align-items: center; /* Vertically center */
+  font-size: 0.8rem; /* Small text */
+  color: rgba(255, 255, 255, 0.5); /* Very transparent text */
+  padding-top: 1rem; /* Space above metadata */
+  border-top: 1px solid rgba(255, 255, 255, 0.1); /* Subtle separator line */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SELECTED PROJECT DETAILS - Expanded project information
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Selected project details container */
+.selected-project-details {
+  margin-top: 2rem; /* Space above details */
+
+  /* Glassmorphism effect - more prominent than cards */
+  background: rgba(255, 255, 255, 0.08); /* Slightly more opaque */
+  border: 1px solid rgba(255, 255, 255, 0.15); /* More visible border */
+  border-radius: 12px; /* Rounded corners */
+  padding: 2rem; /* Generous inner spacing */
+  backdrop-filter: blur(15px); /* Enhanced blur effect */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+}
+
+/* Selected project title */
+.selected-project-title {
+  margin: 0 0 1.5rem 0; /* Space below title */
+  color: inherit; /* Inherit color */
+  font-size: 1.5rem; /* Large title */
+  font-weight: 600; /* Semi-bold */
+}
+
+/* Grid layout for project details */
+.selected-project-grid {
+  display: grid; /* CSS Grid layout */
+  grid-template-columns: 150px 1fr; /* Fixed label width, flexible value */
+  gap: 0.75rem; /* Space between grid items */
+  margin-bottom: 1.5rem; /* Space below grid */
+}
+
+/* Project detail labels */
+.selected-project-label {
+  font-weight: 600; /* Bold labels */
+  color: rgba(255, 255, 255, 0.9); /* High contrast */
+}
+
+/* Project detail values */
+.selected-project-value {
+  color: rgba(255, 255, 255, 0.7); /* Medium contrast */
+}
+
+/* Action buttons container for selected project */
+.selected-project-actions {
+  display: flex; /* Flexbox layout */
+  gap: 1rem; /* Space between buttons */
+  margin-top: 1.5rem; /* Space above buttons */
+  flex-wrap: wrap; /* Wrap buttons on small screens */
+}
+
+/* Ensure action buttons have consistent width on larger screens */
+.selected-project-actions .btn {
+  flex: 1; /* Equal width distribution */
+  min-width: 140px; /* Minimum button width */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN - Light mode adaptations
+   ═══════════════════════════════════════════════════════════════
+   
+   These styles adapt the component for users who prefer light mode.
+   They maintain the same glassmorphism effect but with inverted colors.
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: light) {
+  /* Controls section light mode */
+  .controls-section {
+    background: rgba(255, 255, 255, 0.8); /* More opaque white */
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Dark border */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); /* Softer shadow */
+  }
+
+  /* Input fields light mode */
+  .search-input,
+  .status-filter {
+    border: 1px solid rgba(0, 0, 0, 0.2); /* Dark border */
+    background: rgba(0, 0, 0, 0.02); /* Very light background */
+  }
+
+  .search-input:focus,
+  .status-filter:focus {
+    background: rgba(0, 0, 0, 0.05); /* Slightly darker when focused */
+  }
+
+  .search-input::placeholder {
+    color: rgba(0, 0, 0, 0.5); /* Dark placeholder text */
+  }
+
+  /* Secondary buttons light mode */
+  .btn-secondary {
+    background: rgba(0, 0, 0, 0.05); /* Light background */
+    border: 1px solid rgba(0, 0, 0, 0.2); /* Dark border */
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.1); /* Darker on hover */
+    border-color: #646cff; /* Blue border on hover */
+  }
+
+  /* Loading container light mode */
+  .loading-container {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .loading-container p {
+    color: rgba(0, 0, 0, 0.7); /* Dark text */
+  }
+
+  /* Empty state light mode */
+  .empty-state {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .empty-state p {
+    color: rgba(0, 0, 0, 0.7); /* Dark text */
+  }
+
+  .empty-state .subtitle {
+    color: rgba(0, 0, 0, 0.5); /* Darker subtitle */
+  }
+
+  /* Project cards light mode */
+  .project-card {
+    background: rgba(255, 255, 255, 0.8); /* More opaque white */
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Dark border */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); /* Softer shadow */
+  }
+
+  .project-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); /* Enhanced but softer shadow */
+    border-color: rgba(0, 0, 0, 0.2); /* Darker border on hover */
+  }
+
+  .project-card-description {
+    color: rgba(0, 0, 0, 0.7); /* Dark text */
+  }
+
+  .project-card-meta {
+    color: rgba(0, 0, 0, 0.5); /* Dark metadata text */
+    border-top: 1px solid rgba(0, 0, 0, 0.1); /* Dark separator */
+  }
+
+  /* Selected project details light mode */
+  .selected-project-details {
+    background: rgba(255, 255, 255, 0.9); /* More opaque */
+    border: 1px solid rgba(0, 0, 0, 0.15); /* Dark border */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  }
+
+  .selected-project-label {
+    color: rgba(0, 0, 0, 0.9); /* Dark labels */
+  }
+
+  .selected-project-value {
+    color: rgba(0, 0, 0, 0.7); /* Dark values */
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS - Mobile and tablet adaptations
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Tablet and small desktop */
+@media (max-width: 768px) {
+  .project-browser {
+    padding: 1rem; /* Reduced padding on smaller screens */
+  }
+
+  .project-browser h1 {
+    font-size: 2rem; /* Smaller title on mobile */
+  }
+
+  .controls-section {
+    flex-direction: column; /* Stack controls vertically */
+    align-items: stretch; /* Full width controls */
+  }
+
+  .search-input {
+    min-width: auto; /* Remove minimum width constraint */
+  }
+
+  .projects-grid {
+    grid-template-columns: 1fr; /* Single column on mobile */
+    gap: 1rem; /* Reduced gap */
+  }
+
+  .selected-project-grid {
+    grid-template-columns: 1fr; /* Single column layout */
+    gap: 0.5rem; /* Reduced gap */
+  }
+
+  .selected-project-label {
+    margin-bottom: 0.25rem; /* Space below labels */
+  }
+
+  /* Action buttons stack vertically on mobile */
+  .selected-project-actions {
+    flex-direction: column; /* Stack buttons vertically */
+  }
+
+  .selected-project-actions .btn {
+    flex: none; /* Remove flex growth */
+    min-width: auto; /* Remove minimum width */
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KEY REACT + CSS CONCEPTS DEMONSTRATED:
+   ═══════════════════════════════════════════════════════════════
+   
+   1. COMPONENT-SCOPED STYLES: This CSS file only affects ProjectBrowser
+   2. GLASSMORPHISM: Semi-transparent backgrounds with backdrop-blur
+   3. RESPONSIVE DESIGN: Adapts to screen size and color scheme preferences
+   4. CSS GRID: Modern layout system for responsive card layouts
+   5. CSS TRANSITIONS: Smooth animations for better user experience
+   6. CSS CUSTOM PROPERTIES: Could be enhanced with CSS variables
+   7. ACCESSIBILITY: Focus states and proper contrast ratios
+   8. MOBILE-FIRST: Responsive breakpoints for different screen sizes
+   ═══════════════════════════════════════════════════════════════ */

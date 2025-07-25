@@ -1,0 +1,234 @@
+/* ═══════════════════════════════════════════════════════════════
+   CSS FOR REACT COMPONENTS
+   ═══════════════════════════════════════════════════════════════
+   
+   In React, CSS works the same as regular CSS, but with some differences:
+   1. We import CSS files in JavaScript/TypeScript files
+   2. CSS class names are applied using "className" instead of "class"
+   3. Styles are scoped to components (this CSS only affects LoginForm)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Main container - centers the login form on the page */
+.login-container {
+  display: flex; /* Flexbox for centering */
+  align-items: center; /* Center vertically */
+  justify-content: center; /* Center horizontally */
+  min-height: 100vh; /* Full viewport height */
+  padding: 2rem; /* Space around edges */
+}
+
+/* The login form card */
+.login-form {
+  /* Modern glassmorphism effect - semi-transparent background with blur */
+  background: rgba(255, 255, 255, 0.05); /* Semi-transparent white */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+  border-radius: 12px; /* Rounded corners */
+  padding: 2.5rem; /* Inner spacing */
+  width: 100%; /* Full width of container */
+  max-width: 400px; /* But never wider than 400px */
+  backdrop-filter: blur(10px); /* Blur effect behind the form */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Drop shadow */
+}
+
+/* Form title styling */
+.login-form h2 {
+  margin: 0 0 2rem 0; /* Remove default margin, add bottom margin */
+  text-align: center; /* Center the text */
+  color: inherit; /* Use parent's text color (adapts to theme) */
+  font-size: 2rem; /* Large font size */
+}
+
+/* Container for each form field (label + input) */
+.form-group {
+  margin-bottom: 1.5rem; /* Space between form fields */
+}
+
+/* Labels for form inputs */
+.form-group label {
+  display: block; /* Label takes full width */
+  margin-bottom: 0.5rem; /* Space between label and input */
+  font-weight: 500; /* Medium bold text */
+  color: inherit; /* Inherit color from parent */
+}
+
+/* Input field styling */
+.form-group input {
+  width: 100%; /* Full width of parent */
+  padding: 0.75rem 1rem; /* Inner spacing (top/bottom left/right) */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+  border-radius: 8px; /* Rounded corners */
+  background: rgba(255, 255, 255, 0.05); /* Semi-transparent background */
+  color: inherit; /* Text color inherits from parent */
+  font-size: 1rem; /* Standard font size */
+
+  /* CSS transitions - smooth animation when properties change */
+  transition:
+    border-color 0.25s,
+    background-color 0.25s;
+
+  box-sizing: border-box; /* Include padding/border in width calculation */
+}
+
+/* Input styling when focused (user clicks/tabs to it) */
+.form-group input:focus {
+  outline: none; /* Remove default browser outline */
+  border-color: #646cff; /* Blue border when focused */
+  background: rgba(255, 255, 255, 0.1); /* Slightly more opaque background */
+}
+
+/* Input styling when disabled (during API calls) */
+.form-group input:disabled {
+  opacity: 0.6; /* Make it look faded */
+  cursor: not-allowed; /* Show "not allowed" cursor */
+}
+
+/* Placeholder text styling */
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.5); /* Semi-transparent placeholder text */
+}
+
+/* Error message styling */
+.error-message {
+  background: rgba(220, 53, 69, 0.1); /* Light red background */
+  border: 1px solid rgba(220, 53, 69, 0.3); /* Red border */
+  color: #ff6b7a; /* Red text color */
+  padding: 0.75rem; /* Inner spacing */
+  border-radius: 6px; /* Rounded corners */
+  margin-bottom: 1rem; /* Space below error message */
+  font-size: 0.9rem; /* Slightly smaller text */
+}
+
+/* Submit button styling */
+.submit-btn {
+  width: 100%; /* Full width */
+  padding: 0.75rem 1.5rem; /* Inner spacing */
+  background: #646cff; /* Blue background */
+  color: white; /* White text */
+  border: none; /* Remove default border */
+  border-radius: 8px; /* Rounded corners */
+  font-size: 1rem; /* Standard font size */
+  font-weight: 500; /* Medium bold */
+  cursor: pointer; /* Show pointer cursor on hover */
+
+  /* Smooth transitions for hover effects */
+  transition:
+    background-color 0.25s,
+    opacity 0.25s;
+
+  margin-bottom: 1rem; /* Space below button */
+}
+
+/* Submit button hover effect (when not disabled) */
+.submit-btn:hover:not(:disabled) {
+  background: #535bf2; /* Darker blue on hover */
+}
+
+/* Submit button when disabled (during loading) */
+.submit-btn:disabled {
+  opacity: 0.6; /* Faded appearance */
+  cursor: not-allowed; /* Show "not allowed" cursor */
+}
+
+/* Logout button styling (different style from submit) */
+.logout-btn {
+  width: 100%; /* Full width */
+  padding: 0.75rem 1.5rem; /* Inner spacing */
+  background: transparent; /* No background color */
+  color: inherit; /* Inherit text color */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+  border-radius: 8px; /* Rounded corners */
+  font-size: 1rem; /* Standard font size */
+  font-weight: 500; /* Medium bold */
+  cursor: pointer; /* Pointer cursor */
+
+  /* Smooth transitions */
+  transition:
+    border-color 0.25s,
+    background-color 0.25s;
+}
+
+/* Logout button hover effect */
+.logout-btn:hover {
+  border-color: #646cff; /* Blue border on hover */
+  background: rgba(100, 108, 255, 0.1); /* Light blue background */
+}
+
+/* Help section styling */
+.login-help {
+  text-align: center; /* Center the text */
+  margin-top: 1.5rem; /* Space above help section */
+}
+
+/* Help text styling */
+.login-help p {
+  color: rgba(255, 255, 255, 0.6); /* Semi-transparent text */
+  font-size: 0.9rem; /* Smaller font size */
+  margin: 0; /* Remove default margin */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN - Light mode adjustments
+   ═══════════════════════════════════════════════════════════════
+   
+   @media queries detect user's system theme preference
+   This adjusts colors for users who prefer light mode
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: light) {
+  /* Form styling for light mode */
+  .login-form {
+    background: rgba(255, 255, 255, 0.8); /* More opaque white background */
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Dark border */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  }
+
+  /* Input styling for light mode */
+  .form-group input {
+    border: 1px solid rgba(0, 0, 0, 0.2); /* Dark border */
+    background: rgba(0, 0, 0, 0.02); /* Very light background */
+  }
+
+  .form-group input:focus {
+    background: rgba(0, 0, 0, 0.05); /* Slightly darker when focused */
+  }
+
+  /* Placeholder text for light mode */
+  .form-group input::placeholder {
+    color: rgba(0, 0, 0, 0.5); /* Dark placeholder text */
+  }
+
+  /* Logout button for light mode */
+  .logout-btn {
+    border: 1px solid rgba(0, 0, 0, 0.2); /* Dark border */
+  }
+
+  .logout-btn:hover {
+    border-color: #646cff; /* Blue border on hover */
+    background: rgba(100, 108, 255, 0.05); /* Light blue background */
+  }
+
+  /* Help text for light mode */
+  .login-help p {
+    color: rgba(0, 0, 0, 0.6); /* Dark text */
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KEY CSS CONCEPTS FOR REACT DEVELOPERS:
+   ═══════════════════════════════════════════════════════════════
+   
+   1. CLASS NAMES: In JSX, use "className" instead of "class"
+      Example: <div className="login-form">
+   
+   2. CSS MODULES: Each component can have its own CSS file
+      This helps organize styles and prevents conflicts
+   
+   3. RESPONSIVE DESIGN: Use @media queries to adapt to different screens
+      prefers-color-scheme detects user's light/dark mode preference
+   
+   4. CSS VARIABLES: You can use CSS custom properties for theming
+      Example: color: var(--primary-color);
+   
+   5. PSEUDO-CLASSES: :hover, :focus, :disabled change appearance based on state
+      These provide visual feedback to users
+   ═══════════════════════════════════════════════════════════════ */

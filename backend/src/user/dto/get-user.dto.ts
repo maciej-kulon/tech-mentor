@@ -3,6 +3,5 @@ export class GetUserResponseDto {
   public readonly name: string;
   public readonly surname: string;
   public readonly email: string;
-  public readonly createdAt: Date;
-  public readonly updatedAt: Date;
+  public readonly company?: string;
 }

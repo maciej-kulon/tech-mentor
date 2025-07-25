@@ -1,0 +1,85 @@
+name: Extract Types
+
+on:
+  push:
+    branches:
+      - "feature/**"
+      - "feat/**"
+      - "bugfix/**"
+      - "fix/**"
+      - "hotfix/**"
+      - "release/**"
+    paths:
+      - "backend/src/**/*.dto.ts"
+      - "backend/src/**/*.enum.ts"
+      - "backend/src/**/*.controller.ts"
+      - "backend/scripts/extract-*.js"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  extract-types:
+    name: Extract Types
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.14.0"
+          cache: "npm"
+          cache-dependency-path: ./backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Extract types and endpoints
+        run: npm run extract-all
+
+      - name: Check for changes
+        id: check-changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Changed files:"
+            git status --porcelain
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configure Git
+        if: steps.check-changes.outputs.changes == 'true'
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Commit and push changes
+        if: steps.check-changes.outputs.changes == 'true'
+        run: |
+          git add -A
+          git commit -m "chore: auto-generate types from backend DTOs and endpoints [skip ci]"
+          git push origin ${{ github.ref }}
+
+      - name: No changes detected
+        if: steps.check-changes.outputs.changes == 'false'
+        run: echo "✅ No type changes detected - skipping commit"
+
+      - name: Summary
+        run: |
+          echo "🎉 Type extraction completed successfully!"
+          echo "📁 Generated files location: web/src/types/generated/"
+          if [ "${{ steps.check-changes.outputs.changes }}" == "true" ]; then
+            echo "✅ Types committed to branch: ${{ github.ref }}"
+          else
+            echo "ℹ️  No changes were needed"
+          fi

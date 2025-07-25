@@ -1,0 +1,145 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "clear": "Clear",
+    "search": "Search",
+    "filter": "Filter",
+    "all": "All",
+    "none": "None",
+    "required": "Required",
+    "optional": "Optional"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back! 👋",
+      "subtitle": "Please enter your credentials to access your account",
+      "emailLabel": "Email Address",
+      "passwordLabel": "Password",
+      "emailPlaceholder": "Enter your email",
+      "passwordPlaceholder": "Enter your password",
+      "loginButton": "Login",
+      "loggingIn": "Logging in...",
+      "noAccount": "Don't have an account?",
+      "signUpLink": "Sign up here",
+      "welcomeMessage": "Welcome, {{name}}! 🎉",
+      "loggedInMessage": "You are successfully logged in.",
+      "userInfo": "User Info:",
+      "nameLabel": "Name:",
+      "emailLabel": "Email:",
+      "companyLabel": "Company:",
+      "logoutButton": "Logout",
+      "validation": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "passwordRequired": "Password is required"
+      }
+    },
+    "register": {
+      "title": "Create Your Account 🚀",
+      "subtitle": "Join Tech Mentor and start managing your projects",
+      "firstNameLabel": "First Name",
+      "lastNameLabel": "Last Name",
+      "companyLabel": "Company (Optional)",
+      "emailLabel": "Email Address",
+      "passwordLabel": "Password",
+      "confirmPasswordLabel": "Confirm Password",
+      "firstNamePlaceholder": "Enter your first name",
+      "lastNamePlaceholder": "Enter your last name",
+      "companyPlaceholder": "Enter your company name",
+      "emailPlaceholder": "Enter your email",
+      "passwordPlaceholder": "Create a password (min 6 characters)",
+      "confirmPasswordPlaceholder": "Confirm your password",
+      "createAccountButton": "Create Account",
+      "creatingAccount": "Creating Account...",
+      "hasAccount": "Already have an account?",
+      "signInLink": "Sign in here",
+      "successTitle": "Registration Successful! 🎉",
+      "successMessage": "Your account has been created successfully.",
+      "redirectingMessage": "Redirecting to login page...",
+      "goToLoginLink": "Go to Login Now",
+      "validation": {
+        "nameRequired": "Name is required",
+        "surnameRequired": "Surname is required",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "passwordRequired": "Password is required",
+        "passwordTooShort": "Password must be at least 6 characters long",
+        "passwordsDoNotMatch": "Passwords do not match"
+      }
+    }
+  },
+  "projects": {
+    "browser": {
+      "title": "Your projects",
+      "searchPlaceholder": "Search projects...",
+      "statusFilter": {
+        "all": "All Statuses",
+        "active": "Active",
+        "completed": "Completed",
+        "paused": "Paused"
+      },
+      "createButton": "Create Project",
+      "clearFiltersButton": "Clear Filters",
+      "loadingMessage": "Loading projects...",
+      "noProjectsMessage": "No projects found.",
+      "noProjectsSubtitle": "Try adjusting your search or filters, or create a new project.",
+      "projectCard": {
+        "statusLabel": "Status:",
+        "idLabel": "ID:",
+        "noDescription": "No description available"
+      },
+      "selectedProject": {
+        "title": "Selected Project Details",
+        "nameLabel": "Name:",
+        "descriptionLabel": "Description:",
+        "statusLabel": "Status:",
+        "idLabel": "ID:",
+        "noDescription": "No description",
+        "openButton": "Open Project",
+        "editButton": "Edit Project Info"
+      },
+      "createModal": {
+        "title": "Create New Project"
+      }
+    },
+    "createForm": {
+      "successTitle": "Project Created Successfully!",
+      "successMessage": "Your new project has been added to your project list.",
+      "nameLabel": "Project Name *",
+      "descriptionLabel": "Project Description *",
+      "statusLabel": "Project Status *",
+      "namePlaceholder": "Enter project name (e.g., Website Redesign)",
+      "descriptionPlaceholder": "Describe your project in detail...",
+      "createButton": "Create Project",
+      "creatingButton": "Creating Project...",
+      "cancelButton": "Cancel",
+      "validation": {
+        "nameRequired": "Project name is required",
+        "nameTooShort": "Project name must be at least 2 characters long",
+        "statusRequired": "Project status is required",
+        "notLoggedIn": "You must be logged in to create a project",
+        "unexpectedError": "An unexpected error occurred. Please try again."
+      }
+    }
+  },
+  "modal": {
+    "closeButton": "Close modal"
+  },
+  "language": {
+    "en": "English",
+    "pl": "Polski",
+    "switchLanguage": "Switch Language"
+  }
+}

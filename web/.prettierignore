@@ -1,7 +1,0 @@
-node_modules/
-dist/
-build/
-coverage/
-.angular/
-package-lock.json
-*.log 
