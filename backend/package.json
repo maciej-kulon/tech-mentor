@@ -6,7 +6,14 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "npm run extract-all && nest build",
+    "extract-types": "node scripts/extract-types.js",
+    "extract-endpoints": "node scripts/extract-endpoints.js",
+    "extract-all": "npm run extract-types && npm run extract-endpoints",
+    "test-extraction": "node scripts/test-extraction.js",
+    "watch-types": "node scripts/watch-types.js",
+    "watch-all": "node scripts/watch-types.js",
+    "dev": "concurrently \"npm run watch-all\" \"npm run start:dev\" --names \"watch,nest\" --prefix-colors \"cyan,green\"",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -27,6 +34,7 @@
     "semantic-release": "semantic-release"
   },
   "dependencies": {
+    "@logdash/js-sdk": "^1.0.9",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^10.0.0",
@@ -35,9 +43,11 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^10.0.0",
     "@types/bcryptjs": "^3.0.0",
+    "@types/cookie-parser": "^1.4.9",
     "bcryptjs": "^3.0.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "cookie-parser": "^1.4.7",
     "mongoose": "^8.13.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -58,6 +68,8 @@
     "@types/passport-local": "^1.0.38",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "chokidar": "^3.6.0",
+    "concurrently": "^9.2.0",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.31.0",
@@ -73,7 +85,8 @@
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "ts-morph": "^26.0.0"
   },
   "lint-staged": {
     "*.ts": [
